@@ -1,6 +1,8 @@
 package com.sunilson.bachelorthesis.presentation.homepage;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.homepage.day.HomepageDayFragment;
+import com.sunilson.bachelorthesis.presentation.utilities.Constants;
 import com.sunilson.bachelorthesis.presentation.viewmodelBasics.ViewModelFactory;
 
 import javax.inject.Inject;
@@ -53,8 +56,23 @@ public class HomepageActivity extends AppCompatActivity implements NavigationVie
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         navigationView.setNavigationItemSelectedListener(this);
+        
+//Decide which fragment should be loaded
+        String fragmentTag = getIntent().getStringExtra("fragmentTag");
+        if (fragmentTag == null) {
+            changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
+        } else {
+            switch (fragmentTag) {
+                case Constants.FRAGMENT_TAG_DAY:
+                    changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
+                    break;
+                default:
+                    changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
+                    break;
+            }
+        }
 
-        changeFragment(new HomepageDayFragment(), "bla");
+        //Get ViewModel from factory
         homepageViewModel = ViewModelProviders.of(this, viewModelFactory).get(HomepageViewModel.class);
     }
 
@@ -86,5 +104,11 @@ public class HomepageActivity extends AppCompatActivity implements NavigationVie
 
     public void changeFragment(Fragment fragment, String tag) {
         getSupportFragmentManager().beginTransaction().replace(R.id.activity_homepage_frame_layout, fragment, tag).commit();
+    }
+
+    public static Intent getCallingIntent(Context context, String fragmentTag) {
+        Intent intent = new Intent(context, HomepageActivity.class);
+        intent.putExtra("fragmentTag", fragmentTag);
+        return intent;
     }
 }

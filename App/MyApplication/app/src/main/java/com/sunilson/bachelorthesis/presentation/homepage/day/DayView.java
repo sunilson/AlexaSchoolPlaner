@@ -6,7 +6,6 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -16,78 +15,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
-import com.sunilson.bachelorthesis.presentation.models.CalendarDay;
-import com.sunilson.bachelorthesis.presentation.models.Event;
+import com.sunilson.bachelorthesis.presentation.models.events.Event;
+import com.sunilson.bachelorthesis.presentation.models.types.EventType;
 import com.sunilson.bachelorthesis.presentation.utilities.ViewUtilities;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * @author Linus Weiss
+ *
+ * A view which takes in an object of the class {@link com.sunilson.bachelorthesis.presentation.homepage.day.CalendarDayModel} and renders its events on a hourly timeline
  */
-
 public class DayView extends RelativeLayout {
 
+    //TODO Make calculations async
+
     //Day with events. Events must be sorted by starting date
-    private CalendarDay calendarDay = new CalendarDay();
+    private CalendarDayModel calendarDayModel = new CalendarDayModel();
     //List for events. Inner list are the connected groups
     private List<EventGroup> addedEvents = new ArrayList<>();
-    private Date startPoint;
     private int groupCounter = 0;
+    private boolean ready = false;
+    private View topView;
 
     public DayView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    private void addDay(CalendarDay calendarDay) {
-        this.calendarDay = calendarDay;
-        calculateFields();
-    }
-
     private void calculateFields() {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        try {
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 03:45"), sdf.parse("20/12/1993 08:55"), "Event 1"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 10:45"), sdf.parse("20/12/1993 18:58"), "Event 1"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 10:55"), sdf.parse("20/12/1993 11:55"), "Event 2"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 10:55"), sdf.parse("20/12/1993 11:55"), "Event 2"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 11:05"), sdf.parse("20/12/1993 12:25"), "Event 3"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 12:35"), sdf.parse("20/12/1993 13:35"), "Event 4"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 13:45"), sdf.parse("20/12/1993 15:55"), "Event 5"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 15:52"), sdf.parse("20/12/1993 16:55"), "Event 6"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 16:58"), sdf.parse("20/12/1993 18:55"), "Event 7"));
-            calendarDay.getEventList().add(new Event(sdf.parse("20/12/1993 19:08"), sdf.parse("20/12/1993 20:55"), "Event 8"));
-            startPoint = sdf.parse("20/12/1993 00:00");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        for (Event event : calendarDay.getEventList()) {
+        //Iterate over all events and start the calculations
+        for (Event event : calendarDayModel.getEventList()) {
             checkOverlappingEvents(event);
-        }
-
-
-        int groupIndex = 0;
-        for (EventGroup eventGroup : addedEvents) {
-            Log.d("Linus", "Group with index : " + Integer.toString(groupIndex));
-            int columnIndex = 0;
-            for (EventColumn eventColumn : eventGroup.eventColumns) {
-                Log.d("Linus", "Column with index : " + Integer.toString(columnIndex));
-                for (Event event : eventColumn.events) {
-                    if (event instanceof RecurringEvent) {
-                        Log.d("Linus", "Reccuring Event with title " + event.getTitle() + " and width " + Integer.toString(event.getWidth()));
-                    } else {
-                        Log.d("Linus", "Event with title " + event.getTitle() + " and width " + Integer.toString(event.getWidth()));
-                    }
-                }
-                columnIndex++;
-            }
-            groupIndex++;
         }
 
         renderFields();
@@ -195,6 +155,14 @@ public class DayView extends RelativeLayout {
     }
 
 
+    /**
+     * Traverses a column in a group at a specific index upwards from a specific event and expands
+     * all views in that column to the next one, if available
+     *
+     * @param event      The event which starts the expanding
+     * @param eventGroup The group in which the column is
+     * @param index The index of the "old" column, which should be expanded to a new one
+     */
     private void reverseExpand(Event event, EventGroup eventGroup, int index) {
 
         EventColumn previousColumn = eventGroup.eventColumns.get(index);
@@ -212,17 +180,9 @@ public class DayView extends RelativeLayout {
         }
     }
 
-
-    public void init() {
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                calculateFields();
-            }
-        });
-    }
-
+    /**
+     * Render the events at their position with their calculated size
+     */
     private void renderFields() {
 
         final float scale = getResources().getDisplayMetrics().density;
@@ -237,13 +197,19 @@ public class DayView extends RelativeLayout {
             addView(line);
         }
 
+        //Go through all created event groups
         for (EventGroup eventGroup : addedEvents) {
             int horizontalIndex = 0;
             for (EventColumn eventColumn : eventGroup.eventColumns) {
                 int width = eventGroup.eventColumns.size();
                 for (Event event : eventColumn.events) {
+                    //Only render "real" events, not placeholders
                     if (!(event instanceof RecurringEvent)) {
-                        addView(generateSingleField(width, event, horizontalIndex));
+                        View view = generateSingleField(width, event, horizontalIndex);
+                        addView(view);
+                        if(topView == null) {
+                            topView = view;
+                        }
                     }
                 }
                 horizontalIndex++;
@@ -251,6 +217,14 @@ public class DayView extends RelativeLayout {
         }
     }
 
+    /**
+     * Generates a View for a single Event
+     *
+     * @param width            Width of Event in its group
+     * @param event            The event itself
+     * @param horizontalMargin The margin which defines the horizontal position of the event
+     * @return A Linearlayout containing the name of the Event and a click listener
+     */
     private View generateSingleField(int width, final Event event, int horizontalMargin) {
         //Setup container view
         LinearLayout container = new LinearLayout(getContext());
@@ -259,7 +233,7 @@ public class DayView extends RelativeLayout {
                 ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), event.getFrom().getTime(), event.getTo().getTime()));
         layoutParamsContainer.setMargins(
                 getWidth() / width * horizontalMargin,
-                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), startPoint.getTime(), event.getFrom().getTime()),
+                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), calendarDayModel.getDayStartDate().getTime(), event.getFrom().getTime()),
                 0,
                 0);
         container.setPadding((int) getResources().getDimension(R.dimen.day_field_container_padding),
@@ -277,86 +251,95 @@ public class DayView extends RelativeLayout {
                 (int) getResources().getDimension(R.dimen.day_field_content_padding));
         content.setLayoutParams(layoutParamsContent);
         Drawable drawable = getResources().getDrawable(R.drawable.event_background);
-        drawable.setColorFilter(new PorterDuffColorFilter(event.getColor(), PorterDuff.Mode.SRC_IN));
+        drawable.setColorFilter(new PorterDuffColorFilter(getResources().getColor(event.getEventType().getVal()), PorterDuff.Mode.SRC_IN));
         content.setBackground(drawable);
         content.setGravity(Gravity.CENTER);
 
 
-        //Add text to content
+        //Add text to content and content to container
         TextView textView = new TextView(getContext());
         LinearLayout.LayoutParams layoutParamsTextView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         textView.setLayoutParams(layoutParamsTextView);
         textView.setEllipsize(TextUtils.TruncateAt.END);
         textView.setMaxLines(1);
         textView.setText(event.getTitle());
+        textView.setTextColor(getResources().getColor(R.color.white));
         content.addView(textView);
+        container.addView(content);
 
+        //Set click listener to view
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getContext(), event.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
-        container.addView(content);
 
         return container;
     }
 
+    /**
+     * Placeholder class for events that are wider than one column. Contains all the information needed to expand it
+     */
     private class RecurringEvent extends Event {
 
         public Event mainEvent;
 
         public RecurringEvent(Event event) {
-            super(event.getFrom(), event.getTo(), event.getTitle());
+            super(event.getFrom(), event.getTo(), event.getTitle(), EventType.APPOINTMENT);
             this.mainEvent = event;
         }
     }
 
-    private class CalendarField {
-        public int width;
-        public String id;
-
-        public CalendarField(int width, String id) {
-            this.id = id;
-            this.width = width;
-        }
-    }
-
+    /**
+     * Describes a group of events that are overlapping with others in the group and are arranged in columns
+     */
     private class EventGroup {
         public List<EventColumn> eventColumns = new ArrayList<>();
         public long currentEnd = 0;
     }
 
+    /**
+     * Describes a column of events that don't overlap but are in the same group
+     */
     private class EventColumn {
         public List<Event> events = new ArrayList<>();
         public long currentEnd = 0;
     }
 
-      /*
-        //Draw events
-        for (int i = 0; i < fields.length; i++) {
-            for (int j = 0; j < fields[i].length; j++) {
-                if (fields[i][j] != null) {
 
+    /**
+     * Adds a new day to the View and re-renders it
+     *
+     * @param calendarDayModel The new day to be added and rendered
+     */
+    public void addDay(CalendarDayModel calendarDayModel) {
+        this.calendarDayModel = calendarDayModel;
 
-                    //Check above and below, if this is a single event or a longer one, add respective padding
-                    int paddingValue = (int) getResources().getDimension(R.dimen.day_field_padding);
-                    int paddingTop = 0;
-                    int paddingBottom = 0;
-                    if (j != 0 && fields[i][j - 1] != null && fields[i][j - 1].id != fields[i][j].id) {
-                        paddingTop = paddingValue;
-                    }
-                    if (j != fields[i].length - 1 && fields[i][j + 1] != null && fields[i][j + 1].id != fields[i][j].id) {
-                        paddingBottom = paddingValue;
-                    }
-                    container.setPadding(paddingValue, paddingTop, paddingValue, paddingBottom);
-
-
-                    //Add container to parent
-                    addView(container);
-                }
-            }
+        if (ready) {
+            //Sort model to be sure it is sorted correctly for rendering
+            this.calendarDayModel.sort();
+            calculateFields();
+        } else {
+            //TODO Error Handling oder Listener implementieren
         }
-        */
+    }
+
+    /**
+     * Sets up a layout listener and signalizes if the View is ready for altering. If ready, the listener is removed
+     */
+    public void init() {
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                ready = true;
+            }
+        });
+    }
+
+    public View getTopView() {
+        return this.topView;
+    }
 
 }
