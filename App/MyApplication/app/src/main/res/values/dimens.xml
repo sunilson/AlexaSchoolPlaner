@@ -8,6 +8,7 @@
 
     <!-- Calendar -->
     <dimen name="day_height">50dp</dimen>
+    <dimen name="day_height_legend">40dp</dimen>
     <dimen name="day_field_container_padding">2dp</dimen>
     <dimen name="day_field_content_padding">5dp</dimen>
 </resources>
