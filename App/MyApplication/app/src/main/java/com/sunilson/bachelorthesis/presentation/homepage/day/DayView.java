@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.models.events.Event;
-import com.sunilson.bachelorthesis.presentation.models.types.EventType;
+import com.sunilson.bachelorthesis.presentation.models.events.EventType;
 import com.sunilson.bachelorthesis.presentation.utilities.ViewUtilities;
 
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ import java.util.List;
 public class DayView extends RelativeLayout {
 
     //TODO Make calculations async
+    //TODO Make widths of events in rows evenly width
 
     //Day with events. Events must be sorted by starting date
     private CalendarDayModel calendarDayModel = new CalendarDayModel();
@@ -262,7 +263,7 @@ public class DayView extends RelativeLayout {
         textView.setLayoutParams(layoutParamsTextView);
         textView.setEllipsize(TextUtils.TruncateAt.END);
         textView.setMaxLines(1);
-        textView.setText(event.getTitle());
+        textView.setText(event.getDescription());
         textView.setTextColor(getResources().getColor(R.color.white));
         content.addView(textView);
         container.addView(content);
@@ -271,7 +272,7 @@ public class DayView extends RelativeLayout {
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), event.getTitle(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), event.getDescription(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -283,10 +284,10 @@ public class DayView extends RelativeLayout {
      */
     private class RecurringEvent extends Event {
 
-        public Event mainEvent;
+        Event mainEvent;
 
-        public RecurringEvent(Event event) {
-            super(event.getFrom(), event.getTo(), event.getTitle(), EventType.APPOINTMENT);
+        RecurringEvent(Event event) {
+            super(event.getFrom(), event.getTo(), event.getDescription(), EventType.SCHOOLAPPOINTMENT, null);
             this.mainEvent = event;
         }
     }

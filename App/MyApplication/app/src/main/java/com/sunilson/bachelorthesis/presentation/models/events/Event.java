@@ -1,8 +1,8 @@
 package com.sunilson.bachelorthesis.presentation.models.events;
 
-import com.sunilson.bachelorthesis.presentation.models.types.EventType;
-
 import java.util.Date;
+
+import javax.annotation.Nullable;
 
 /**
  * @author Linus Weiss
@@ -13,14 +13,30 @@ import java.util.Date;
 public class Event {
 
     private Date from, to;
-    private String title;
+    private String description;
     private int width = 1;
     private EventType eventType;
+    private Location location;
 
-    public Event(Date from, Date to, String title, EventType eventType) {
+    /**
+     *
+     * @param from Start Date - required
+     * @param to To Date - optional
+     * @param description Description of the event
+     * @param eventType Type of the event (combined with color code)
+     * @param location Location of the event (String or/and geo location)
+     */
+    public Event(Date from, @Nullable Date to, String description, EventType eventType, @Nullable  Location location) {
         this.from = from;
-        this.to = to;
-        this.title = title;
+
+        //If to date is null it is just addes as the from date + 1 hour
+        if(to != null) {
+            this.to = to;
+        } else {
+            this.to = new Date(this.from.getTime() + 3600000);
+        }
+
+        this.description = description;
         this.eventType = eventType;
     }
 
@@ -52,11 +68,19 @@ public class Event {
         this.to = to;
     }
 
-    public String getTitle() {
-        return title;
+    public String getDescription() {
+        return description;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

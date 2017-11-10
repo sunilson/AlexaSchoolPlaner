@@ -56,19 +56,21 @@ public class HomepageActivity extends AppCompatActivity implements NavigationVie
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         navigationView.setNavigationItemSelectedListener(this);
-        
-//Decide which fragment should be loaded
-        String fragmentTag = getIntent().getStringExtra("fragmentTag");
-        if (fragmentTag == null) {
-            changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
-        } else {
-            switch (fragmentTag) {
-                case Constants.FRAGMENT_TAG_DAY:
-                    changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
-                    break;
-                default:
-                    changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
-                    break;
+
+        //Decide which fragment should be loaded and only if this is no orientation change
+        if (savedInstanceState == null) {
+            String fragmentTag = getIntent().getStringExtra("fragmentTag");
+            if (fragmentTag == null) {
+                changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
+            } else {
+                switch (fragmentTag) {
+                    case Constants.FRAGMENT_TAG_DAY:
+                        changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
+                        break;
+                    default:
+                        changeFragment(HomepageDayFragment.newInstance(), Constants.FRAGMENT_TAG_DAY);
+                        break;
+                }
             }
         }
 
