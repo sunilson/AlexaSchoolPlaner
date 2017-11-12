@@ -6,7 +6,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by linus_000 on 04.11.2017.
+ * @author Linus Weiss
  */
 
 public class ViewUtilities {
@@ -16,12 +16,27 @@ public class ViewUtilities {
         return Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
     }
 
-    public static int dateToHeight(int rowHeightScaled, long from, long to) {
+    public static int dateToHeight(int rowHeightScaled, long from, long to, long[] bounds) {
+
+        if(from < bounds[0]) {
+            from = bounds[0];
+        }
+
+        if(to > bounds[1]) {
+            to = bounds[1];
+        }
+
         long difference = to - from;
         double minuteHeight = (24d * (double) rowHeightScaled) / 1440d;
         long minutes = TimeUnit.MILLISECONDS.toMinutes(difference);
 
-        return (int)( minutes * minuteHeight);
+        int result = (int)( minutes * minuteHeight);
+
+        if(result > 0 ){
+            return result;
+        } else {
+            return 0;
+        }
     }
 
 }

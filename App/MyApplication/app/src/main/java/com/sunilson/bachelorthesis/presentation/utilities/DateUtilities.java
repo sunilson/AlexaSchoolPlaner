@@ -1,5 +1,10 @@
 package com.sunilson.bachelorthesis.presentation.utilities;
 
+import com.sunilson.bachelorthesis.presentation.event.models.Event;
+
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,6 +27,17 @@ public class DateUtilities {
         cal.setTime(date);
         cal.add(timeType, amount);
         return cal.getTime();
+    }
+
+    public static Boolean isEventOverlappingDay(DateTime dayStart, Event event) {
+        Interval today = new Interval(dayStart, dayStart.plusDays(1).withTimeAtStartOfDay());
+        Interval eventInterval = new Interval(event.getFrom(), event.getTo());
+
+        if (eventInterval.overlaps(today)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

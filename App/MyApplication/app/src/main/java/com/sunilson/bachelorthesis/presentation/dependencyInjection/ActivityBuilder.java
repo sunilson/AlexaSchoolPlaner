@@ -1,7 +1,10 @@
 package com.sunilson.bachelorthesis.presentation.dependencyInjection;
 
+import com.sunilson.bachelorthesis.presentation.event.EventActivity;
+import com.sunilson.bachelorthesis.presentation.event.EventModule;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageModule;
+import com.sunilson.bachelorthesis.presentation.homepage.day.HomepageFragmentBuilder;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -13,7 +16,10 @@ import dagger.android.ContributesAndroidInjector;
 @Module
 public abstract class ActivityBuilder {
 
-    @ContributesAndroidInjector(modules = HomepageModule.class)
+    @ContributesAndroidInjector(modules = {HomepageModule.class, HomepageFragmentBuilder.class})
     abstract HomepageActivity bindHomepageActivity();
+
+    @ContributesAndroidInjector(modules = EventModule.class)
+    abstract EventActivity bindEventActivity();
 
 }

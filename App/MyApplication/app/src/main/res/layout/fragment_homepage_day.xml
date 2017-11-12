@@ -12,17 +12,21 @@
 
         <include layout="@layout/timeline_sidebar" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-            <com.sunilson.bachelorthesis.presentation.homepage.day.DayView
-                android:id="@+id/fragment_homepage_day_view"
-                android:layout_width="0px"
-                android:layout_weight="1"
+            android:layout_height="match_parent">
+
+            <include layout="@layout/calendar_lines" />
+
+            <LinearLayout
+                android:id="@+id/fragment_homepage_day_container"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                />
-        </LinearLayout>
+                android:orientation="horizontal"
+                >
+            </LinearLayout>
+
+
+        </RelativeLayout>
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

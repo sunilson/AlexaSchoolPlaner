@@ -5,52 +5,94 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
-import com.sunilson.bachelorthesis.presentation.models.events.Event;
-import com.sunilson.bachelorthesis.presentation.models.types.EventType;
+import com.sunilson.bachelorthesis.presentation.event.models.Event;
+import com.sunilson.bachelorthesis.presentation.event.models.EventType;
+import com.sunilson.bachelorthesis.presentation.navigation.Navigator;
 import com.sunilson.bachelorthesis.presentation.utilities.ViewUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Nullable;
+
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * @author Linus Weiss
- *
- * A view which takes in an object of the class {@link com.sunilson.bachelorthesis.presentation.homepage.day.CalendarDayModel} and renders its events on a hourly timeline
+ *         <p>
+ *         A view which takes in an object of the class {@link com.sunilson.bachelorthesis.presentation.homepage.day.CalendarDayModel} and renders its events on a hourly timeline
  */
 public class DayView extends RelativeLayout {
 
     //TODO Make calculations async
+    //TODO Make widths of events in rows evenly width
 
-    //Day with events. Events must be sorted by starting date
-    private CalendarDayModel calendarDayModel = new CalendarDayModel();
-    //List for events. Inner list are the connected groups
+    private CalendarDayModel calendarDayModel;
     private List<EventGroup> addedEvents = new ArrayList<>();
     private int groupCounter = 0;
     private boolean ready = false;
     private View topView;
 
-    public DayView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public DayView(Context context) {
+        super(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        inflater.inflate(R.layout.day_view, this, true);
     }
 
     private void calculateFields() {
 
-        //Iterate over all events and start the calculations
-        for (Event event : calendarDayModel.getEventList()) {
-            checkOverlappingEvents(event);
-        }
+        //Make calculations for DayView in background
+        Observable
+                .fromCallable(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() throws Exception {
 
-        renderFields();
+                        //Iterate over all events and start the calculations
+                        for (Event event : calendarDayModel.getEventList()) {
+                            checkOverlappingEvents(event);
+                        }
+
+
+                        return true;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Boolean>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        renderFields();
+                    }
+                });
     }
 
     private void checkOverlappingEvents(Event event) {
@@ -119,12 +161,12 @@ public class DayView extends RelativeLayout {
         //If first EventColumn is empty, add Event to it, as this is the first event
         if (eventColumn.events.size() == 0) {
             eventColumn.events.add(event);
-            eventColumn.currentEnd = event.getTo().getTime();
+            eventColumn.currentEnd = event.getTo().getMillis();
             return true;
         }
 
         //Check if event is overlapping current column
-        if (eventColumn.currentEnd > event.getFrom().getTime()) {
+        if (eventColumn.currentEnd > event.getFrom().getMillis()) {
             //TODO Error bei Overlapping - Not Overlapping - Overlapping - Not Overlapping
             overlapping = true;
 
@@ -146,8 +188,8 @@ public class DayView extends RelativeLayout {
             }
 
             //Set new end to column
-            if (event.getTo().getTime() > eventColumn.currentEnd) {
-                eventColumn.currentEnd = event.getTo().getTime();
+            if (event.getTo().getMillis() > eventColumn.currentEnd) {
+                eventColumn.currentEnd = event.getTo().getMillis();
             }
         }
 
@@ -161,42 +203,37 @@ public class DayView extends RelativeLayout {
      *
      * @param event      The event which starts the expanding
      * @param eventGroup The group in which the column is
-     * @param index The index of the "old" column, which should be expanded to a new one
+     * @param index      The index of the "old" column, which should be expanded to a new one
      */
     private void reverseExpand(Event event, EventGroup eventGroup, int index) {
 
         EventColumn previousColumn = eventGroup.eventColumns.get(index);
         EventColumn newColumn = eventGroup.eventColumns.get(index + 1);
 
+        //Iterate over all Events of the previous column
         for (Event tempEvent : previousColumn.events) {
-            if (tempEvent.getTo().getTime() < event.getFrom().getTime()) {
+            //Only look at events that are before the given event
+            if (tempEvent.getTo().getMillis() < event.getFrom().getMillis()) {
+
+                //Checking if the event is a recurring event or not
                 if (tempEvent instanceof RecurringEvent) {
+                    //If it is a recurring event, add 1 width to the main Event
                     ((RecurringEvent) tempEvent).mainEvent.setWidth(((RecurringEvent) tempEvent).mainEvent.getWidth() + 1);
                 } else {
+                    //If it is a main event, add 1 event to it
                     tempEvent.setWidth(tempEvent.getWidth() + 1);
                 }
+                //Add new recurring event to the newly created Column
                 newColumn.events.add(new RecurringEvent(tempEvent));
             }
         }
     }
 
+
     /**
      * Render the events at their position with their calculated size
      */
     private void renderFields() {
-
-        final float scale = getResources().getDisplayMetrics().density;
-
-        //Draw seperator lines
-        for (int i = 50; i < getHeight() * scale * 0.5f; i += 50) {
-            View line = new View(getContext());
-            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 1);
-            layoutParams.setMargins(0, (int) (i * scale + 0.5f), 0, 0);
-            line.setLayoutParams(layoutParams);
-            line.setBackgroundColor(getResources().getColor(R.color.calendar_background_text));
-            addView(line);
-        }
-
         //Go through all created event groups
         for (EventGroup eventGroup : addedEvents) {
             int horizontalIndex = 0;
@@ -207,10 +244,12 @@ public class DayView extends RelativeLayout {
                     if (!(event instanceof RecurringEvent)) {
                         View view = generateSingleField(width, event, horizontalIndex);
                         addView(view);
-                        if(topView == null) {
+                        if (topView == null) {
                             topView = view;
                         }
+                    } else {
                     }
+
                 }
                 horizontalIndex++;
             }
@@ -230,10 +269,10 @@ public class DayView extends RelativeLayout {
         LinearLayout container = new LinearLayout(getContext());
         LinearLayout.LayoutParams layoutParamsContainer = new LinearLayout.LayoutParams(
                 getWidth() / width * event.getWidth(),
-                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), event.getFrom().getTime(), event.getTo().getTime()));
+                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), event.getFrom().getMillis(), event.getTo().getMillis(), new long[] {calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}));
         layoutParamsContainer.setMargins(
                 getWidth() / width * horizontalMargin,
-                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), calendarDayModel.getDayStartDate().getTime(), event.getFrom().getTime()),
+                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), calendarDayModel.getDayStartDate().getMillis(), event.getFrom().getMillis(),  new long[] {calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}),
                 0,
                 0);
         container.setPadding((int) getResources().getDimension(R.dimen.day_field_container_padding),
@@ -255,14 +294,13 @@ public class DayView extends RelativeLayout {
         content.setBackground(drawable);
         content.setGravity(Gravity.CENTER);
 
-
         //Add text to content and content to container
         TextView textView = new TextView(getContext());
         LinearLayout.LayoutParams layoutParamsTextView = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         textView.setLayoutParams(layoutParamsTextView);
         textView.setEllipsize(TextUtils.TruncateAt.END);
         textView.setMaxLines(1);
-        textView.setText(event.getTitle());
+        textView.setText(event.getDescription());
         textView.setTextColor(getResources().getColor(R.color.white));
         content.addView(textView);
         container.addView(content);
@@ -271,7 +309,7 @@ public class DayView extends RelativeLayout {
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), event.getTitle(), Toast.LENGTH_SHORT).show();
+                Navigator.navigateToEvent(getContext());
             }
         });
 
@@ -283,10 +321,10 @@ public class DayView extends RelativeLayout {
      */
     private class RecurringEvent extends Event {
 
-        public Event mainEvent;
+        Event mainEvent;
 
-        public RecurringEvent(Event event) {
-            super(event.getFrom(), event.getTo(), event.getTitle(), EventType.APPOINTMENT);
+        RecurringEvent(Event event) {
+            super(event.getFrom(), event.getTo(), event.getDescription(), EventType.SCHOOLAPPOINTMENT, null);
             this.mainEvent = event;
         }
     }
@@ -313,10 +351,12 @@ public class DayView extends RelativeLayout {
      *
      * @param calendarDayModel The new day to be added and rendered
      */
-    public void addDay(CalendarDayModel calendarDayModel) {
-        this.calendarDayModel = calendarDayModel;
+    public void renderDay(@Nullable CalendarDayModel calendarDayModel) {
+        if (calendarDayModel != null) {
+            this.calendarDayModel = calendarDayModel;
+        }
 
-        if (ready) {
+        if (ready && this.calendarDayModel != null) {
             //Sort model to be sure it is sorted correctly for rendering
             this.calendarDayModel.sort();
             calculateFields();
@@ -328,12 +368,20 @@ public class DayView extends RelativeLayout {
     /**
      * Sets up a layout listener and signalizes if the View is ready for altering. If ready, the listener is removed
      */
-    public void init() {
+    public void init(@Nullable  final CalendarDayModel dayModel) {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                //Store dayModel
+                if (dayModel != null) {
+                    calendarDayModel = dayModel;
+                }
+
+                //Signal that view is ready and render day
                 ready = true;
+                renderDay(null);
             }
         });
     }

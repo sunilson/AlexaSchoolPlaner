@@ -5,11 +5,12 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="calendar_background_text">#cbc9c9</color>
+    <color name="calendar_background_lines">#e4e4e4</color>
 
     <!-- Calendar colors -->
-    <color name="appointment">#FF4081</color>
+    <color name="schoolAppointment">#FF4081</color>
+    <color name="specialAppointment">#FF4081</color>
     <color name="deadline">#3F51B5</color>
-    <color name="period">#0fe608</color>
 
     <!-- Basic Colors -->
     <color name="white">#FFFFFF</color>
