@@ -1,4 +1,4 @@
-package com.sunilson.bachelorthesis.presentation.models.events;
+package com.sunilson.bachelorthesis.presentation.event.models;
 
 /**
  * Created by linus_000 on 05.11.2017.

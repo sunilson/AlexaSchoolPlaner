@@ -1,4 +1,4 @@
-package com.sunilson.bachelorthesis.presentation.models.events;
+package com.sunilson.bachelorthesis.presentation.event.models;
 
 import com.sunilson.bachelorthesis.R;
 

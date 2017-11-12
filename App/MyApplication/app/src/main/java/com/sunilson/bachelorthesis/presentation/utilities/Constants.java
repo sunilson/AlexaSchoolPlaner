@@ -1,6 +1,6 @@
 package com.sunilson.bachelorthesis.presentation.utilities;
 
-import com.sunilson.bachelorthesis.presentation.models.events.EventType;
+import com.sunilson.bachelorthesis.presentation.event.models.EventType;
 
 /**
  * Created by linus_000 on 06.11.2017.
@@ -14,4 +14,7 @@ public class Constants {
             EventType.SPECIALAPPOINTMENT,
             EventType.DEADLINE
     };
+    public final static String SharedPrefsCalendarSettings = "calendarSettings";
+    public final static String SharedPrefsCalendarSettingsFromDate = "fromDate";
+    public final static String SharedPrefsCalendarSettingsToDate = "toDate";
 }

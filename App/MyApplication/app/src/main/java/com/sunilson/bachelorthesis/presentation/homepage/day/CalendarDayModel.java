@@ -1,9 +1,12 @@
 package com.sunilson.bachelorthesis.presentation.homepage.day;
 
-import com.sunilson.bachelorthesis.presentation.models.events.Event;
+import com.sunilson.bachelorthesis.presentation.event.models.Event;
+import com.sunilson.bachelorthesis.presentation.homepage.exception.CalendarDayModelInvalidEventException;
+import com.sunilson.bachelorthesis.presentation.utilities.DateUtilities;
+
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,26 +17,31 @@ import java.util.List;
 public class CalendarDayModel {
 
     private List<Event> eventList = new ArrayList<>();
-    private Date dayStartDate;
+    private DateTime dayStartDate, dayEndDate;
 
-    public CalendarDayModel() {
+    public CalendarDayModel(DateTime dayStartDate) {
+        this.dayStartDate = dayStartDate.withTimeAtStartOfDay();
+        this.dayEndDate = this.dayStartDate.withTime(23, 59, 59, 999);
+    }
 
+    public void add(Event event) throws CalendarDayModelInvalidEventException {
+        if(DateUtilities.isEventOverlappingDay(dayStartDate, event)) {
+            eventList.add(event);
+        } else {
+            throw new CalendarDayModelInvalidEventException("Event is not valid for this day");
+        }
+    }
+
+    public DateTime getDayEndDate() {
+        return dayEndDate;
+    }
+
+    public DateTime getDayStartDate() {
+        return dayStartDate;
     }
 
     public List<Event> getEventList() {
         return eventList;
-    }
-
-    public void setEventList(List<Event> eventList) {
-        this.eventList = eventList;
-    }
-
-    public Date getDayStartDate() {
-        return dayStartDate;
-    }
-
-    public void setDayStartDate(Date dayStartDate) {
-        this.dayStartDate = dayStartDate;
     }
 
     public void sort() {

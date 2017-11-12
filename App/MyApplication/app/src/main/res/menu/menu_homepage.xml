@@ -10,6 +10,11 @@
             android:icon="@drawable/ic_menu_24dp"
             />
         <item
+            android:id="@+id/menu_homepage_three_days"
+            android:title="3-Tage Ansicht"
+            android:icon="@drawable/ic_menu_24dp"
+            />
+        <item
             android:id="@+id/menu_homepage_week"
             android:title="Wochenansicht"
             android:icon="@drawable/ic_menu_24dp"

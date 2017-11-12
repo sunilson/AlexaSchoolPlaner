@@ -3,28 +3,27 @@ package com.sunilson.bachelorthesis.presentation.navigation;
 import android.content.Context;
 import android.content.Intent;
 
+import com.sunilson.bachelorthesis.presentation.event.EventActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
- * Created by linus_000 on 06.11.2017.
+ * @author Linus Weiss
  */
 
-@Singleton
 public class Navigator {
 
-    @Inject
-    public Navigator() {
 
+    public static void navigateToEvent(Context context) {
+        if(context != null) {
+            Intent intent = EventActivity.getCallingIntent(context);
+            context.startActivity(intent);
+        }
     }
 
-    public void navigateToHomepage(Context context, String fragmentTag) {
+    public static void navigateToHomepage(Context context, String fragmentTag) {
         if (context != null) {
             Intent intent = HomepageActivity.getCallingIntent(context, fragmentTag);
             context.startActivity(intent);
         }
     }
-
 }

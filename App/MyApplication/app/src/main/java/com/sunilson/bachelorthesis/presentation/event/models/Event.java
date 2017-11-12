@@ -1,6 +1,6 @@
-package com.sunilson.bachelorthesis.presentation.models.events;
+package com.sunilson.bachelorthesis.presentation.event.models;
 
-import java.util.Date;
+import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 
@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 
 public class Event {
 
-    private Date from, to;
+    private DateTime from, to;
     private String description;
     private int width = 1;
     private EventType eventType;
@@ -26,14 +26,14 @@ public class Event {
      * @param eventType Type of the event (combined with color code)
      * @param location Location of the event (String or/and geo location)
      */
-    public Event(Date from, @Nullable Date to, String description, EventType eventType, @Nullable  Location location) {
+    public Event(DateTime from, @Nullable DateTime to, String description, EventType eventType, @Nullable  Location location) {
         this.from = from;
 
         //If to date is null it is just addes as the from date + 1 hour
         if(to != null) {
             this.to = to;
         } else {
-            this.to = new Date(this.from.getTime() + 3600000);
+            this.to = new DateTime(this.from.getMillis()).plusHours(1);
         }
 
         this.description = description;
@@ -52,19 +52,19 @@ public class Event {
         this.width = width;
     }
 
-    public Date getFrom() {
+    public DateTime getFrom() {
         return from;
     }
 
-    public void setFrom(Date from) {
+    public void setFrom(DateTime from) {
         this.from = from;
     }
 
-    public Date getTo() {
+    public DateTime getTo() {
         return to;
     }
 
-    public void setTo(Date to) {
+    public void setTo(DateTime to) {
         this.to = to;
     }
 

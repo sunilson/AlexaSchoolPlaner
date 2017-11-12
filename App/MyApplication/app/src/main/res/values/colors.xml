@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="calendar_background_text">#cbc9c9</color>
+    <color name="calendar_background_lines">#e4e4e4</color>
 
     <!-- Calendar colors -->
     <color name="schoolAppointment">#FF4081</color>
