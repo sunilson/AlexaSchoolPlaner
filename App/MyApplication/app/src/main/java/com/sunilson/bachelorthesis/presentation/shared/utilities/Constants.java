@@ -1,9 +1,9 @@
-package com.sunilson.bachelorthesis.presentation.utilities;
+package com.sunilson.bachelorthesis.presentation.shared.utilities;
 
 import com.sunilson.bachelorthesis.presentation.event.models.EventType;
 
 /**
- * Created by linus_000 on 06.11.2017.
+ * @author Linus Weiss
  */
 
 public class Constants {

@@ -1,4 +1,6 @@
-package com.sunilson.bachelorthesis.presentation.homepage.day;
+package com.sunilson.bachelorthesis.presentation.homepage.calendar;
+
+import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.CalendarDayModel;
 
 import java.util.ArrayList;
 import java.util.List;

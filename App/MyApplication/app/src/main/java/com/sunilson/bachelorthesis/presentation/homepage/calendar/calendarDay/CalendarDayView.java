@@ -1,9 +1,7 @@
-package com.sunilson.bachelorthesis.presentation.homepage.day;
+package com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,7 +15,7 @@ import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.event.models.Event;
 import com.sunilson.bachelorthesis.presentation.event.models.EventType;
 import com.sunilson.bachelorthesis.presentation.navigation.Navigator;
-import com.sunilson.bachelorthesis.presentation.utilities.ViewUtilities;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.ViewUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +32,9 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * @author Linus Weiss
  *         <p>
- *         A view which takes in an object of the class {@link com.sunilson.bachelorthesis.presentation.homepage.day.CalendarDayModel} and renders its events on a hourly timeline
+ *         A view which takes in an object of the class {@link com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.CalendarDayModel} and renders its events on a hourly timeline
  */
-public class DayView extends RelativeLayout {
+public class CalendarDayView extends RelativeLayout {
 
     //TODO Make calculations async
     //TODO Make widths of events in rows evenly width
@@ -47,7 +45,7 @@ public class DayView extends RelativeLayout {
     private boolean ready = false;
     private View topView;
 
-    public DayView(Context context) {
+    public CalendarDayView(Context context) {
         super(context);
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.day_view, this, true);
@@ -275,10 +273,12 @@ public class DayView extends RelativeLayout {
                 ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), calendarDayModel.getDayStartDate().getMillis(), event.getFrom().getMillis(),  new long[] {calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}),
                 0,
                 0);
+
         container.setPadding((int) getResources().getDimension(R.dimen.day_field_container_padding),
                 (int) getResources().getDimension(R.dimen.day_field_container_padding),
                 (int) getResources().getDimension(R.dimen.day_field_container_padding),
                 (int) getResources().getDimension(R.dimen.day_field_container_padding));
+
         container.setLayoutParams(layoutParamsContainer);
 
         //Setup content view
@@ -289,9 +289,7 @@ public class DayView extends RelativeLayout {
                 (int) getResources().getDimension(R.dimen.day_field_content_padding),
                 (int) getResources().getDimension(R.dimen.day_field_content_padding));
         content.setLayoutParams(layoutParamsContent);
-        Drawable drawable = getResources().getDrawable(R.drawable.event_background);
-        drawable.setColorFilter(new PorterDuffColorFilter(getResources().getColor(event.getEventType().getVal()), PorterDuff.Mode.SRC_IN));
-        content.setBackground(drawable);
+        content.setBackgroundColor(getResources().getColor(event.getEventType().getVal()));
         content.setGravity(Gravity.CENTER);
 
         //Add text to content and content to container
@@ -309,7 +307,7 @@ public class DayView extends RelativeLayout {
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigator.navigateToEvent(getContext());
+                Navigator.navigateToEvent(getContext(), v, ((AppCompatActivity) getContext()).findViewById(R.id.activity_homepage_appbar_layout));
             }
         });
 

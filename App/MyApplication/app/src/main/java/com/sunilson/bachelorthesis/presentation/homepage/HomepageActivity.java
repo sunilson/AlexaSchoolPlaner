@@ -11,16 +11,18 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.sunilson.bachelorthesis.R;
-import com.sunilson.bachelorthesis.presentation.baseClasses.BaseActivity;
-import com.sunilson.bachelorthesis.presentation.baseClasses.HasViewModel;
-import com.sunilson.bachelorthesis.presentation.homepage.day.HomepageFragmentCalendar;
-import com.sunilson.bachelorthesis.presentation.homepage.exception.CalendarSettingsException;
-import com.sunilson.bachelorthesis.presentation.utilities.Constants;
-import com.sunilson.bachelorthesis.presentation.viewmodelBasics.ViewModelFactory;
+import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
+import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
+import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasViewModel;
+import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
+import com.sunilson.bachelorthesis.presentation.homepage.utilities.HomepageCalendarHelper;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
+import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -38,7 +40,7 @@ import dagger.android.support.HasSupportFragmentInjector;
  * @author Linus Weiss
  */
 
-public class HomepageActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HasViewModel, HasSupportFragmentInjector {
+public class HomepageActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector {
 
     @BindView(R.id.activity_homepage_drawer_layout)
     DrawerLayout drawerLayout;
@@ -46,13 +48,21 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     @BindView(R.id.activity_homepage_navigation)
     NavigationView navigationView;
 
+    @BindView(R.id.activity_homepage_refresh_layout)
+    SwipeRefreshLayout swipeRefreshLayout;
+
     @Inject
     ViewModelFactory viewModelFactory;
+
+
+    @Inject
+    HomepageCalendarHelper homepageCalendarHelper;
+
 
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
 
-    HomepageViewModel homepageViewModel;
+    CalendarViewModel calendarViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,11 +71,7 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
         setContentView(R.layout.activity_homepage);
         ButterKnife.bind(this);
 
-        try {
-            CurrentCalendarSettingsStorage.setDates(this, new DateTime(DateTimeZone.UTC), new DateTime(DateTimeZone.UTC).plusDays(1));
-        } catch (CalendarSettingsException e) {
-            e.printStackTrace();
-        }
+        homepageCalendarHelper.setCurrentCalendarDates(new DateTime(DateTimeZone.UTC), new DateTime(DateTimeZone.UTC).plusDays(1));
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -79,7 +85,7 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
         }
 
         //Get ViewModel from factory
-        homepageViewModel = ViewModelProviders.of(this, viewModelFactory).get(HomepageViewModel.class);
+        calendarViewModel = ViewModelProviders.of(this, viewModelFactory).get(CalendarViewModel.class);
     }
 
     @Override
@@ -120,8 +126,9 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
 
     /**
      * Change current fragment in Acitvity
+     *
      * @param fragment Instance of new Fragment
-     * @param tag Tag of new Fragment used to find it later
+     * @param tag      Tag of new Fragment used to find it later
      */
     public void changeFragment(Fragment fragment, String tag) {
         getSupportFragmentManager().beginTransaction().replace(R.id.activity_homepage_frame_layout, fragment, tag).commit();
@@ -129,8 +136,8 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
 
     @Override
     @SuppressWarnings("unchecked")
-    public HomepageViewModel getViewModel() {
-        return this.homepageViewModel;
+    public CalendarViewModel getViewModel() {
+        return this.calendarViewModel;
     }
 
     @Override
@@ -143,11 +150,16 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
      *
      * @param context
      * @param fragmentTag Tag of fragment that should be loaded first
-     * @return  Intent to navigate to this Activity
+     * @return Intent to navigate to this Activity
      */
     public static Intent getCallingIntent(Context context, String fragmentTag) {
         Intent intent = new Intent(context, HomepageActivity.class);
         intent.putExtra("fragmentTag", fragmentTag);
         return intent;
+    }
+
+    @Override
+    public void loading(boolean value) {
+        swipeRefreshLayout.setRefreshing(value);
     }
 }

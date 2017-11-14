@@ -4,7 +4,7 @@ import com.sunilson.bachelorthesis.presentation.event.EventActivity;
 import com.sunilson.bachelorthesis.presentation.event.EventModule;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageModule;
-import com.sunilson.bachelorthesis.presentation.homepage.day.HomepageFragmentBuilder;
+import com.sunilson.bachelorthesis.presentation.homepage.HomepageFragmentBuilder;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;

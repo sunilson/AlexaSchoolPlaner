@@ -9,15 +9,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.sunilson.bachelorthesis.R;
-import com.sunilson.bachelorthesis.presentation.baseClasses.BaseActivity;
-import com.sunilson.bachelorthesis.presentation.viewmodelBasics.ViewModelFactory;
+import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
+import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import dagger.android.AndroidInjection;
 
 /**
- * Created by linus_000 on 12.11.2017.
+ * @author Linus Weiss
  */
 
 public class EventActivity extends BaseActivity {
@@ -31,13 +32,17 @@ public class EventActivity extends BaseActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_event);
+        eventViewModel = ViewModelProviders.of(this, viewModelFactory).get(EventViewModel.class);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        eventViewModel = ViewModelProviders.of(this, viewModelFactory).get(EventViewModel.class);
+        getSupportActionBar().setTitle("Test Title");
+
+
+
+        ButterKnife.bind(this);
     }
 
     /**
@@ -56,7 +61,8 @@ public class EventActivity extends BaseActivity {
 
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                //supportFinishAfterTransition();
+                supportFinishAfterTransition();
         }
 
         return super.onOptionsItemSelected(item);

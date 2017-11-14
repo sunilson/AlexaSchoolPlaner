@@ -1,4 +1,4 @@
-package com.sunilson.bachelorthesis.presentation.viewmodelBasics;
+package com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics;
 
 import android.arch.lifecycle.ViewModel;
 

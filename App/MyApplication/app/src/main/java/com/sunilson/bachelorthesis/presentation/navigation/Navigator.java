@@ -1,7 +1,10 @@
 package com.sunilson.bachelorthesis.presentation.navigation;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.sunilson.bachelorthesis.presentation.event.EventActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
@@ -13,7 +16,7 @@ import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 public class Navigator {
 
 
-    public static void navigateToEvent(Context context) {
+    public static void navigateToEvent(Context context, View view, View appBar) {
         if(context != null) {
             Intent intent = EventActivity.getCallingIntent(context);
             context.startActivity(intent);
@@ -23,7 +26,7 @@ public class Navigator {
     public static void navigateToHomepage(Context context, String fragmentTag) {
         if (context != null) {
             Intent intent = HomepageActivity.getCallingIntent(context, fragmentTag);
-            context.startActivity(intent);
+            context.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
         }
     }
 }

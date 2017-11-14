@@ -1,10 +1,10 @@
-package com.sunilson.bachelorthesis.presentation.viewmodelBasics;
+package com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
 import com.sunilson.bachelorthesis.presentation.event.EventViewModel;
-import com.sunilson.bachelorthesis.presentation.homepage.HomepageViewModel;
+import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
 
 import dagger.Binds;
 import dagger.Module;
@@ -19,8 +19,8 @@ public abstract class ViewModelModule {
 
     @Binds
     @IntoMap
-    @ViewModelKey(HomepageViewModel.class)
-    abstract ViewModel bindHomepageViewModel(HomepageViewModel homepageViewModel);
+    @ViewModelKey(CalendarViewModel.class)
+    abstract ViewModel bindHomepageViewModel(CalendarViewModel calendarViewModel);
 
     @Binds
     @IntoMap

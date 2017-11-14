@@ -3,7 +3,7 @@ package com.sunilson.bachelorthesis.presentation.application;
 import android.app.Application;
 import android.content.Context;
 
-import com.sunilson.bachelorthesis.presentation.viewmodelBasics.ViewModelModule;
+import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelModule;
 
 import javax.inject.Singleton;
 

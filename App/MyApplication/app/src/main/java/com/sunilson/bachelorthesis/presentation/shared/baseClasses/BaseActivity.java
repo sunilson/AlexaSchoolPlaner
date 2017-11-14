@@ -1,4 +1,4 @@
-package com.sunilson.bachelorthesis.presentation.baseClasses;
+package com.sunilson.bachelorthesis.presentation.shared.baseClasses;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

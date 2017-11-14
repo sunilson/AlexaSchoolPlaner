@@ -1,4 +1,6 @@
-package com.sunilson.bachelorthesis.presentation.homepage.day;
+package com.sunilson.bachelorthesis.presentation.homepage;
+
+import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
 
 import dagger.Module;
 import dagger.Provides;

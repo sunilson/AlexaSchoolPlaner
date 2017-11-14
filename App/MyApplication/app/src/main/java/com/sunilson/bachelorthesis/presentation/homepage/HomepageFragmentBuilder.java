@@ -1,4 +1,6 @@
-package com.sunilson.bachelorthesis.presentation.homepage.day;
+package com.sunilson.bachelorthesis.presentation.homepage;
+
+import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -11,5 +13,5 @@ import dagger.android.ContributesAndroidInjector;
 public abstract class HomepageFragmentBuilder {
 
     @ContributesAndroidInjector(modules = HomepageFragmentModule.class)
-    abstract HomepageFragmentCalendar provideHomepageDayFragment();
+    abstract HomepageFragmentCalendar provideHomepageCalendarFragment();
 }

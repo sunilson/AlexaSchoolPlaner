@@ -1,8 +1,8 @@
-package com.sunilson.bachelorthesis.presentation.homepage.day;
+package com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay;
 
 import com.sunilson.bachelorthesis.presentation.event.models.Event;
 import com.sunilson.bachelorthesis.presentation.homepage.exception.CalendarDayModelInvalidEventException;
-import com.sunilson.bachelorthesis.presentation.utilities.DateUtilities;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.DateUtilities;
 
 import org.joda.time.DateTime;
 

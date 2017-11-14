@@ -1,4 +1,4 @@
-package com.sunilson.bachelorthesis.presentation.utilities;
+package com.sunilson.bachelorthesis.presentation.shared.utilities;
 
 import com.sunilson.bachelorthesis.presentation.event.models.Event;
 
