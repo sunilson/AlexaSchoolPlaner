@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".presentation.event.EventActivity"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/AppTheme_Exploding"
             />
     </application>
 

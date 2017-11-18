@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
@@ -14,6 +14,7 @@ import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModel
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.android.AndroidInjection;
 
@@ -22,6 +23,9 @@ import dagger.android.AndroidInjection;
  */
 
 public class EventActivity extends BaseActivity {
+
+    @BindView(R.id.activity_event_header)
+    LinearLayout event_header;
 
     @Inject
     ViewModelFactory viewModelFactory;
@@ -35,14 +39,14 @@ public class EventActivity extends BaseActivity {
         setContentView(R.layout.activity_event);
         eventViewModel = ViewModelProviders.of(this, viewModelFactory).get(EventViewModel.class);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setTitle("Test Title");
-
 
 
         ButterKnife.bind(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     /**
@@ -57,12 +61,17 @@ public class EventActivity extends BaseActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        finish();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
             case android.R.id.home:
                 //supportFinishAfterTransition();
-                supportFinishAfterTransition();
+                finish();
         }
 
         return super.onOptionsItemSelected(item);

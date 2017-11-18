@@ -1,7 +1,6 @@
 package com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay;
 
 import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -307,7 +306,7 @@ public class CalendarDayView extends RelativeLayout {
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigator.navigateToEvent(getContext(), v, ((AppCompatActivity) getContext()).findViewById(R.id.activity_homepage_appbar_layout));
+                Navigator.navigateToEvent(getContext(), v);
             }
         });
 

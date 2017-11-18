@@ -16,10 +16,12 @@ import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 public class Navigator {
 
 
-    public static void navigateToEvent(Context context, View view, View appBar) {
+    public static void navigateToEvent(Context context, View view) {
         if(context != null) {
             Intent intent = EventActivity.getCallingIntent(context);
-            context.startActivity(intent);
+            ActivityOptions options = ActivityOptions
+                    .makeSceneTransitionAnimation((AppCompatActivity) context);
+            context.startActivity(intent, options.toBundle());
         }
     }
 
