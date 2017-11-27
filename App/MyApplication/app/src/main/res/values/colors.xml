@@ -5,7 +5,7 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="calendar_background_text">#cbc9c9</color>
-    <color name="calendar_background_lines">#e4e4e4</color>
+    <color name="calendar_background_lines">#ededed</color>
 
     <!-- Calendar colors -->
     <color name="schoolAppointment">#FF4081</color>
@@ -14,4 +14,7 @@
 
     <!-- Basic Colors -->
     <color name="white">#FFFFFF</color>
+
+    <!-- FAB Colors -->
+    <color name="black_semi_transparent">#B2000000</color>
 </resources>

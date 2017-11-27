@@ -8,7 +8,7 @@ var descriptionValidator = [
         validator: 'isLength',
         passIfEmpty: true,
         arguments: [eventVariables.description.minLength, eventVariables.description.maxLength],
-        message: 'Summary length is invalid!'
+        message: 'Description length is invalid!'
     })
 ];
 
@@ -34,11 +34,13 @@ var geoValidator = [
 var locationValidator = [
     validate({
         validator: 'isLength',
+        passIfEmpty: true,
         arguments: [eventVariables.location.minLength, eventVariables.location.maxLength],
         message: 'Location length is invalid!'
     }),
     validate({
         validator: 'isAscii',
+        passIfEmpty: true,
         arguments: [eventVariables.location.minLength, eventVariables.location.maxLength],
         message: 'Location contains invalid characters!'
     }),
@@ -48,17 +50,21 @@ var summaryValidator = [
     validate({
         validator: 'isLength',
         arguments: [eventVariables.summary.minLength, eventVariables.summary.maxLength],
-        message: 'Title length is invalid!'
+        message: 'Summary length is invalid!'
     })
 ];
 
 var eventSchema = new mongoose.Schema({
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+    },
     description: {
-        required: true,
         type: String,
         validate: descriptionValidator
     },
     summary: {
+        required: true,
         type: String,
         validate: summaryValidator
     },

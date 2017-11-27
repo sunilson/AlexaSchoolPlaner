@@ -26,21 +26,43 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/activity_homepage_refresh_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-            <FrameLayout
-                android:id="@+id/activity_homepage_frame_layout"
+            <android.support.v4.view.ViewPager
+                android:id="@+id/activity_homepage_viewpager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                >
-            </FrameLayout>
-        </android.support.v4.widget.SwipeRefreshLayout>
-    </android.support.design.widget.CoordinatorLayout>
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                />
 
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/activity_homepage_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_icon="@drawable/ic_add_white_24dp"
+            app:fab_colorNormal="@color/colorAccent"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="16dp"
+            app:fab_labelsPosition="left"
+            app:fab_labelStyle="@style/menu_labels_style"
+            >
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_homepage_add_appointment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="@color/colorPrimary"
+                app:fab_title="Appointment"
+                app:fab_icon="@drawable/ic_event_white_24dp"
+                />
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/activity_homepage_add_deadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="@color/colorPrimary"
+                app:fab_title="Deadline"
+                app:fab_icon="@drawable/ic_schedule_white_24dp"
+                />
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+
+    </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/activity_homepage_navigation"
@@ -48,7 +70,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/navigation_header"
-        app:menu="@menu/menu_homepage">
+        app:menu="@menu/menu_homepage_drawer">
 
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

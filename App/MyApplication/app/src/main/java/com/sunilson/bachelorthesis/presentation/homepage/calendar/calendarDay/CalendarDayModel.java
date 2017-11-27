@@ -1,50 +1,48 @@
 package com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay;
 
-import com.sunilson.bachelorthesis.presentation.event.models.Event;
-import com.sunilson.bachelorthesis.presentation.homepage.exception.CalendarDayModelInvalidEventException;
-import com.sunilson.bachelorthesis.presentation.shared.utilities.DateUtilities;
+import com.sunilson.bachelorthesis.presentation.event.EventModel;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+
+import lombok.Getter;
 
 /**
  * @author Linus Weiss
  *
- * Model class of a single calendar dayStartDate for the Presentation layer
+ *Model class of a single calendar dayStartDate for the Presentation layer
  */
 public class CalendarDayModel {
 
-    private List<Event> eventList = new ArrayList<>();
-    private DateTime dayStartDate, dayEndDate;
+    @Getter
+    private List<EventModel> eventList = new ArrayList<>();
 
-    public CalendarDayModel(DateTime dayStartDate) {
-        this.dayStartDate = dayStartDate.withTimeAtStartOfDay();
+    @Getter
+    private DateTime dayStartDate;
+
+    @Getter
+    private DateTime dayEndDate;
+
+    public CalendarDayModel(LocalDate dayStartDate) {
+        this.dayStartDate = dayStartDate.toDateTimeAtStartOfDay();
         this.dayEndDate = this.dayStartDate.withTime(23, 59, 59, 999);
     }
 
-    public void add(Event event) throws CalendarDayModelInvalidEventException {
-        if(DateUtilities.isEventOverlappingDay(dayStartDate, event)) {
-            eventList.add(event);
-        } else {
-            throw new CalendarDayModelInvalidEventException("Event is not valid for this day");
-        }
-    }
-
-    public DateTime getDayEndDate() {
-        return dayEndDate;
-    }
-
-    public DateTime getDayStartDate() {
-        return dayStartDate;
-    }
-
-    public List<Event> getEventList() {
-        return eventList;
+    public void addEvent(EventModel event) {
+        eventList.add(event);
     }
 
     public void sort() {
-        //TODO sort event list
+        Collections.sort(eventList, new Comparator<EventModel>() {
+            @Override
+            public int compare(EventModel e1, EventModel e2) {
+                return e1.getFrom().compareTo(e2.getFrom());
+            }
+        });
     }
 }

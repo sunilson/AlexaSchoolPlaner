@@ -6,16 +6,18 @@ import org.joda.time.DateTime;
 
 import java.util.List;
 
-import io.reactivex.Flowable;
+import io.reactivex.Observable;
 
 /**
- * Created by linus_000 on 13.11.2017.
+ * @author Linus Weiss
  */
 
 public interface EventRepository {
 
-    Flowable<List<EventEntity>> getEventList(DateTime from, DateTime to);
+    Observable<List<EventEntity>> getEventList(DateTime from, DateTime to);
 
-    Flowable<EventEntity> getSingleEvent(String id);
+    Observable<EventEntity> getSingleEvent(String id);
+
+    Observable<EventEntity> addEvent(Object body);
 
 }

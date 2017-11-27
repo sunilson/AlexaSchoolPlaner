@@ -11,7 +11,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by linus_000 on 17.11.2017.
+ * @author Linus Weiss
  */
 
 @Module()
@@ -29,7 +29,7 @@ public class NetworkModule {
     @Singleton
     Retrofit retrofit(OkHttpClient client) {
         return new Retrofit.Builder()
-                .baseUrl("http://localhost:3000/")
+                .baseUrl("http://172.16.16.127:5000/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)

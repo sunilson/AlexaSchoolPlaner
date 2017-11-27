@@ -1,6 +1,8 @@
 package com.sunilson.bachelorthesis.domain.interactors;
 
-import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * @author Linus Weiss
@@ -8,13 +10,13 @@ import io.reactivex.Flowable;
 
 public abstract class AbstractUseCase<T, Params> {
 
-
     public AbstractUseCase() {
     }
 
-    abstract Flowable<T> buildUseCaseFlowable(Params params);
+    protected abstract Observable<T> buildUseCaseObservable(Params params);
 
-    public Flowable<T> execute(Params params) {
-        return this.buildUseCaseFlowable(params);
+    public Observable<T> execute(Params params) {
+        Observable<T> observable = this.buildUseCaseObservable(params).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        return observable;
     }
 }

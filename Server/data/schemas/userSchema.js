@@ -47,7 +47,6 @@ var emailValidator = [
 ];
 
 var userSchema = new Schema({
-    events: [Event],
     username: {
         type: String,
         required: true,
@@ -103,17 +102,19 @@ userSchema.pre('save', function (next) {
         }
     }
 
-    //Hash password
-    if (this.password) {
-        this.password = passwordHash.generate(this.password);
-    }
-
     //Transform username
     this.username = this.username.toLowerCase();
 
     //If proifle picture is empty, load default picture
-    if (this.profilepicture) {
+    if (!this.profilepicture) {
         this.profilepicture = "http://www.planystech.com/wp-content/uploads/2017/03/profile-placeholder.jpg";
+    }
+
+    if (!this.isModified('password')) return next();
+
+    //Hash password
+    if (this.password) {
+        this.password = passwordHash.generate(this.password);
     }
 
     next();

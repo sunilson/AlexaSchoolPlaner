@@ -1,5 +1,6 @@
 package com.sunilson.bachelorthesis.presentation.homepage;
 
+import android.app.DatePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -10,27 +11,33 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
-import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
-import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasViewModel;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
 import com.sunilson.bachelorthesis.presentation.homepage.utilities.HomepageCalendarHelper;
+import com.sunilson.bachelorthesis.presentation.navigation.Navigator;
+import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
+import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasViewModel;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import org.joda.time.Days;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
@@ -40,7 +47,30 @@ import dagger.android.support.HasSupportFragmentInjector;
  * @author Linus Weiss
  */
 
-public class HomepageActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector {
+public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector, DatePickerDialog.OnDateSetListener {
+
+/*
+    @OnClick(R.id.activity_homepage_fab)
+    public void fabClick(View v) {
+        //Creating the instance of PopupMenu
+        PopupMenu popup = new PopupMenu(HomepageActivity.this, v);
+        //Inflating the Popup using xml file
+        popup.getMenuInflater()
+                .inflate(R.menu.test_menu, popup.getMenu());
+        popup.show();
+        //Navigator.navigateToAddEvent(this);
+    }
+    */
+
+    @OnClick(R.id.activity_homepage_add_deadline)
+    public void addDeadlineEvent() {
+        Navigator.navigateToAddEvent(this, 2);
+    }
+
+    @OnClick(R.id.activity_homepage_add_appointment)
+    public void addAppEvent() {
+        Navigator.navigateToAddEvent(this, 1);
+    }
 
     @BindView(R.id.activity_homepage_drawer_layout)
     DrawerLayout drawerLayout;
@@ -48,19 +78,19 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     @BindView(R.id.activity_homepage_navigation)
     NavigationView navigationView;
 
-    @BindView(R.id.activity_homepage_refresh_layout)
-    SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.activity_homepage_viewpager)
+    ViewPager viewPager;
 
     @Inject
     ViewModelFactory viewModelFactory;
 
-
     @Inject
     HomepageCalendarHelper homepageCalendarHelper;
 
-
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
+
+    CalendarViewPagerAdapter calendarViewPagerAdapter;
 
     CalendarViewModel calendarViewModel;
 
@@ -71,17 +101,16 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
         setContentView(R.layout.activity_homepage);
         ButterKnife.bind(this);
 
-        homepageCalendarHelper.setCurrentCalendarDates(new DateTime(DateTimeZone.UTC), new DateTime(DateTimeZone.UTC).plusDays(1));
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         navigationView.setNavigationItemSelectedListener(this);
 
+        viewPager.setOffscreenPageLimit(1);
         //Decide which fragment should be loaded and only if this is no orientation change
         if (savedInstanceState == null) {
-            changeFragment(HomepageFragmentCalendar.newInstance(2), Constants.FRAGMENT_TAG_DAY);
+            initializeNewViewPager();
         }
 
         //Get ViewModel from factory
@@ -94,11 +123,45 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_homepage, menu);
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case Constants.ADD_EVENT_REQUEST:
+                /**
+                HomepageFragmentCalendar homepageFragmentCalendar = (HomepageFragmentCalendar) getSupportFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_DAY);
+
+                if (homepageFragmentCalendar != null) {
+                    homepageFragmentCalendar.EventWasAdded();
+                } else {
+                    changeFragment(HomepageFragmentCalendar.newInstance(homepageCalendarHelper.getCurrentLongDates()), Constants.FRAGMENT_TAG_DAY);
+                }
+                break;
+                 **/
+
+                //TODO
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);
                 return true;
+            case R.id.menu_homepage_calendar:
+                DateTime dateTime = homepageCalendarHelper.getCurrentCalendarDates()[0];
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        this, this, dateTime.getYear(), dateTime.getMonthOfYear() - 1, dateTime.getDayOfMonth());
+                datePickerDialog.show();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -108,30 +171,23 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_homepage_day:
-                changeFragment(HomepageFragmentCalendar.newInstance(1), Constants.FRAGMENT_TAG_DAY);
+                homepageCalendarHelper.setDayAmount(0);
+                initializeNewViewPager();
                 drawerLayout.closeDrawers();
                 return true;
             case R.id.menu_homepage_three_days:
-                changeFragment(HomepageFragmentCalendar.newInstance(3), Constants.FRAGMENT_TAG_DAY);
+                homepageCalendarHelper.setDayAmount(2);
+                initializeNewViewPager();
                 drawerLayout.closeDrawers();
                 return true;
             case R.id.menu_homepage_week:
-                changeFragment(HomepageFragmentCalendar.newInstance(7), Constants.FRAGMENT_TAG_DAY);
+                homepageCalendarHelper.setDayAmount(6);
+                initializeNewViewPager();
                 drawerLayout.closeDrawers();
                 return true;
         }
 
         return false;
-    }
-
-    /**
-     * Change current fragment in Acitvity
-     *
-     * @param fragment Instance of new Fragment
-     * @param tag      Tag of new Fragment used to find it later
-     */
-    public void changeFragment(Fragment fragment, String tag) {
-        getSupportFragmentManager().beginTransaction().replace(R.id.activity_homepage_frame_layout, fragment, tag).commit();
     }
 
     @Override
@@ -159,7 +215,41 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
     public void loading(boolean value) {
-        swipeRefreshLayout.setRefreshing(value);
+    }
+
+    @Override
+    public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
+        DateTime[] dateTimes = homepageCalendarHelper.getCurrentCalendarDates();
+        int dayAmount = Days.daysBetween(dateTimes[0], dateTimes[1]).getDays();
+        DateTime from = new DateTime(year, month + 1, dayOfMonth, 0, 0);
+        DateTime to = from.plusDays(dayAmount);
+        homepageCalendarHelper.setCurrentCalendarDates(from, to);
+    }
+
+    @Override
+    public void onRefresh() {
+        HomepageFragmentCalendar homepageFragmentCalendar = (HomepageFragmentCalendar) getSupportFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_DAY);
+
+        if (homepageFragmentCalendar != null) {
+            homepageFragmentCalendar.loadData();
+        } else {
+            this.loading(false);
+        }
+    }
+
+    private void initializeNewViewPager() {
+        if(calendarViewPagerAdapter != null) calendarViewPagerAdapter.clear();
+        viewPager.removeAllViews();
+        viewPager.setAdapter(null);
+
+        calendarViewPagerAdapter = new CalendarViewPagerAdapter(getSupportFragmentManager(), homepageCalendarHelper);
+        viewPager.setAdapter(calendarViewPagerAdapter);
+        viewPager.setCurrentItem((int)(Integer.MAX_VALUE/2));
     }
 }

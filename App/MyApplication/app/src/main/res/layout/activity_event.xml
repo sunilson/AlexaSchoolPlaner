@@ -1,15 +1,94 @@
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="Event"
+            type="com.sunilson.bachelorthesis.presentation.event.EventModel" />
+    </data>
 
-    <LinearLayout
-        android:id="@+id/activity_event_header"
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/colorAccent"
-        android:transitionName="bla"
-        >
-    </LinearLayout>
-</android.support.design.widget.CoordinatorLayout>
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/activity_event_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:background="@color/colorAccent"
+                    android:padding="@dimen/event_padding">
+
+                    <TextView
+                        android:id="@+id/activity_event_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentLeft="true"
+                        android:text="@{Event.summary}"
+                        android:textColor="@color/white"
+                        android:textSize="32sp"
+                        android:visibility="invisible" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_event_content_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="@dimen/event_padding"
+                    android:visibility="invisible">
+
+                    <TextView
+                        style="@style/event_headline"
+                        android:text="Beschreibung" />
+
+                    <TextView
+                        android:id="@+id/activity_event_description"
+                        style="@style/event_text"
+                        android:text="@{Event.description}"
+                        />
+
+                    <TextView
+                        style="@style/event_headline"
+                        android:text="Zeitraum" />
+
+                    <TextView
+                        android:id="@+id/activity_event_from"
+                        style="@style/event_text"
+                        android:text="@{Event.from.toString()}"/>
+
+                    <TextView
+                        android:id="@+id/activity_event_to"
+                        style="@style/event_text"
+                        android:text="@{Event.to.toString()}"
+                        />
+
+                    <TextView
+                        style="@style/event_headline"
+                        android:text="Location" />
+                </LinearLayout>
+            </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
+
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_event_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_icon="@drawable/ic_edit_white_24dp"
+            app:layout_anchor="@id/activity_event_header"
+            app:layout_anchorGravity="bottom|right" />
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

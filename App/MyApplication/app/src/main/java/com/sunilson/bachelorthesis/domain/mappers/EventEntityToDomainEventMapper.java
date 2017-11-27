@@ -3,11 +3,14 @@ package com.sunilson.bachelorthesis.domain.mappers;
 import com.sunilson.bachelorthesis.data.model.EventEntity;
 import com.sunilson.bachelorthesis.domain.model.DomainEvent;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Created by linus_000 on 13.11.2017.
+ * @author Linus Weiss
  */
 
 @Singleton
@@ -18,7 +21,19 @@ public class EventEntityToDomainEventMapper {
 
     }
 
-    public DomainEvent mapToEntity(EventEntity eventEntity) {
-        return new DomainEvent();
+    public DomainEvent mapToDomainEvent(EventEntity eventEntity) {
+        DomainEvent domainEvent = new DomainEvent();
+
+        domainEvent.setDescription(eventEntity.getDescription());
+        domainEvent.setEventType(eventEntity.getType());
+        domainEvent.setLocation(eventEntity.getLocation());
+        domainEvent.setId(eventEntity.getId());
+        domainEvent.setSummary(eventEntity.getSummary());
+
+        DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+        domainEvent.setFrom(parser.parseDateTime(eventEntity.getFrom()));
+        domainEvent.setTo(parser.parseDateTime(eventEntity.getTo()));
+
+        return domainEvent;
     }
 }

@@ -22,7 +22,13 @@
         </activity>
         <activity android:name=".presentation.event.EventActivity"
             android:theme="@style/AppTheme_Exploding"
+            android:label="@string/event_activity"
             />
-    </application>
+        <activity android:name=".presentation.addEvent.AddEventActivity"
+            android:label="@string/add_event_activity"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
 
+    </application>
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest>

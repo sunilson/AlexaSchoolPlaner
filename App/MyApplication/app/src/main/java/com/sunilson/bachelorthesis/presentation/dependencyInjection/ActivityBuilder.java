@@ -1,5 +1,7 @@
 package com.sunilson.bachelorthesis.presentation.dependencyInjection;
 
+import com.sunilson.bachelorthesis.presentation.addEvent.AddEventActivity;
+import com.sunilson.bachelorthesis.presentation.addEvent.AddEventModule;
 import com.sunilson.bachelorthesis.presentation.event.EventActivity;
 import com.sunilson.bachelorthesis.presentation.event.EventModule;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
@@ -21,5 +23,8 @@ public abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = EventModule.class)
     abstract EventActivity bindEventActivity();
+
+    @ContributesAndroidInjector(modules = AddEventModule.class)
+    abstract AddEventActivity bindAddEventActivity();
 
 }

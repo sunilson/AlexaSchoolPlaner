@@ -4,9 +4,9 @@ module.exports = {
         minLength: 5
     },
     types: {
-        schoolAppointment: 1,
-        specialAppointment: 2,
-        deadline: 3
+        schoolAppointment: 0,
+        specialAppointment: 1,
+        deadline: 2
     },
     summary: {
         maxLength: 120,

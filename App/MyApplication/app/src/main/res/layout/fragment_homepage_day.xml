@@ -1,32 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
-    android:id="@+id/fragment_homepage_day_view_scroll_view"
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:background="@color/white"
+    >
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/fragment_homepage_day_view_scroll_view"
+        android:layout_below="@id/fragment_homepage_header_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <include layout="@layout/timeline_sidebar" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <include layout="@layout/calendar_lines" />
+
+                <LinearLayout
+                    android:id="@+id/fragment_homepage_day_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    >
+                </LinearLayout>
+
+
+            </RelativeLayout>
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/fragment_homepage_header_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <include layout="@layout/timeline_sidebar" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <include layout="@layout/calendar_lines" />
-
-            <LinearLayout
-                android:id="@+id/fragment_homepage_day_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                >
-            </LinearLayout>
-
-
-        </RelativeLayout>
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/timeline_width"
+        android:background="@color/white"
+        android:gravity="bottom"
+        >
     </LinearLayout>
-</android.support.v4.widget.NestedScrollView>
+    <View
+        style="@style/calendar_separator_line"
+        android:layout_below="@id/fragment_homepage_header_container"
+        android:layout_marginTop="0dp"
+        />
+
+
+</RelativeLayout>

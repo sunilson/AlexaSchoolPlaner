@@ -1,39 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group
-        android:id="@+id/menu_homepage_navigation_calendar_group"
-        >
-        <item
-            android:id="@+id/menu_homepage_day"
-            android:title="Tagesansicht"
-            android:icon="@drawable/ic_menu_24dp"
-            />
-        <item
-            android:id="@+id/menu_homepage_three_days"
-            android:title="3-Tage Ansicht"
-            android:icon="@drawable/ic_menu_24dp"
-            />
-        <item
-            android:id="@+id/menu_homepage_week"
-            android:title="Wochenansicht"
-            android:icon="@drawable/ic_menu_24dp"
-            />
-    </group>
 
-    <group
-        android:id="@+id/menu_homepage_navigation_group"
-        >
-        <item
-            android:id="@+id/menu_homepage_bfew"
-            android:title="Tagesansicht"
-            android:icon="@drawable/ic_menu_24dp"
-            />
-        <item
-            android:id="@+id/menu_homepage_fwewf"
-            android:title="Tagesansicht"
-            android:icon="@drawable/ic_menu_24dp"
-            />
-    </group>
-
+<item
+    android:id="@+id/menu_homepage_calendar"
+    android:title="Tagesansicht"
+    android:icon="@drawable/ic_date_range_white_24dp"
+    android:orderInCategory="200"
+    app:showAsAction="ifRoom"
+    />
 </menu>

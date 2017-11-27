@@ -1,6 +1,10 @@
 package com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -11,8 +15,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sunilson.bachelorthesis.R;
-import com.sunilson.bachelorthesis.presentation.event.models.Event;
-import com.sunilson.bachelorthesis.presentation.event.models.EventType;
+import com.sunilson.bachelorthesis.presentation.event.EventModel;
+import com.sunilson.bachelorthesis.presentation.event.EventType;
 import com.sunilson.bachelorthesis.presentation.navigation.Navigator;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.ViewUtilities;
 
@@ -35,7 +39,6 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class CalendarDayView extends RelativeLayout {
 
-    //TODO Make calculations async
     //TODO Make widths of events in rows evenly width
 
     private CalendarDayModel calendarDayModel;
@@ -48,6 +51,7 @@ public class CalendarDayView extends RelativeLayout {
         super(context);
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.day_view, this, true);
+        setLayoutTransition(new LayoutTransition());
     }
 
     private void calculateFields() {
@@ -59,7 +63,7 @@ public class CalendarDayView extends RelativeLayout {
                     public Boolean call() throws Exception {
 
                         //Iterate over all events and start the calculations
-                        for (Event event : calendarDayModel.getEventList()) {
+                        for (EventModel event : calendarDayModel.getEventList()) {
                             checkOverlappingEvents(event);
                         }
 
@@ -92,7 +96,7 @@ public class CalendarDayView extends RelativeLayout {
                 });
     }
 
-    private void checkOverlappingEvents(Event event) {
+    private void checkOverlappingEvents(EventModel event) {
 
         //Check if list is empty, if yes, add first list
         if (addedEvents.size() == 0) {
@@ -110,7 +114,7 @@ public class CalendarDayView extends RelativeLayout {
      * @param event  The event to be added
      * @return
      */
-    private boolean checkGroups(List<EventGroup> groups, Event event) {
+    private boolean checkGroups(List<EventGroup> groups, EventModel event) {
 
         EventGroup group = groups.get(groupCounter);
 
@@ -143,7 +147,7 @@ public class CalendarDayView extends RelativeLayout {
      * @param overlapping If the event has overlapped anything yet
      * @return If the event has been added to the group or not
      */
-    private boolean checkColumns(EventGroup eventGroup, int index, Event event, boolean firstEvent, boolean overlapping) {
+    private boolean checkColumns(EventGroup eventGroup, int index, EventModel event, boolean firstEvent, boolean overlapping) {
 
         if (index == eventGroup.eventColumns.size()) {
             if (overlapping) {
@@ -202,13 +206,13 @@ public class CalendarDayView extends RelativeLayout {
      * @param eventGroup The group in which the column is
      * @param index      The index of the "old" column, which should be expanded to a new one
      */
-    private void reverseExpand(Event event, EventGroup eventGroup, int index) {
+    private void reverseExpand(EventModel event, EventGroup eventGroup, int index) {
 
         EventColumn previousColumn = eventGroup.eventColumns.get(index);
         EventColumn newColumn = eventGroup.eventColumns.get(index + 1);
 
         //Iterate over all Events of the previous column
-        for (Event tempEvent : previousColumn.events) {
+        for (EventModel tempEvent : previousColumn.events) {
             //Only look at events that are before the given event
             if (tempEvent.getTo().getMillis() < event.getFrom().getMillis()) {
 
@@ -236,7 +240,7 @@ public class CalendarDayView extends RelativeLayout {
             int horizontalIndex = 0;
             for (EventColumn eventColumn : eventGroup.eventColumns) {
                 int width = eventGroup.eventColumns.size();
-                for (Event event : eventColumn.events) {
+                for (EventModel event : eventColumn.events) {
                     //Only render "real" events, not placeholders
                     if (!(event instanceof RecurringEvent)) {
                         View view = generateSingleField(width, event, horizontalIndex);
@@ -261,22 +265,22 @@ public class CalendarDayView extends RelativeLayout {
      * @param horizontalMargin The margin which defines the horizontal position of the event
      * @return A Linearlayout containing the name of the Event and a click listener
      */
-    private View generateSingleField(int width, final Event event, int horizontalMargin) {
+    private View generateSingleField(int width, final EventModel event, int horizontalMargin) {
         //Setup container view
         LinearLayout container = new LinearLayout(getContext());
         LinearLayout.LayoutParams layoutParamsContainer = new LinearLayout.LayoutParams(
                 getWidth() / width * event.getWidth(),
-                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), event.getFrom().getMillis(), event.getTo().getMillis(), new long[] {calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}));
+                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), event.getFrom().getMillis(), event.getTo().getMillis(), new long[]{calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}));
         layoutParamsContainer.setMargins(
                 getWidth() / width * horizontalMargin,
-                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), calendarDayModel.getDayStartDate().getMillis(), event.getFrom().getMillis(),  new long[] {calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}),
+                ViewUtilities.dateToHeight((int) getResources().getDimension(R.dimen.day_height), calendarDayModel.getDayStartDate().getMillis(), event.getFrom().getMillis(), new long[]{calendarDayModel.getDayStartDate().getMillis(), calendarDayModel.getDayEndDate().getMillis()}),
                 0,
                 0);
 
         container.setPadding((int) getResources().getDimension(R.dimen.day_field_container_padding),
-                (int) getResources().getDimension(R.dimen.day_field_container_padding),
-                (int) getResources().getDimension(R.dimen.day_field_container_padding),
-                (int) getResources().getDimension(R.dimen.day_field_container_padding));
+                0,
+                0,
+                0);
 
         container.setLayoutParams(layoutParamsContainer);
 
@@ -288,7 +292,9 @@ public class CalendarDayView extends RelativeLayout {
                 (int) getResources().getDimension(R.dimen.day_field_content_padding),
                 (int) getResources().getDimension(R.dimen.day_field_content_padding));
         content.setLayoutParams(layoutParamsContent);
-        content.setBackgroundColor(getResources().getColor(event.getEventType().getVal()));
+        Drawable drawable = getResources().getDrawable(R.drawable.event_background);
+        drawable.setColorFilter(new PorterDuffColorFilter(getResources().getColor(event.getEventType().getVal()), PorterDuff.Mode.SRC_IN));
+        content.setBackground(drawable);
         content.setGravity(Gravity.CENTER);
 
         //Add text to content and content to container
@@ -297,7 +303,7 @@ public class CalendarDayView extends RelativeLayout {
         textView.setLayoutParams(layoutParamsTextView);
         textView.setEllipsize(TextUtils.TruncateAt.END);
         textView.setMaxLines(1);
-        textView.setText(event.getDescription());
+        textView.setText(event.getSummary());
         textView.setTextColor(getResources().getColor(R.color.white));
         content.addView(textView);
         container.addView(content);
@@ -306,7 +312,7 @@ public class CalendarDayView extends RelativeLayout {
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigator.navigateToEvent(getContext(), v);
+                Navigator.navigateToEvent(getContext(), event.getId(), event.getEventType().getVal());
             }
         });
 
@@ -316,12 +322,12 @@ public class CalendarDayView extends RelativeLayout {
     /**
      * Placeholder class for events that are wider than one column. Contains all the information needed to expand it
      */
-    private class RecurringEvent extends Event {
+    private class RecurringEvent extends EventModel {
 
-        Event mainEvent;
+        EventModel mainEvent;
 
-        RecurringEvent(Event event) {
-            super(event.getFrom(), event.getTo(), event.getDescription(), EventType.SCHOOLAPPOINTMENT, null);
+        RecurringEvent(EventModel event) {
+            super(event.getId(), event.getFrom(), event.getTo(), event.getDescription(), EventType.SCHOOLAPPOINTMENT);
             this.mainEvent = event;
         }
     }
@@ -338,7 +344,7 @@ public class CalendarDayView extends RelativeLayout {
      * Describes a column of events that don't overlap but are in the same group
      */
     private class EventColumn {
-        public List<Event> events = new ArrayList<>();
+        public List<EventModel> events = new ArrayList<>();
         public long currentEnd = 0;
     }
 
@@ -355,7 +361,6 @@ public class CalendarDayView extends RelativeLayout {
 
         if (ready && this.calendarDayModel != null) {
             //Sort model to be sure it is sorted correctly for rendering
-            this.calendarDayModel.sort();
             calculateFields();
         } else {
             //TODO Error Handling oder Listener implementieren
@@ -375,6 +380,8 @@ public class CalendarDayView extends RelativeLayout {
                 if (dayModel != null) {
                     calendarDayModel = dayModel;
                 }
+
+                setBackground(getResources().getDrawable(R.drawable.calendar_header_background));
 
                 //Signal that view is ready and render day
                 ready = true;

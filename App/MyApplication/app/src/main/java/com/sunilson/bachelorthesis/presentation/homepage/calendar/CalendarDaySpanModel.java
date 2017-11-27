@@ -5,24 +5,21 @@ import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.Ca
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 /**
  * @author Linus Weiss
  */
 
+@NoArgsConstructor
 public class CalendarDaySpanModel {
 
+    @Getter
     private List<CalendarDayModel> dayModels = new ArrayList<>();
-
-    public CalendarDaySpanModel() {
-
-    }
 
     public void add(CalendarDayModel calendarDayModel) {
         this.dayModels.add(calendarDayModel);
-    }
-
-    public List<CalendarDayModel> getDayModels() {
-        return this.dayModels;
     }
 
 }

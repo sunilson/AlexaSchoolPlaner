@@ -14,33 +14,30 @@ eventService.saveEvent = (event, userId) => {
             });
         }
 
-        //Parse timestamps to Javascript Dates
-        if (event.to && event.from && Number.isInteger(event.to) && Number.isInteger(event.from)) {
-            event.from = new Date(event.from);
-
-            //If event is a deadline, offset to date by 1 hour
-            //Also if to Date is smaller than the from date offset it
-            if ((event.type && event.type === eventVariables.types.deadline) || (event.from.getMilliseconds() > event.to)) {
-                event.to = new Date(event.from.getMilliseconds() + eventVariables.dates.deadlineOffset);
-            } else {
-                event.to = new Date(event.to);
-            }
-        } else {
+        //Check if from Date is given and is a positive Integer, also if to date is given it needs to be an Integer
+        if (!event.from || !Number.isInteger(event.from) ||
+            event.from < 0 || (event.to && !Number.isInteger(event.to))) {
             reject({
                 status: 400,
                 message: "Date was invalid"
             });
         }
 
-        //TODO User suchen und Event pushen
-        userModel.find({
-            _id: userId
-        }).exec().then((user) => {
-            user.events.push(new eventModel({
+        //Parse from Date
+        event.from = new Date(event.from);
 
-            }));
-            return user.save();
-        }).then((result) => {
+        //If event is a deadline, offset to date by 1 hour
+        //Also if to Date is smaller than the from date offset it
+        if ((event.type && event.type === eventVariables.types.deadline) || (event.from.getMilliseconds() > event.to)) {
+            event.to = new Date(event.from.getMilliseconds() + eventVariables.dates.deadlineOffset);
+        } else {
+            event.to = new Date(event.to);
+        }
+
+        //Add author
+        event.author = userId;
+
+        new eventModel(event).save().then((result) => {
             resolve(result);
         }).catch((error) => {
             reject(error);

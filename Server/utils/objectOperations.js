@@ -9,6 +9,10 @@ function trimObject(object) {
     return object;
 }
 
+objectOperations.trimObject = (object) => {
+    return trimObject(object);
+}
+
 objectOperations.parseObject = (object) => {
     if (object) {
         return trimObject(JSON.parse(object));

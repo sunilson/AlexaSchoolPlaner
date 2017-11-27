@@ -2,17 +2,46 @@ package com.sunilson.bachelorthesis.presentation.event;
 
 import android.arch.lifecycle.ViewModel;
 
+import com.sunilson.bachelorthesis.domain.interactors.calendar.GetSingleEventUseCase;
+import com.sunilson.bachelorthesis.domain.model.DomainEvent;
+import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
+
 import javax.inject.Inject;
 
+import io.reactivex.functions.Function;
+
 /**
- * Created by linus_000 on 12.11.2017.
+ * @author Linus Weiss
  */
 
 public class EventViewModel extends ViewModel {
 
-    @Inject
-    public EventViewModel() {
+    GetSingleEventUseCase getSingleEventUseCase;
+    DomainEventToEventModelMapper domainEventToEventModelMapper;
 
+    @Inject
+    public EventViewModel(GetSingleEventUseCase getSingleEventUseCase, DomainEventToEventModelMapper domainEventToEventModelMapper) {
+        this.getSingleEventUseCase = getSingleEventUseCase;
+        this.domainEventToEventModelMapper = domainEventToEventModelMapper;
     }
 
+    public io.reactivex.Observable<EventModel> getSingleEvent(String id) {
+        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id)).map(new Function<DomainEvent, EventModel>() {
+            @Override
+            public EventModel apply(DomainEvent domainEvent) throws Exception {
+                return domainEventToEventModelMapper.toEvent(domainEvent);
+            }
+        });
+    }
+
+    /*
+    public LiveData<EventModel> getSingleEvent(String id) {
+        return LiveDataReactiveStreams.fromPublisher(getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id)).map(new Function<DomainEvent, EventModel>() {
+            @Override
+            public EventModel apply(DomainEvent domainEvent) throws Exception {
+                return domainEventToEventModelMapper.toEvent(domainEvent);
+            }
+        }));
+    }
+*/
 }

@@ -3,12 +3,11 @@ package com.sunilson.bachelorthesis.presentation.homepage.utilities;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.sunilson.bachelorthesis.presentation.homepage.exception.CalendarSettingsException;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -19,7 +18,7 @@ import javax.inject.Singleton;
  */
 
 @Singleton
-public class HomepageCalendarHelper implements CalendarHelperInterface {
+public class HomepageCalendarHelper {
 
     private Application application;
 
@@ -28,24 +27,21 @@ public class HomepageCalendarHelper implements CalendarHelperInterface {
         this.application = application;
     }
 
-    @Override
     public void setCurrentCalendarDates(@Nullable DateTime from, @Nullable DateTime to) {
         SharedPreferences sharedPreferences = application.getSharedPreferences(Constants.SharedPrefsCalendarSettings, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         if (from != null) {
-            editor.putLong(Constants.SharedPrefsCalendarSettingsFromDate, from.getMillis());
+            editor.putLong(Constants.SharedPrefsCalendarSettingsFromDate, from.withTimeAtStartOfDay().getMillis());
         }
 
         if (to != null) {
-            editor.putLong(Constants.SharedPrefsCalendarSettingsToDate, to.getMillis());
-            Log.d("Linus", to.toString());
+            editor.putLong(Constants.SharedPrefsCalendarSettingsToDate, to.withTimeAtStartOfDay().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59).getMillis());
         }
 
         editor.commit();
     }
 
-    @Override
-    public DateTime[] getCurrentCalendarDates() throws CalendarSettingsException {
+    public DateTime[] getCurrentCalendarDates() {
         DateTime[] result = new DateTime[2];
         SharedPreferences sharedPreferences = application.getSharedPreferences(Constants.SharedPrefsCalendarSettings, Context.MODE_PRIVATE);
 
@@ -58,11 +54,66 @@ public class HomepageCalendarHelper implements CalendarHelperInterface {
             return result;
         }
 
-        throw new CalendarSettingsException("No valid dates set!");
+        result[0] = new DateTime();
+        result[1] = result[0].plusDays(2);
+        return result;
     }
 
+    public Long[] getCurrentLongDates() {
+        DateTime[] dateTimes = getCurrentCalendarDates();
+        return new Long[]{
+                dateTimes[0].getMillis(),
+                dateTimes[1].getMillis()
+        };
+    }
+
+    public Long[] convertDateTimesToLongDates(DateTime[] dateTimes) {
+        return new Long[]{
+                dateTimes[0].getMillis(),
+                dateTimes[1].getMillis()
+        };
+    }
+
+
+
+    public void setDayAmount(int dayAmount) {
+        DateTime[] dateTimes = getCurrentCalendarDates();
+        setCurrentCalendarDates(null, dateTimes[0].plusDays(dayAmount));
+    }
+
+    public DateTime[] addDayAmountToDateTimes(DateTime[] dateTimes, int dayAmount) {
+        return new DateTime[]{
+                dateTimes[0].plusDays(dayAmount),
+                dateTimes[1].plusDays(dayAmount)
+        };
+    }
+
+    public void addPeriod() {
+        DateTime[] dateTimes = getCurrentCalendarDates();
+        int dayAmount = Days.daysBetween(dateTimes[0], dateTimes[1]).getDays();
+        setCurrentCalendarDates(dateTimes[0].plusDays(dayAmount + 1), dateTimes[1].plusDays(dayAmount + 1));
+    }
+
+    public void subtractPeriod() {
+        DateTime[] dateTimes = getCurrentCalendarDates();
+        int dayAmount = Days.daysBetween(dateTimes[0], dateTimes[1]).getDays();
+        setCurrentCalendarDates(dateTimes[0].minusDays(dayAmount + 1), dateTimes[1].minusDays(dayAmount + 1));
+    }
+
+    public DateTime[] addPeriodFromDateTimes(DateTime[] dateTimes) {
+        int dayAmount = Days.daysBetween(dateTimes[0], dateTimes[1]).getDays();
+        return new DateTime[]{dateTimes[0].plusDays(dayAmount + 1), dateTimes[1].plusDays(dayAmount + 1)};
+    }
+
+    public DateTime[] subtractPeriodFromDateTimes(DateTime[] dateTimes) {
+        int dayAmount = Days.daysBetween(dateTimes[0], dateTimes[1]).getDays();
+        return new DateTime[]{dateTimes[0].minusDays(dayAmount + 1), dateTimes[1].minusDays(dayAmount + 1)};
+    }
+
+    /*
+
     @Override
-    public DateTime[] convertToBoundDates(int dayAmount) throws CalendarSettingsException {
+    public DateTime[] convertToBoundDates(int dayAmount) {
 
         //Calculate from and to times
         DateTime[] dateTimes = null;
@@ -78,4 +129,6 @@ public class HomepageCalendarHelper implements CalendarHelperInterface {
 
         return dateTimes;
     }
+
+    */
 }

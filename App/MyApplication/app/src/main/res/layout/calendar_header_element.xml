@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0px"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:padding="5dp"
+    android:gravity="center_vertical"
+    android:background="@drawable/calendar_header_background"
+    >
+
+    <TextView
+        android:id="@+id/header_element_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="28"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/header_element_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="14sp" />
+</LinearLayout>
