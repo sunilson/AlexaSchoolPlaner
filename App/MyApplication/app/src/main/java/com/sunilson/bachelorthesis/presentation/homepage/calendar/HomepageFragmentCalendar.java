@@ -83,12 +83,12 @@ public class HomepageFragmentCalendar extends Fragment {
         Long from = getArguments().getLong("from");
         Long to = getArguments().getLong("to");
         dateTimes = new DateTime[]{new DateTime(from), new DateTime(to)};
-        loadData();
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadData();
     }
 
     @Nullable
@@ -112,12 +112,6 @@ public class HomepageFragmentCalendar extends Fragment {
         super.onDestroy();
     }
 
-    public void newInit() {
-        loadData();
-        initializeHeader(LayoutInflater.from(getActivity()));
-    }
-
-
     private void initializeHeader(LayoutInflater inflater) {
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("MMMM");
@@ -132,6 +126,7 @@ public class HomepageFragmentCalendar extends Fragment {
             days.add(d);
         }
 
+        //Format the dates of the DayViews and add them to the Header
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E");
         for (DateTime dateTime : days) {
             LinearLayout header = (LinearLayout) inflater.inflate(R.layout.calendar_header_element, headerContainer, false);
@@ -141,6 +136,9 @@ public class HomepageFragmentCalendar extends Fragment {
         }
     }
 
+    /**
+     * Load event data from current dates from the server
+     */
     public void loadData() {
         //Check if Activity implements HasViewModel interface and returns the correct type of ViewModel
         if (getActivity() instanceof HasViewModel && ((HasViewModel) getActivity()).getViewModel() instanceof CalendarViewModel) {
@@ -151,20 +149,31 @@ public class HomepageFragmentCalendar extends Fragment {
         }
     }
 
+    /**
+     * Observer used for listening to the network event requests
+     */
     private final class EventListObserver extends DisposableObserver<CalendarDaySpanModel> {
 
+        /**
+         * Called when new data arrives
+         *
+         * @param days The data, formatted into a CalendarDaySpanModel object
+         */
         @Override
         public void onNext(CalendarDaySpanModel days) {
-            ((HasViewModel) getActivity()).loading(false);
-            CalendarDayView calendarDayView;
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
-            dayContainer.removeAllViews();
+            if (dayContainer != null) {
+                ((HasViewModel) getActivity()).loading(false);
+                CalendarDayView calendarDayView;
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
+                dayContainer.removeAllViews();
 
-            for (int i = 0; i < days.getDayModels().size(); i++) {
-                calendarDayView = new CalendarDayView(getContext());
-                calendarDayView.setLayoutParams(layoutParams);
-                calendarDayView.init(days.getDayModels().get(i));
-                dayContainer.addView(calendarDayView);
+                //Iterate over days and add them to the fragment
+                for (int i = 0; i < days.getDayModels().size(); i++) {
+                    calendarDayView = new CalendarDayView(getContext());
+                    calendarDayView.setLayoutParams(layoutParams);
+                    calendarDayView.init(days.getDayModels().get(i));
+                    dayContainer.addView(calendarDayView);
+                }
             }
         }
 

@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
 import com.sunilson.bachelorthesis.presentation.addEvent.AddEventActivity;
+import com.sunilson.bachelorthesis.presentation.authentication.AuthenticationActivity;
 import com.sunilson.bachelorthesis.presentation.event.EventActivity;
-import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 
@@ -17,6 +17,14 @@ import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 
 public class Navigator {
 
+
+    public static void navigateToLogin(AppCompatActivity context) {
+        if(context != null) {
+            Intent intent = AuthenticationActivity.getCallingIntent(context);
+            context.startActivity(intent);
+            context.finish();
+        }
+    }
 
     public static void navigateToEvent(Context context, String id, int eventColor) {
         if(context != null) {
@@ -32,13 +40,6 @@ public class Navigator {
         if(activity != null) {
             Intent intent = AddEventActivity.getCallingIntent(activity, eventType);
             activity.startActivityForResult(intent, Constants.ADD_EVENT_REQUEST);
-        }
-    }
-
-    public static void navigateToHomepage(Context context, String fragmentTag) {
-        if (context != null) {
-            Intent intent = HomepageActivity.getCallingIntent(context, fragmentTag);
-            context.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation((AppCompatActivity) context).toBundle());
         }
     }
 }

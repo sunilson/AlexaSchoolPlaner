@@ -5,8 +5,8 @@ import com.sunilson.bachelorthesis.presentation.addEvent.AddEventModule;
 import com.sunilson.bachelorthesis.presentation.event.EventActivity;
 import com.sunilson.bachelorthesis.presentation.event.EventModule;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
-import com.sunilson.bachelorthesis.presentation.homepage.HomepageModule;
-import com.sunilson.bachelorthesis.presentation.homepage.HomepageFragmentBuilder;
+import com.sunilson.bachelorthesis.presentation.homepage.dependencyInjection.HomepageModule;
+import com.sunilson.bachelorthesis.presentation.homepage.dependencyInjection.HomepageFragmentBuilder;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;

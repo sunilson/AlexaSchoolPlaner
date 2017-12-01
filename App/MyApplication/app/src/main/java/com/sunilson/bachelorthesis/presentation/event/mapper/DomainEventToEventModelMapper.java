@@ -1,6 +1,6 @@
 package com.sunilson.bachelorthesis.presentation.event.mapper;
 
-import com.sunilson.bachelorthesis.domain.model.DomainEvent;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
 import com.sunilson.bachelorthesis.presentation.event.EventModel;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 

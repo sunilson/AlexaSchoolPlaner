@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Application;
 
 
+import com.squareup.leakcanary.LeakCanary;
+
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjector;
@@ -21,6 +23,11 @@ public class BaseApplication extends Application implements HasActivityInjector 
 
     @Override public void onCreate() {
         super.onCreate();
+        if(LeakCanary.isInAnalyzerProcess(this)) {
+            return;
+        }
+
+        LeakCanary.install(this);
         this.initializeInjector();
     }
 

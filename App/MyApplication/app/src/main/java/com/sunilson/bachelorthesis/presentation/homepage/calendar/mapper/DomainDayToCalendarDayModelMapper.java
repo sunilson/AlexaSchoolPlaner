@@ -1,7 +1,7 @@
 package com.sunilson.bachelorthesis.presentation.homepage.calendar.mapper;
 
-import com.sunilson.bachelorthesis.domain.model.DomainDay;
-import com.sunilson.bachelorthesis.domain.model.DomainEvent;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainDay;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
 import com.sunilson.bachelorthesis.presentation.event.EventModel;
 import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.CalendarDayModel;

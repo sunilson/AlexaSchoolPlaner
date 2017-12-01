@@ -11,8 +11,8 @@ module.exports = {
         standard: "standard",
         google: "google"
     },
-    name: {
-        minLength: 2,
-        maxLength: 50,
+    auth: {
+        accessExpire: "60m",
+        refreshExpire: "1000d"
     }
 }

@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     android:clipToPadding="false"
     android:background="@color/white"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     >
 
     <android.support.v4.widget.NestedScrollView
@@ -54,6 +56,4 @@
         android:layout_below="@id/fragment_homepage_header_container"
         android:layout_marginTop="0dp"
         />
-
-
 </RelativeLayout>

@@ -17,8 +17,8 @@ import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.databinding.ActivityAddEventBinding;
-import com.sunilson.bachelorthesis.domain.interactors.calendar.AddEventUseCase;
-import com.sunilson.bachelorthesis.domain.model.DomainEvent;
+import com.sunilson.bachelorthesis.domain.calendar.interactors.AddEventUseCase;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
 import com.sunilson.bachelorthesis.presentation.event.EventModel;
 import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;

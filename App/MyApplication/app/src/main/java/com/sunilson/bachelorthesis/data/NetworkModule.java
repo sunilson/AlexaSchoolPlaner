@@ -1,5 +1,7 @@
 package com.sunilson.bachelorthesis.data;
 
+import com.sunilson.bachelorthesis.data.interceptors.AuthenticationInterceptor;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -19,10 +21,10 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    OkHttpClient okHttpClient() {
+    OkHttpClient okHttpClient(AuthenticationInterceptor authenticationInterceptor) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        return new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        return new OkHttpClient.Builder().addInterceptor(interceptor).addNetworkInterceptor(authenticationInterceptor).build();
     }
 
     @Provides

@@ -1,6 +1,6 @@
 package com.sunilson.bachelorthesis.presentation.homepage.calendar.mapper;
 
-import com.sunilson.bachelorthesis.domain.model.DomainDay;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainDay;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarDaySpanModel;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.CalendarDayModel;
 

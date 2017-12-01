@@ -2,8 +2,8 @@ package com.sunilson.bachelorthesis.presentation.event;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.sunilson.bachelorthesis.domain.interactors.calendar.GetSingleEventUseCase;
-import com.sunilson.bachelorthesis.domain.model.DomainEvent;
+import com.sunilson.bachelorthesis.domain.calendar.interactors.GetSingleEventUseCase;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
 import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
 
 import javax.inject.Inject;

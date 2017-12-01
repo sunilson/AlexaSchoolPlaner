@@ -18,18 +18,6 @@ var usernameValidator = [
     })
 ];
 
-var nameValidator = [
-    validate({
-        validator: 'isAlpha',
-        message: 'Name contains invalid characters!'
-    }),
-    validate({
-        validator: 'isLength',
-        arguments: [userVariables.name.minLength, userVariables.name.maxLength],
-        message: "Name is too long or too short!"
-    })
-];
-
 var passwordValidator = [
     validate({
         validator: 'isLength',
@@ -70,14 +58,6 @@ var userSchema = new Schema({
     activated: {
         type: Boolean
     },
-    firstname: {
-        type: String,
-        validate: nameValidator
-    },
-    lastname: {
-        type: String,
-        validate: nameValidator
-    },
     type: {
         type: String,
         required: true
@@ -104,11 +84,6 @@ userSchema.pre('save', function (next) {
 
     //Transform username
     this.username = this.username.toLowerCase();
-
-    //If proifle picture is empty, load default picture
-    if (!this.profilepicture) {
-        this.profilepicture = "http://www.planystech.com/wp-content/uploads/2017/03/profile-placeholder.jpg";
-    }
 
     if (!this.isModified('password')) return next();
 

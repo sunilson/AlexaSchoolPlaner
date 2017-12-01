@@ -2,8 +2,8 @@ package com.sunilson.bachelorthesis.presentation.homepage.calendar;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.sunilson.bachelorthesis.domain.interactors.calendar.GetDaySpanUseCase;
-import com.sunilson.bachelorthesis.domain.model.DomainDay;
+import com.sunilson.bachelorthesis.domain.calendar.interactors.GetDaySpanUseCase;
+import com.sunilson.bachelorthesis.domain.calendar.model.DomainDay;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.mapper.DomainDayListToCalendarDaySpanModelMapper;
 
 import org.joda.time.DateTime;

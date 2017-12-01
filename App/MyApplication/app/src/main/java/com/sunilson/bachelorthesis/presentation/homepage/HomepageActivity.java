@@ -11,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
@@ -78,9 +77,6 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
     @BindView(R.id.activity_homepage_navigation)
     NavigationView navigationView;
 
-    @BindView(R.id.activity_homepage_viewpager)
-    ViewPager viewPager;
-
     @Inject
     ViewModelFactory viewModelFactory;
 
@@ -90,7 +86,6 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
 
-    CalendarViewPagerAdapter calendarViewPagerAdapter;
 
     CalendarViewModel calendarViewModel;
 
@@ -107,10 +102,9 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp);
         navigationView.setNavigationItemSelectedListener(this);
 
-        viewPager.setOffscreenPageLimit(1);
         //Decide which fragment should be loaded and only if this is no orientation change
         if (savedInstanceState == null) {
-            initializeNewViewPager();
+            changeContainerFragment();
         }
 
         //Get ViewModel from factory
@@ -172,18 +166,21 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
         switch (item.getItemId()) {
             case R.id.menu_homepage_day:
                 homepageCalendarHelper.setDayAmount(0);
-                initializeNewViewPager();
+                changeContainerFragment();
                 drawerLayout.closeDrawers();
                 return true;
             case R.id.menu_homepage_three_days:
                 homepageCalendarHelper.setDayAmount(2);
-                initializeNewViewPager();
+                changeContainerFragment();
                 drawerLayout.closeDrawers();
                 return true;
             case R.id.menu_homepage_week:
                 homepageCalendarHelper.setDayAmount(6);
-                initializeNewViewPager();
+                changeContainerFragment();
                 drawerLayout.closeDrawers();
+                return true;
+            case R.id.menu_homepage_log_out:
+                Navigator.navigateToLogin(this);
                 return true;
         }
 
@@ -230,6 +227,7 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
         DateTime from = new DateTime(year, month + 1, dayOfMonth, 0, 0);
         DateTime to = from.plusDays(dayAmount);
         homepageCalendarHelper.setCurrentCalendarDates(from, to);
+        changeContainerFragment();
     }
 
     @Override
@@ -243,13 +241,7 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
         }
     }
 
-    private void initializeNewViewPager() {
-        if(calendarViewPagerAdapter != null) calendarViewPagerAdapter.clear();
-        viewPager.removeAllViews();
-        viewPager.setAdapter(null);
-
-        calendarViewPagerAdapter = new CalendarViewPagerAdapter(getSupportFragmentManager(), homepageCalendarHelper);
-        viewPager.setAdapter(calendarViewPagerAdapter);
-        viewPager.setCurrentItem((int)(Integer.MAX_VALUE/2));
+    private void changeContainerFragment() {
+        getSupportFragmentManager().beginTransaction().replace(R.id.activity_homepage_framelayout, HomepageCalendarContainerFragment.newInstance()).commit();
     }
 }

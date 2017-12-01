@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
@@ -19,12 +20,12 @@ import java.util.List;
 
 public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
 
-    HomepageCalendarHelper homepageCalendarHelper;
-    FragmentManager fm;
-    int firstStart = 0;
+    private HomepageCalendarHelper homepageCalendarHelper;
+    private FragmentManager fm;
+    private int firstStart = 0;
     private DateTime[] middleDateTimes;
     private Integer prevFragmentPos;
-    boolean direction;
+    private boolean direction;
 
     public CalendarViewPagerAdapter(FragmentManager fm, HomepageCalendarHelper homepageCalendarHelper) {
         super(fm);
@@ -36,12 +37,9 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
 
-        //1 rechts am Anfang
-        //2 links am Anfang
-        //Habe ich nach rechts oder nach links gewischt? Middle Date von links oder von rechts übernehmen
-
         DateTime[] tempDateTimes = middleDateTimes;
         int fragmentPos = position % 3;
+        Log.d("Linus", Integer.toString(fragmentPos));
         if (firstStart < 3) {
             firstStart++;
             if (fragmentPos == 1) {
@@ -95,9 +93,11 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
             }
 
             if (direction) {
+                Log.d("Linus", "Right");
                 middleDateTimes = homepageCalendarHelper.addPeriodFromDateTimes(middleDateTimes);
                 tempDateTimes = homepageCalendarHelper.addPeriodFromDateTimes(middleDateTimes);
             } else {
+                Log.d("Linus", "Left");
                 middleDateTimes = homepageCalendarHelper.subtractPeriodFromDateTimes(middleDateTimes);
                 tempDateTimes = homepageCalendarHelper.subtractPeriodFromDateTimes(middleDateTimes);
             }
@@ -114,7 +114,6 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
         super.destroyItem(container, position, object);
         HomepageFragmentCalendar fragmentCalendar = (HomepageFragmentCalendar) object;
         fm.beginTransaction().remove(fragmentCalendar).commit();
-
     }
 
     public void clear() {

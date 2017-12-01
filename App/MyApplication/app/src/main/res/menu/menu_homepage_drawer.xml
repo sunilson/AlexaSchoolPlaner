@@ -6,18 +6,18 @@
         >
         <item
             android:id="@+id/menu_homepage_day"
-            android:title="Tagesansicht"
-            android:icon="@drawable/ic_menu_24dp"
+            android:title="@string/day_view"
+            android:icon="@drawable/ic_view_day_white_24dp"
             />
         <item
             android:id="@+id/menu_homepage_three_days"
-            android:title="3-Tage Ansicht"
-            android:icon="@drawable/ic_menu_24dp"
+            android:title="@string/three_day_view"
+            android:icon="@drawable/ic_view_column_white_24dp"
             />
         <item
             android:id="@+id/menu_homepage_week"
-            android:title="Wochenansicht"
-            android:icon="@drawable/ic_menu_24dp"
+            android:title="@string/week_view"
+            android:icon="@drawable/ic_view_week_white_24dp"
             />
     </group>
 
@@ -26,13 +26,13 @@
         >
         <item
             android:id="@+id/menu_homepage_bfew"
-            android:title="Tagesansicht"
-            android:icon="@drawable/ic_menu_24dp"
+            android:title="@string/settings"
+            android:icon="@drawable/ic_settings_white_24dp"
             />
         <item
-            android:id="@+id/menu_homepage_fwewf"
-            android:title="Tagesansicht"
-            android:icon="@drawable/ic_menu_24dp"
+            android:id="@+id/menu_homepage_log_out"
+            android:title="@string/log_out"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
             />
     </group>
 

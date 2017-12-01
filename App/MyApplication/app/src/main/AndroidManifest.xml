@@ -28,6 +28,8 @@
             android:label="@string/add_event_activity"
             android:theme="@style/AppTheme.NoActionBar"
             />
+        <activity android:name=".presentation.authentication.AuthenticationActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
