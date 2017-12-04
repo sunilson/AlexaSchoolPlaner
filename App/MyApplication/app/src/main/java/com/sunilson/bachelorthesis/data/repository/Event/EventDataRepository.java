@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Observable;
-import retrofit2.Retrofit;
 
 /**
  * @author Linus Weiss
@@ -23,8 +22,8 @@ public class EventDataRepository implements com.sunilson.bachelorthesis.domain.r
     private EventRetrofitService eventRetrofitService;
 
     @Inject
-    public EventDataRepository(Retrofit retrofit) {
-        this.eventRetrofitService = retrofit.create(EventRetrofitService.class);
+    public EventDataRepository(EventRetrofitService eventRetrofitService) {
+        this.eventRetrofitService = eventRetrofitService;
     }
 
     @Override

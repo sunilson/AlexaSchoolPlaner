@@ -1,0 +1,55 @@
+package com.sunilson.bachelorthesis.data.dependencyInjection;
+
+import com.sunilson.bachelorthesis.data.interceptors.AuthenticationInterceptor;
+import com.sunilson.bachelorthesis.data.repository.Event.EventRetrofitService;
+import com.sunilson.bachelorthesis.data.repository.authentication.AuthenticationRetrofitService;
+
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+/**
+ * @author Linus Weiss
+ */
+
+@Module()
+public class NetworkModule {
+
+    @Provides
+    @Singleton
+    OkHttpClient okHttpClient(AuthenticationInterceptor authenticationInterceptor) {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        return new OkHttpClient.Builder().addInterceptor(interceptor).addNetworkInterceptor(authenticationInterceptor).build();
+    }
+
+    @Provides
+    @Singleton
+    Retrofit retrofit(OkHttpClient client) {
+        return new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:5000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .client(client)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    AuthenticationRetrofitService authenticationRetrofitService(Retrofit retrofit) {
+        return retrofit.create(AuthenticationRetrofitService.class);
+    }
+
+    @Provides
+    @Singleton
+    EventRetrofitService eventRetrofitService(Retrofit retrofit) {
+        return retrofit.create(EventRetrofitService.class);
+    }
+
+}

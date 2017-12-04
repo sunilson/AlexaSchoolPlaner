@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.event.EventModel;
 import com.sunilson.bachelorthesis.presentation.event.EventType;
-import com.sunilson.bachelorthesis.presentation.navigation.Navigator;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.Navigator;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.ViewUtilities;
 
 import java.util.ArrayList;

@@ -56,7 +56,6 @@ public class HomepageFragmentCalendar extends Fragment {
     DisposableManager disposableManager;
 
     private Unbinder unbinder;
-    private Integer dayAmount;
     private List<CalendarDayModel> days = new ArrayList<>();
     private DateTime[] dateTimes = new DateTime[0];
 

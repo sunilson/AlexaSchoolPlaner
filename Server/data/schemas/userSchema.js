@@ -75,7 +75,7 @@ userSchema.pre('save', function (next) {
 
     //Set activation status
     if (!this.activated) {
-        if (this.type !== UserVariables.type.standard) {
+        if (this.type !== userVariables.type.standard) {
             this.activated = true;
         } else {
             this.activated = false;

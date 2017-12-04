@@ -17,4 +17,10 @@
     <string name="week_view">Woche</string>
     <string name="settings">Settings</string>
     <string name="log_out">Sign out</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="username_hint">Enter username</string>
+    <string name="password_hint">Enter password</string>
+    <string name="repeat_password_hint">Repeat password</string>
+    <string name="email_hint">Enter email address</string>
 </resources>

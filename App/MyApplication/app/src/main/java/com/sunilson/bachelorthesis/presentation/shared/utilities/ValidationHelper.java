@@ -35,6 +35,16 @@ public class ValidationHelper {
         return true;
     }
 
+    public boolean validateUsername(String username) {
+        return true;
+    }
+    public boolean validateEmail(String email) {
+        return true;
+    }
+    public boolean validatePassword(String password) {
+        return true;
+    }
+
     public boolean validateFromToDates(@Nullable DateTime from, @Nullable DateTime to) {
         if(from == null || to == null) return false;
 

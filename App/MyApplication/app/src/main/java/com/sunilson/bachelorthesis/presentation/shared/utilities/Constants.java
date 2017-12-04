@@ -9,6 +9,7 @@ import com.sunilson.bachelorthesis.presentation.event.EventType;
 public class Constants {
 
     public final static String FRAGMENT_TAG_DAY = "homepageFragmentDay";
+    public final static String FRAGMENT_TAG_Register = "registerFragment";
 
     public final static int SCHOOLAPPOINTMENT = 0;
     public final static int SPECIALAPPOINTMENT = 1;

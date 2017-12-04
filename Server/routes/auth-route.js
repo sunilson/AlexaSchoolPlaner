@@ -22,12 +22,13 @@ var UserVariables = require("../variables/UserVariables");
 var ObjectOperations = require("../utils/objectOperations");
 var validationService = require("../services/validationService");
 
-router.post('/refreshToken', function (req, res) {
+router.get('/refreshToken', function (req, res) {
     //Get data from request
-    var refreshToken = req.body.refreshToken;
+    var refreshToken = req.query.refreshToken;
     if (!refreshToken) {
         return res.sendStatus(400);
     }
+
     //Get token from database
     refreshTokenModel.findOne({
         refreshToken: refreshToken
@@ -46,9 +47,7 @@ router.post('/refreshToken', function (req, res) {
             } else {
                 var userId = decoded.id;
                 var accessToken = tokenService.generateToken(userId);
-                res.status(200).json({
-                    accessToken: accessToken
-                })
+                res.status(200).json(accessToken);
             }
         });
     });
@@ -57,13 +56,8 @@ router.post('/refreshToken', function (req, res) {
 //Login route
 router.post('/login', function (req, res, next) {
 
-    //Check if body contains required params
-    if (!req.body || !req.body.name || !req.body.password) {
-        return res.sendStatus(400);
-    }
-
-    var name = req.body.name;
-    var password = req.body.password;
+    let user = ObjectOperations.trimObject(req.body);
+    console.log(user);
 
     //Compare request data with database and retrieve user object
     if (validator.isEmail(name)) {
@@ -85,7 +79,8 @@ router.post('/login', function (req, res, next) {
 
 router.post('/register', function (req, res, next) {
 
-    var parsedUser = ObjectOperations.parseObject(req.body.data);
+    var parsedUser = ObjectOperations.trimObject(req.body);
+    console.log(parsedUser);
 
     var results = {}
     //Validate and save data to database
@@ -97,11 +92,26 @@ router.post('/register', function (req, res, next) {
     }).then((tokens) => {
         //Send verification mail to new user
         results.tokens = tokens;
-        return validationService.sendVerification(results.user.id, results.user.email);
+        //return validationService.sendVerification(results.user.id, results.user.email);
     }).then((validationResult) => {
-        console.log("Validation");
         //Return login tokens to the requester
+        console.log({
+            user: {
+                id: results.user.id,
+                username: results.user.username,
+                email: results.user.email
+            },
+            tokens: {
+                accessToken: results.tokens.accessToken,
+                refreshToken: results.tokens.refreshToken
+            }
+        });
         return res.status(201).json({
+            user: {
+                id: results.user.id,
+                username: results.user.username,
+                email: results.user.email
+            },
             tokens: {
                 accessToken: results.tokens.accessToken,
                 refreshToken: results.tokens.refreshToken

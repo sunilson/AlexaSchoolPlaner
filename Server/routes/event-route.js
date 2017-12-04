@@ -5,6 +5,11 @@ var ObjectOperations = require("../utils/objectOperations");
 var eventModel = require("../data/models/eventModel");
 var userModel = require("../data/models/userModel");
 var moment = require("moment");
+var config = require("../config");
+var algoliasearch = require("algoliasearch");
+var algoliaClient = algoliasearch(config.algolia.appId, config.algolia.apiKey);
+var algoliaEventIndex = algoliaClient.initIndex('bachelor_thesis_events');
+algoliaEventIndex.setSettings(config.algoliaIndexSettings);
 
 //Route for creating a new event
 router.post('/new', (req, res, next) => {
@@ -17,9 +22,47 @@ router.post('/new', (req, res, next) => {
 
     //Save event to database and react to result
     eventService.saveEvent(event, /*user.id*/ "5a103e699c04124d2813693a").then((result) => {
-        res.status(201).json(result);
+
+        //Add event to algolia search index
+        let searchIndex = {};
+        searchIndex["description"] = result.description;
+        searchIndex["summary"] = result.summary;
+        searchIndex["eventId"] = result.id;
+        searchIndex["type"] = result.type;
+        searchIndex["from"] = Date.parse(result.from);
+        searchIndex["to"] = Date.parse(result.to);
+        algoliaEventIndex.addObject(searchIndex);
+
+        return res.status(201).json(result);
     }).catch((err) => {
         return next(err);
+    });
+});
+
+//Search for an event in the future containing the search query term
+router.get('/searchNextEvent', (req, res, next) => {
+    let query = req.query.query;
+
+    res.sendStatus(201);
+
+});
+
+
+router.get('/nearestEvent', (req, res, next) => {
+    let date = parseInt(req.query.date);
+
+    eventModel.findOne({
+        author: "5a103e699c04124d2813693a" /* user.id */ ,
+        from: {
+            $gte: new Date(date)
+        },
+        to: {
+            $lt: new Date(date + 10800000)
+        }
+    }).lean().exec().then((result) => {
+        res.status(200).json(result);
+    }).catch((error) => {
+        next(error);
     });
 });
 

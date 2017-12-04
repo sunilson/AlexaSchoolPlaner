@@ -14,19 +14,21 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.DatePicker;
 
 import com.sunilson.bachelorthesis.R;
+import com.sunilson.bachelorthesis.domain.authentication.interactors.CheckLoginStatusUseCase;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
 import com.sunilson.bachelorthesis.presentation.homepage.utilities.HomepageCalendarHelper;
-import com.sunilson.bachelorthesis.presentation.navigation.Navigator;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasViewModel;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.Navigator;
 import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
 
 import org.joda.time.DateTime;
@@ -41,25 +43,13 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
+import io.reactivex.functions.Action;
 
 /**
  * @author Linus Weiss
  */
 
 public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector, DatePickerDialog.OnDateSetListener {
-
-/*
-    @OnClick(R.id.activity_homepage_fab)
-    public void fabClick(View v) {
-        //Creating the instance of PopupMenu
-        PopupMenu popup = new PopupMenu(HomepageActivity.this, v);
-        //Inflating the Popup using xml file
-        popup.getMenuInflater()
-                .inflate(R.menu.test_menu, popup.getMenu());
-        popup.show();
-        //Navigator.navigateToAddEvent(this);
-    }
-    */
 
     @OnClick(R.id.activity_homepage_add_deadline)
     public void addDeadlineEvent() {
@@ -86,6 +76,8 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
 
+    @Inject
+    CheckLoginStatusUseCase checkLoginStatusUseCase;
 
     CalendarViewModel calendarViewModel;
 
@@ -182,6 +174,14 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
             case R.id.menu_homepage_log_out:
                 Navigator.navigateToLogin(this);
                 return true;
+            case R.id.menu_homepage_checkLogin:
+                checkLoginStatusUseCase.execute(null).doFinally(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        Log.d("Linus", "Complete!");
+                    }
+                });
+                return true;
         }
 
         return false;
@@ -202,12 +202,10 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
      * Creates an Intent that can be used to navigate to this Activity
      *
      * @param context
-     * @param fragmentTag Tag of fragment that should be loaded first
      * @return Intent to navigate to this Activity
      */
-    public static Intent getCallingIntent(Context context, String fragmentTag) {
+    public static Intent getCallingIntent(Context context) {
         Intent intent = new Intent(context, HomepageActivity.class);
-        intent.putExtra("fragmentTag", fragmentTag);
         return intent;
     }
 

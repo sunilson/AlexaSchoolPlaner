@@ -51,6 +51,7 @@ function checkUniqueValue(value, key) {
         UserModel.findOne(filter).lean().exec((err, result) => {
             if (result) {
                 reject({
+                    status: 400,
                     message: "Username or Email already exists!"
                 });
             } else {

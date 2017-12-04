@@ -1,5 +1,9 @@
 package com.sunilson.bachelorthesis.data.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +14,14 @@ import lombok.Setter;
  * @author Linus Weiss
  */
 
+@Entity
+@TypeConverters({com.sunilson.bachelorthesis.data.repository.database.TypeConverters.class})
 public class EventEntity {
+
+    @PrimaryKey(autoGenerate = true)
+    @Getter
+    @Setter
+    private int dbId;
 
     @SerializedName("_id")
     @Expose

@@ -30,6 +30,11 @@
             android:icon="@drawable/ic_settings_white_24dp"
             />
         <item
+            android:id="@+id/menu_homepage_checkLogin"
+            android:title="Check login status"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            />
+        <item
             android:id="@+id/menu_homepage_log_out"
             android:title="@string/log_out"
             android:icon="@drawable/ic_exit_to_app_black_24dp"

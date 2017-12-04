@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
 import com.sunilson.bachelorthesis.presentation.addEvent.AddEventViewModel;
+import com.sunilson.bachelorthesis.presentation.authentication.AuthenticationViewModel;
 import com.sunilson.bachelorthesis.presentation.event.EventViewModel;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
 
@@ -32,6 +33,11 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(AddEventViewModel.class)
     abstract ViewModel bindAddEventViewModel(AddEventViewModel addEventViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(AuthenticationViewModel.class)
+    abstract ViewModel bindAuthenticationViewModel(AuthenticationViewModel authenticationViewModel);
 
     @Binds
     abstract ViewModelProvider.Factory provideViewModelFactory(ViewModelFactory viewModelFactory);

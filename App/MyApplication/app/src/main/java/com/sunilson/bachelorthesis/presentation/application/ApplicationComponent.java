@@ -2,7 +2,8 @@ package com.sunilson.bachelorthesis.presentation.application;
 
 import android.app.Application;
 
-import com.sunilson.bachelorthesis.data.NetworkModule;
+import com.sunilson.bachelorthesis.data.dependencyInjection.LocalStorageModule;
+import com.sunilson.bachelorthesis.data.dependencyInjection.NetworkModule;
 import com.sunilson.bachelorthesis.presentation.dependencyInjection.ActivityBuilder;
 
 import javax.inject.Singleton;
@@ -20,6 +21,7 @@ import dagger.android.AndroidInjectionModule;
         AndroidInjectionModule.class,
         ApplicationModule.class,
         NetworkModule.class,
+        LocalStorageModule.class,
         ActivityBuilder.class})
 public interface ApplicationComponent  {
 
