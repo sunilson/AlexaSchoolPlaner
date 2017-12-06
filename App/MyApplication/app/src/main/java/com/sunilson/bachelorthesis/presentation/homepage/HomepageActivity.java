@@ -121,18 +121,7 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
 
         switch (requestCode) {
             case Constants.ADD_EVENT_REQUEST:
-                /**
-                HomepageFragmentCalendar homepageFragmentCalendar = (HomepageFragmentCalendar) getSupportFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_DAY);
-
-                if (homepageFragmentCalendar != null) {
-                    homepageFragmentCalendar.EventWasAdded();
-                } else {
-                    changeFragment(HomepageFragmentCalendar.newInstance(homepageCalendarHelper.getCurrentLongDates()), Constants.FRAGMENT_TAG_DAY);
-                }
-                break;
-                 **/
-
-                //TODO
+                changeContainerFragment();
         }
     }
 

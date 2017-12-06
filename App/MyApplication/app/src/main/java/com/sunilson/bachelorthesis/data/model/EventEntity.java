@@ -14,16 +14,13 @@ import lombok.Setter;
  * @author Linus Weiss
  */
 
-@Entity
+@Entity(tableName = "Events")
 @TypeConverters({com.sunilson.bachelorthesis.data.repository.database.TypeConverters.class})
 public class EventEntity {
 
-    @PrimaryKey(autoGenerate = true)
-    @Getter
-    @Setter
-    private int dbId;
-
     @SerializedName("_id")
+    @PrimaryKey
+    @android.support.annotation.NonNull
     @Expose
     @Getter
     @Setter

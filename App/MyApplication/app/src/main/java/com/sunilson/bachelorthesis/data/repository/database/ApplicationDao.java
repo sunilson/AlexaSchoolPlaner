@@ -9,7 +9,9 @@ import android.arch.persistence.room.Update;
 import com.sunilson.bachelorthesis.data.model.EventEntity;
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
 
-import io.reactivex.Flowable;
+import java.util.List;
+
+import io.reactivex.Single;
 
 /**
  * @author Linus Weiss
@@ -27,6 +29,15 @@ public interface ApplicationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addEvent(EventEntity eventEntity);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void addEvents(List<EventEntity> events);
+
+    @Query("SELECT * FROM EVENTS WHERE EVENTS.`from` < :to AND EVENTS.`to` >= :from")
+    Single<List<EventEntity>> getEvents(String from, String to);
+
+    @Query("SELECT * FROM Events WHERE id = :id")
+    Single<EventEntity> getSingleEvent(String id);
+
     @Query("SELECT * FROM Users WHERE id = 1")
-    Flowable<UserEntity> getCurrentUser();
+    Single<UserEntity> getCurrentUser();
 }

@@ -2,7 +2,6 @@ package com.sunilson.bachelorthesis.data.repository.authentication;
 
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
 import com.sunilson.bachelorthesis.data.repository.database.ApplicationDatabase;
-import com.sunilson.bachelorthesis.domain.authentication.model.DomainUser;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,8 +26,8 @@ public class AuthenticationDataRepository implements com.sunilson.bachelorthesis
     }
 
     @Override
-    public Observable<UserEntity> signIn(String name, String password) {
-        return authenticationRetrofitService.signIn(name, password).doOnNext(new Consumer<UserEntity>() {
+    public Observable<UserEntity> signIn(Object body) {
+        return authenticationRetrofitService.signIn(body).doOnNext(new Consumer<UserEntity>() {
             @Override
             public void accept(UserEntity userEntity) throws Exception {
                 applicationDatabase.applicationDao().addUser(userEntity);
@@ -37,7 +36,7 @@ public class AuthenticationDataRepository implements com.sunilson.bachelorthesis
     }
 
     @Override
-    public Observable<UserEntity> signUp(DomainUser domainUser) {
+    public Observable<UserEntity> signUp(Object domainUser) {
         return this.authenticationRetrofitService.register(domainUser).doOnNext(new Consumer<UserEntity>() {
             @Override
             public void accept(UserEntity userEntity) throws Exception {

@@ -1,8 +1,9 @@
 package com.sunilson.bachelorthesis.data.dependencyInjection;
 
-import com.sunilson.bachelorthesis.data.interceptors.AuthenticationInterceptor;
+import com.sunilson.bachelorthesis.data.interceptors.TokenAuthenticator;
 import com.sunilson.bachelorthesis.data.repository.Event.EventRetrofitService;
 import com.sunilson.bachelorthesis.data.repository.authentication.AuthenticationRetrofitService;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 
 import javax.inject.Singleton;
 
@@ -23,17 +24,17 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    OkHttpClient okHttpClient(AuthenticationInterceptor authenticationInterceptor) {
+    OkHttpClient okHttpClient(TokenAuthenticator tokenAuthenticator) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        return new OkHttpClient.Builder().addInterceptor(interceptor).addNetworkInterceptor(authenticationInterceptor).build();
+        return new OkHttpClient.Builder().authenticator(tokenAuthenticator).addInterceptor(interceptor)./*addNetworkInterceptor(authenticationInterceptor). */build();
     }
 
     @Provides
     @Singleton
     Retrofit retrofit(OkHttpClient client) {
         return new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:5000/")
+                .baseUrl(Constants.HOME_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(client)

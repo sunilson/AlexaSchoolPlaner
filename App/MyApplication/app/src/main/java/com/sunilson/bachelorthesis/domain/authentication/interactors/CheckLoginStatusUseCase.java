@@ -16,7 +16,7 @@ import io.reactivex.functions.Function;
  * @author Linus Weiss
  */
 
-public class CheckLoginStatusUseCase extends AbstractUseCase<Boolean, Object> {
+public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
 
     private AuthenticationRepository authenticationRepository;
     private RefreshLoginUseCase refreshLoginUseCase;
@@ -28,18 +28,18 @@ public class CheckLoginStatusUseCase extends AbstractUseCase<Boolean, Object> {
     }
 
     @Override
-    protected Observable<Boolean> buildUseCaseObservable(Object o) {
-        return authenticationRepository.getCurrentUser().map(new Function<UserEntity, Boolean>() {
+    protected Observable<String> buildUseCaseObservable(Object o) {
+        return authenticationRepository.getCurrentUser().map(new Function<UserEntity, String>() {
             @Override
-            public Boolean apply(UserEntity userEntity) throws Exception {
+            public String apply(UserEntity userEntity) throws Exception {
                 //If a userEntity has been found, check if the access token is still valid
                 if (userEntity != null) {
                     String accessToken = userEntity.getTokens().getAccessToken();
                     JWT jwt = new JWT(accessToken);
                     if (jwt.getExpiresAt().getTime() < new Date().getTime() + 300000) {
-                        return false;
+                        return accessToken;
                     } else {
-                        return true;
+                        return null;
                     }
                 }
                 throw  new Exception("No UserEntity defined");

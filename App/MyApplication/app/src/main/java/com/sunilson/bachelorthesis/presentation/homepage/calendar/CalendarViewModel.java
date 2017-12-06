@@ -30,8 +30,8 @@ public class CalendarViewModel extends ViewModel {
         this.daySpanModelMapper = daySpanModelMapper;
     }
 
-    public Observable<CalendarDaySpanModel> getDays(DateTime from, DateTime to) {
-       return getDaySpanUseCase.execute(GetDaySpanUseCase.Params.forDaySpan(from, to)).map(
+    public Observable<CalendarDaySpanModel> getDays(DateTime from, DateTime to, Boolean offline) {
+       return getDaySpanUseCase.execute(GetDaySpanUseCase.Params.forDaySpan(from, to, offline)).map(
                new Function<List<DomainDay>, CalendarDaySpanModel>() {
                    @Override
                    public CalendarDaySpanModel apply(List<DomainDay> domainDays) throws Exception {
@@ -40,24 +40,6 @@ public class CalendarViewModel extends ViewModel {
                }
        );
     }
-
-    /*
-    public LiveData<CalendarDaySpanModel> getDays(DateTime from, DateTime to) {
-
-        Log.d("Linus", "Get Days");
-
-        Flowable<List<DomainDay>> flowable = getDaySpanUseCase.execute(GetDaySpanUseCase.Params.forDaySpan(from, to));
-
-        return LiveDataReactiveStreams.fromPublisher(flowable.map(
-                new Function<List<DomainDay>, CalendarDaySpanModel>() {
-                    @Override
-                    public CalendarDaySpanModel apply(List<DomainDay> domainDays) throws Exception {
-                        return daySpanModelMapper.toCalendarDaySpanModel(domainDays);
-                    }
-                }
-        ));
-    }
-    */
 
     @Override
     protected void onCleared() {

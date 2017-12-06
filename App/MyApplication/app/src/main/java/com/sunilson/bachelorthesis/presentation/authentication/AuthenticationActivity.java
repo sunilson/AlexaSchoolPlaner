@@ -8,8 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import com.sunilson.bachelorthesis.R;
-import com.sunilson.bachelorthesis.presentation.authentication.register.RegisterFragment;
+import com.sunilson.bachelorthesis.presentation.authentication.login.LoginFragment;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
+import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasFragments;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasViewModel;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
@@ -26,7 +27,7 @@ import dagger.android.support.HasSupportFragmentInjector;
  * @author Linus Weiss
  */
 
-public class AuthenticationActivity extends BaseActivity implements HasViewModel<AuthenticationViewModel>, HasSupportFragmentInjector {
+public class AuthenticationActivity extends BaseActivity implements HasViewModel<AuthenticationViewModel>, HasFragments, HasSupportFragmentInjector {
 
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
@@ -44,7 +45,7 @@ public class AuthenticationActivity extends BaseActivity implements HasViewModel
         ButterKnife.bind(this);
 
         if(savedInstanceState == null) {
-            changeFragment(RegisterFragment.newInstance(), Constants.FRAGMENT_TAG_Register);
+            changeFragment(LoginFragment.newInstance(), Constants.FRAGMENT_TAG_Register);
         }
 
         authenticationViewModel = ViewModelProviders.of(this, viewModelFactory).get(AuthenticationViewModel.class);
@@ -56,7 +57,7 @@ public class AuthenticationActivity extends BaseActivity implements HasViewModel
      * @param fragment New Fragment
      * @param tag Tag to later find this fragment
      */
-    private void changeFragment(Fragment fragment, String tag) {
+    public void changeFragment(Fragment fragment, String tag) {
         getSupportFragmentManager().beginTransaction().replace(R.id.activity_authentication_framelayout, fragment, tag).commit();
     }
 
@@ -66,7 +67,7 @@ public class AuthenticationActivity extends BaseActivity implements HasViewModel
      * @param fragment New fragment
      * @param tag Tag to later find this fragment and for backstack
      */
-    private void addFragment(Fragment fragment, String tag) {
+    public void addFragment(Fragment fragment, String tag) {
         getSupportFragmentManager().beginTransaction().add(R.id.activity_authentication_framelayout, fragment, tag).addToBackStack(tag).commit();
     }
 

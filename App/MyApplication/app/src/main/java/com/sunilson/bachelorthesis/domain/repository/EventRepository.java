@@ -14,6 +14,7 @@ import io.reactivex.Observable;
 
 public interface EventRepository {
     Observable<List<EventEntity>> getEventList(DateTime from, DateTime to);
+    Observable<List<EventEntity>> getOfflineEventList(DateTime from, DateTime to);
     Observable<EventEntity> getSingleEvent(String id);
     Observable<EventEntity> addEvent(Object body);
 }

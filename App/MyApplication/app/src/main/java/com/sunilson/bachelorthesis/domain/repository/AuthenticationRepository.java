@@ -1,7 +1,6 @@
 package com.sunilson.bachelorthesis.domain.repository;
 
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
-import com.sunilson.bachelorthesis.domain.authentication.model.DomainUser;
 
 import io.reactivex.Observable;
 
@@ -10,8 +9,8 @@ import io.reactivex.Observable;
  */
 
 public interface AuthenticationRepository {
-    Observable<UserEntity> signIn(String name, String password);
-    Observable<UserEntity> signUp(DomainUser domainUser);
+    Observable<UserEntity> signIn(Object domainLoginData);
+    Observable<UserEntity> signUp(Object domainUser);
     Observable<String> refreshToken(String refreshToken);
     Observable<UserEntity> getCurrentUser();
 }

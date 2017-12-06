@@ -4,7 +4,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
@@ -39,7 +38,6 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
 
         DateTime[] tempDateTimes = middleDateTimes;
         int fragmentPos = position % 3;
-        Log.d("Linus", Integer.toString(fragmentPos));
         if (firstStart < 3) {
             firstStart++;
             if (fragmentPos == 1) {
@@ -93,11 +91,9 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
             }
 
             if (direction) {
-                Log.d("Linus", "Right");
                 middleDateTimes = homepageCalendarHelper.addPeriodFromDateTimes(middleDateTimes);
                 tempDateTimes = homepageCalendarHelper.addPeriodFromDateTimes(middleDateTimes);
             } else {
-                Log.d("Linus", "Left");
                 middleDateTimes = homepageCalendarHelper.subtractPeriodFromDateTimes(middleDateTimes);
                 tempDateTimes = homepageCalendarHelper.subtractPeriodFromDateTimes(middleDateTimes);
             }

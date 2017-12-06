@@ -11,7 +11,7 @@ import com.sunilson.bachelorthesis.data.model.user.UserEntity;
  * @author Linus Weiss
  */
 
-@Database(entities = {UserEntity.class, EventEntity.class}, version = 2)
+@Database(entities = {UserEntity.class, EventEntity.class}, version = 4)
 @TypeConverters({com.sunilson.bachelorthesis.data.repository.database.TypeConverters.class})
 public abstract class ApplicationDatabase extends RoomDatabase {
     public abstract ApplicationDao applicationDao();

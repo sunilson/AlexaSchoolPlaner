@@ -1,5 +1,7 @@
 package com.sunilson.bachelorthesis.domain.authentication.interactors;
 
+import android.util.Log;
+
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
 import com.sunilson.bachelorthesis.data.repository.database.ApplicationDatabase;
 import com.sunilson.bachelorthesis.domain.repository.AuthenticationRepository;
@@ -8,7 +10,7 @@ import com.sunilson.bachelorthesis.domain.shared.AbstractUseCase;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 /**
@@ -28,37 +30,34 @@ public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUse
 
     @Override
     protected Observable<String> buildUseCaseObservable(final Params params) {
-        return authenticationRepository.refreshToken(params.refreshToken).flatMap(new Function<String, Observable<Object>>() {
+        return applicationDatabase.applicationDao().getCurrentUser().toObservable().flatMap(new Function<UserEntity, Observable<String>>() {
             @Override
-            public Observable<Object> apply(final String s) throws Exception {
-                if (s != null && s.length() > 0) {
-                    //Get current user and and set access token to the newly generated one
-                    return applicationDatabase.applicationDao().getCurrentUser().toObservable().map(new Function<UserEntity, Object>() {
-                        @Override
-                        public UserEntity apply(UserEntity userEntity) throws Exception {
-                            if (userEntity == null) {
-                                throw new Exception("No UserEntity defined");
-                            }
-                            userEntity.getTokens().setAccessToken(s);
-                            return userEntity;
-                        }
-                    });
-                } else {
-                    return Observable.just(new Object());
-                }
-            }
-        }).flatMap(new Function<Object, ObservableSource<String>>() {
-            @Override
-            public ObservableSource<String> apply(Object userEntity) throws Exception {
-                //If no UserEntity is returned, there was no fresh access token generated. Return empty string
-                if (!(userEntity instanceof UserEntity)) {
-                    return Observable.just("");
+            public Observable<String> apply(final UserEntity userEntity) throws Exception {
+
+                if (userEntity == null) {
+                    throw new Exception("No UserEntity defined");
                 }
 
-                //UserEntity was returned. Update the database entry and return the access token
-                UserEntity tempUserEntity = (UserEntity) userEntity;
-                applicationDatabase.applicationDao().changeAccessToken(tempUserEntity);
-                return Observable.just(tempUserEntity.getTokens().getAccessToken());
+                String refreshToken = userEntity.getTokens().getRefreshToken();
+                return authenticationRepository.refreshToken(refreshToken).flatMap(new Function<String, Observable<String>>() {
+                    @Override
+                    public Observable<String> apply(String s) throws Exception {
+                        Log.d("Linus", "2");
+                        if(s != null && s.length() > 0) {
+                            Log.d("Linus", s);
+                            userEntity.getTokens().setAccessToken(s);
+                            applicationDatabase.applicationDao().changeAccessToken(userEntity);
+                            return Observable.just(s);
+                        }
+
+                        return Observable.just(null);
+                    }
+                });
+            }
+        }).doOnNext(new Consumer<String>() {
+            @Override
+            public void accept(String s) throws Exception {
+                Log.d("Linus", "3");
             }
         });
     }

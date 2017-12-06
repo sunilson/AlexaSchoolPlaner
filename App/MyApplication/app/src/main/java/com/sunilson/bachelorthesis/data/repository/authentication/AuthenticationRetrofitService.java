@@ -18,7 +18,7 @@ public interface AuthenticationRetrofitService {
     Observable<UserEntity> register(@Body Object body);
 
     @POST("auth/login")
-    Observable<UserEntity> signIn(@Query("name") String name, @Query("password") String password);
+    Observable<UserEntity> signIn(@Body Object body);
 
     @GET("auth/refreshToken")
     Observable<String> refreshToken(@Query("refreshToken") String refreshToken);

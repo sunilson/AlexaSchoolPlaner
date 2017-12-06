@@ -1,8 +1,7 @@
 package com.sunilson.bachelorthesis.data.interceptors;
 
-import android.util.Log;
-
 import com.sunilson.bachelorthesis.domain.authentication.interactors.CheckLoginStatusUseCase;
+import com.sunilson.bachelorthesis.domain.authentication.interactors.RefreshLoginUseCase;
 
 import java.io.IOException;
 
@@ -20,26 +19,25 @@ import okhttp3.Response;
 public class AuthenticationInterceptor implements Interceptor {
 
     private Lazy<CheckLoginStatusUseCase> checkLoginStatusUseCase;
+    private Lazy<RefreshLoginUseCase> refreshLoginUseCaseLazy;
 
     @Inject
-    public AuthenticationInterceptor(Lazy<CheckLoginStatusUseCase> checkLoginStatusUseCase) {
+    public AuthenticationInterceptor(Lazy<CheckLoginStatusUseCase> checkLoginStatusUseCase,
+                                     Lazy<RefreshLoginUseCase> refreshLoginUseCaseLazy) {
         this.checkLoginStatusUseCase = checkLoginStatusUseCase;
+        this.refreshLoginUseCaseLazy = refreshLoginUseCaseLazy;
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
-
-
-        Log.d("Linus", checkLoginStatusUseCase.get().execute(null).blockingFirst().toString());
-
-        //TODO AccessToken auf gültigkeit prüfen. Wenn gülitg dann anfügen an den Request, ansonsten verscueh neuen zu holen
+        String accessToken = checkLoginStatusUseCase.get().execute(null).blockingFirst();
+        if(accessToken != null) {
+           request.newBuilder().header("Authorization", accessToken);
+        }
 
         Response response = chain.proceed(request);
-
-        //TODO 401 Error abfangen und versuchen neu zu authentifizieren
-
         return response;
     }
 }

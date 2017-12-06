@@ -60,19 +60,19 @@ router.post('/login', function (req, res, next) {
     console.log(user);
 
     //Compare request data with database and retrieve user object
-    if (validator.isEmail(name)) {
+    if (validator.isEmail(user.name)) {
         UserModel.findOne({
-            email: name
+            email: user.name
         }).lean().exec((error, result) => {
             if (error) return next(error);
-            checkLoginData(result, password, res, next);
+            checkLoginData(result, user.password, res, next);
         });
     } else {
         UserModel.findOne({
-            username: name
+            username: user.name
         }).lean().exec((error, result) => {
             if (error) return next(error);
-            checkLoginData(result, password, res, next);
+            checkLoginData(result, user.password, res, next);
         });
     }
 });
@@ -170,6 +170,7 @@ router.post('/verify', function (req, res, next) {
 
 //Check if login data is correct and return access/refresh tokens and the user details
 function checkLoginData(user, password, res, next) {
+    console.log(user);
     if (user && user.type === UserVariables.type.standard && passwordHash.verify(password, user.password)) {
         //Generate fresh tokens
         tokenService.generateTokens(user._id).then((tokens) => {
@@ -189,7 +190,7 @@ function checkLoginData(user, password, res, next) {
             return next(error);
         });
     } else {
-        res.sendStatus(400);
+        res.sendStatus(401);
     }
 }
 

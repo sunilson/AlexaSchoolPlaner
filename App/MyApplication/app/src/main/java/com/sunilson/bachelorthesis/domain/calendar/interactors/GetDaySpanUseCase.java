@@ -1,12 +1,10 @@
 package com.sunilson.bachelorthesis.domain.calendar.interactors;
 
-import android.support.v4.util.Preconditions;
-
 import com.sunilson.bachelorthesis.data.model.EventEntity;
-import com.sunilson.bachelorthesis.domain.shared.AbstractUseCase;
 import com.sunilson.bachelorthesis.domain.calendar.mappers.EventEntityListToDomainDayListMapper;
 import com.sunilson.bachelorthesis.domain.calendar.model.DomainDay;
 import com.sunilson.bachelorthesis.domain.repository.EventRepository;
+import com.sunilson.bachelorthesis.domain.shared.AbstractUseCase;
 
 import org.joda.time.DateTime;
 
@@ -34,26 +32,36 @@ public class GetDaySpanUseCase extends AbstractUseCase<List<DomainDay>, GetDaySp
 
     @Override
     protected Observable<List<DomainDay>> buildUseCaseObservable(final Params params) {
-        Preconditions.checkNotNull(params);
-        return this.eventRepository.getEventList(params.from, params.to).map(new Function<List<EventEntity>, List<DomainDay>>() {
-            @Override
-            public List<DomainDay> apply(List<EventEntity> eventEntities) throws Exception {
-                return eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate());
-            }
-        });
+        if(params.offline) {
+            return this.eventRepository.getOfflineEventList(params.from, params.to).map(new Function<List<EventEntity>, List<DomainDay>>() {
+                @Override
+                public List<DomainDay> apply(List<EventEntity> eventEntities) throws Exception {
+                    return eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate());
+                }
+            });
+        } else {
+            return this.eventRepository.getEventList(params.from, params.to).map(new Function<List<EventEntity>, List<DomainDay>>() {
+                @Override
+                public List<DomainDay> apply(List<EventEntity> eventEntities) throws Exception {
+                    return eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate());
+                }
+            });
+        }
     }
 
 
     public static final class Params {
         private final DateTime from, to;
+        private final Boolean offline;
 
-        private Params(DateTime from, DateTime to) {
+        private Params(DateTime from, DateTime to, Boolean offline) {
             this.to = to;
             this.from = from;
+            this.offline = offline;
         }
 
-        public static Params forDaySpan(DateTime from, DateTime to) {
-            return new Params(from, to);
+        public static Params forDaySpan(DateTime from, DateTime to, Boolean offline) {
+            return new Params(from, to, offline);
         }
     }
 }

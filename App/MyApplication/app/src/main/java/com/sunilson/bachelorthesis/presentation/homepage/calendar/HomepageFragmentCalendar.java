@@ -16,6 +16,7 @@ import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.Ca
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.CalendarDayView;
 import com.sunilson.bachelorthesis.presentation.homepage.utilities.HomepageCalendarHelper;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.HasViewModel;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.ConnectionManager;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.DisposableManager;
 
 import org.joda.time.DateTime;
@@ -54,6 +55,9 @@ public class HomepageFragmentCalendar extends Fragment {
 
     @Inject
     DisposableManager disposableManager;
+
+    @Inject
+    ConnectionManager connectionManager;
 
     private Unbinder unbinder;
     private List<CalendarDayModel> days = new ArrayList<>();
@@ -143,8 +147,11 @@ public class HomepageFragmentCalendar extends Fragment {
         if (getActivity() instanceof HasViewModel && ((HasViewModel) getActivity()).getViewModel() instanceof CalendarViewModel) {
             //Show loading
             ((HasViewModel) getActivity()).loading(true);
+
+            //Decide if we want to load values from disk or from server
+            Boolean offline = connectionManager.isConnected();
             //Add Observer to disposables
-            disposableManager.add(((CalendarViewModel) ((HasViewModel) getActivity()).getViewModel()).getDays(dateTimes[0], dateTimes[1]).subscribeWith(new EventListObserver()));
+            disposableManager.add(((CalendarViewModel) ((HasViewModel) getActivity()).getViewModel()).getDays(dateTimes[0], dateTimes[1], !offline).subscribeWith(new EventListObserver()));
         }
     }
 
