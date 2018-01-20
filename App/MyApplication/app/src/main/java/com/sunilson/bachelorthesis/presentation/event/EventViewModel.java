@@ -25,7 +25,12 @@ public class EventViewModel extends ViewModel {
         this.domainEventToEventModelMapper = domainEventToEventModelMapper;
     }
 
-    public io.reactivex.Observable<EventModel> getSingleEvent(String id) {
+    public io.reactivex.Observable<EventModel> getSingleEvent(String id) throws IllegalArgumentException {
+
+        if(id == null) {
+            throw new IllegalArgumentException("ID can't be null!");
+        }
+
         return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id)).map(new Function<DomainEvent, EventModel>() {
             @Override
             public EventModel apply(DomainEvent domainEvent) throws Exception {

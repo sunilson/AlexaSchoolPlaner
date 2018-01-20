@@ -1,5 +1,6 @@
 package com.sunilson.bachelorthesis.data.dependencyInjection;
 
+import com.sunilson.bachelorthesis.data.interceptors.AuthenticationInterceptor;
 import com.sunilson.bachelorthesis.data.interceptors.TokenAuthenticator;
 import com.sunilson.bachelorthesis.data.repository.Event.EventRetrofitService;
 import com.sunilson.bachelorthesis.data.repository.authentication.AuthenticationRetrofitService;
@@ -24,10 +25,10 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    OkHttpClient okHttpClient(TokenAuthenticator tokenAuthenticator) {
+    OkHttpClient okHttpClient(TokenAuthenticator tokenAuthenticator, AuthenticationInterceptor authenticationInterceptor) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        return new OkHttpClient.Builder().authenticator(tokenAuthenticator).addInterceptor(interceptor)./*addNetworkInterceptor(authenticationInterceptor). */build();
+        return new OkHttpClient.Builder().authenticator(tokenAuthenticator).addInterceptor(interceptor).addNetworkInterceptor(authenticationInterceptor).build();
     }
 
     @Provides

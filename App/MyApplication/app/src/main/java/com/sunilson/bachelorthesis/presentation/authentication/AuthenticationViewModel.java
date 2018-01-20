@@ -28,11 +28,21 @@ public class AuthenticationViewModel extends ViewModel {
         this.registerUseCase = registerUseCase;
     }
 
-    public Observable<Boolean> login(String name, String password) {
+    public Observable<Boolean> login(String name, String password) throws  IllegalArgumentException {
+
+        if (name == null || password == null) {
+            throw new IllegalArgumentException("One or more argument was null");
+        }
+
       return this.loginUseCase.execute(LoginUseCase.Params.forLogin(name, password));
     }
 
     public Observable<Boolean> register(String name, String email, String password) {
+
+        if (name == null || password == null || email == null) {
+            throw new IllegalArgumentException("One or more argument was null");
+        }
+
         return this.registerUseCase.execute(RegisterUseCase.Params.forRegister(name, password, email));
     }
 

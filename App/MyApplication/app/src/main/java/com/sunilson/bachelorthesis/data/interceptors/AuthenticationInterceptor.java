@@ -1,7 +1,6 @@
 package com.sunilson.bachelorthesis.data.interceptors;
 
 import com.sunilson.bachelorthesis.domain.authentication.interactors.CheckLoginStatusUseCase;
-import com.sunilson.bachelorthesis.domain.authentication.interactors.RefreshLoginUseCase;
 
 import java.io.IOException;
 
@@ -19,13 +18,10 @@ import okhttp3.Response;
 public class AuthenticationInterceptor implements Interceptor {
 
     private Lazy<CheckLoginStatusUseCase> checkLoginStatusUseCase;
-    private Lazy<RefreshLoginUseCase> refreshLoginUseCaseLazy;
 
     @Inject
-    public AuthenticationInterceptor(Lazy<CheckLoginStatusUseCase> checkLoginStatusUseCase,
-                                     Lazy<RefreshLoginUseCase> refreshLoginUseCaseLazy) {
+    public AuthenticationInterceptor(Lazy<CheckLoginStatusUseCase> checkLoginStatusUseCase) {
         this.checkLoginStatusUseCase = checkLoginStatusUseCase;
-        this.refreshLoginUseCaseLazy = refreshLoginUseCaseLazy;
     }
 
     @Override

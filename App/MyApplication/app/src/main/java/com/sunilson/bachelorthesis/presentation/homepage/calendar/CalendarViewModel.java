@@ -30,7 +30,12 @@ public class CalendarViewModel extends ViewModel {
         this.daySpanModelMapper = daySpanModelMapper;
     }
 
-    public Observable<CalendarDaySpanModel> getDays(DateTime from, DateTime to, Boolean offline) {
+    public Observable<CalendarDaySpanModel> getDays(DateTime from, DateTime to, Boolean offline) throws  IllegalArgumentException{
+
+        if(from == null || to == null) {
+            throw new IllegalArgumentException("Dates cannot be null!");
+        }
+
        return getDaySpanUseCase.execute(GetDaySpanUseCase.Params.forDaySpan(from, to, offline)).map(
                new Function<List<DomainDay>, CalendarDaySpanModel>() {
                    @Override

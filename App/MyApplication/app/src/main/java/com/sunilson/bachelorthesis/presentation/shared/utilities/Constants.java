@@ -26,8 +26,8 @@ public class Constants {
     public final static String SharedPrefsCalendarSettingsToDate = "toDate";
     public final static String SharedPrefsCalendarSettingsDayAmount = "dayAmount";
 
-    //public final static String HOME_URL = "http://10.0.2.2:5000/";
-    public final static String HOME_URL = "http://172.16.16.139:5000/";
+    public final static String HOME_URL = "http://10.0.2.2:5000/";
+    //public final static String HOME_URL = "http://172.16.16.139:5000/";
 
     public final static int ADD_EVENT_REQUEST = 1;
 

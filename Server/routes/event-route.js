@@ -41,9 +41,16 @@ router.post('/new', (req, res, next) => {
 
 //Search for an event in the future containing the search query term
 router.get('/searchNextEvent', (req, res, next) => {
-    let query = req.query.query;
+    let query = {};
 
-    res.sendStatus(201);
+    query.query = req.query.query;
+    query.filters = "type = " + req.query.type + " AND from > " + Date.now();
+    query.hitsPerPage = 1;
+
+    algoliaEventIndex.search(query, (err, content) => {
+        if (err) return next(err);
+        res.status(200).json(content.hits[0]);
+    });
 
 });
 
@@ -90,6 +97,7 @@ router.get('/:id', (req, res, next) => {
 router.get('/', (req, res, next) => {
     var from = parseInt(req.query.from);
     var to = parseInt(req.query.to);
+    var type = parseInt(req.query.type);
 
     if (!from || !to || !Number.isInteger(from) || !Number.isInteger(to)) {
         next({
@@ -98,7 +106,7 @@ router.get('/', (req, res, next) => {
         });
     }
 
-    eventModel.find({
+    var searchOptions = {
         author: "5a103e699c04124d2813693a" /* user.id */ ,
         from: {
             $lt: new Date(to)
@@ -106,7 +114,13 @@ router.get('/', (req, res, next) => {
         to: {
             $gte: new Date(from)
         }
-    }).lean().exec().then((result) => {
+    }
+
+    if (type) {
+        searchOptions["type"] = type;
+    }
+
+    eventModel.find(searchOptions).lean().exec().then((result) => {
         console.log(result);
         res.status(200).json(result);
     }).catch((error) => {

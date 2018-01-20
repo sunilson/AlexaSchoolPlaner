@@ -1,16 +1,14 @@
 package com.sunilson.bachelorthesis.domain.authentication.interactors;
 
-import android.util.Log;
-
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
 import com.sunilson.bachelorthesis.data.repository.database.ApplicationDatabase;
+import com.sunilson.bachelorthesis.domain.authentication.exceptions.NoUserFoundException;
 import com.sunilson.bachelorthesis.domain.repository.AuthenticationRepository;
 import com.sunilson.bachelorthesis.domain.shared.AbstractUseCase;
 
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 /**
@@ -32,19 +30,17 @@ public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUse
     protected Observable<String> buildUseCaseObservable(final Params params) {
         return applicationDatabase.applicationDao().getCurrentUser().toObservable().flatMap(new Function<UserEntity, Observable<String>>() {
             @Override
-            public Observable<String> apply(final UserEntity userEntity) throws Exception {
+            public Observable<String> apply(final UserEntity userEntity) throws NoUserFoundException {
 
                 if (userEntity == null) {
-                    throw new Exception("No UserEntity defined");
+                    throw new NoUserFoundException("No UserEntity defined");
                 }
 
                 String refreshToken = userEntity.getTokens().getRefreshToken();
                 return authenticationRepository.refreshToken(refreshToken).flatMap(new Function<String, Observable<String>>() {
                     @Override
                     public Observable<String> apply(String s) throws Exception {
-                        Log.d("Linus", "2");
                         if(s != null && s.length() > 0) {
-                            Log.d("Linus", s);
                             userEntity.getTokens().setAccessToken(s);
                             applicationDatabase.applicationDao().changeAccessToken(userEntity);
                             return Observable.just(s);
@@ -53,11 +49,6 @@ public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUse
                         return Observable.just(null);
                     }
                 });
-            }
-        }).doOnNext(new Consumer<String>() {
-            @Override
-            public void accept(String s) throws Exception {
-                Log.d("Linus", "3");
             }
         });
     }

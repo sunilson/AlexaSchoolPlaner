@@ -30,10 +30,17 @@ public class TokenAuthenticator implements Authenticator {
     @Nullable
     @Override
     public Request authenticate(Route route, Response response) throws IOException {
+        //Don't handle auth requests, because the user doesn't have to already be authenticated for them
         if(response.request().url().toString().startsWith(Constants.HOME_URL + "auth")) {
             return null;
         }
+
+        //TODO CHECKEN OB ACCESS TOKEN ÜBERHAUPT NOCH GÜLTIG IST?
+
+        //Refresh the current access token
         String accessToken = refreshLoginUseCaseLazy.get().execute(null).blockingFirst();
+
+        //If refresh was successful set the header of the previous request, otherwise do nothing
         if(accessToken != null && !accessToken.isEmpty()) {
             return response.request().newBuilder().header("Authorization", accessToken).build();
         } else {

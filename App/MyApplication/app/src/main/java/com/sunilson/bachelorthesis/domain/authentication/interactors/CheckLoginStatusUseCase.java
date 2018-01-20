@@ -2,6 +2,7 @@ package com.sunilson.bachelorthesis.domain.authentication.interactors;
 
 import com.auth0.android.jwt.JWT;
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
+import com.sunilson.bachelorthesis.domain.authentication.exceptions.NoUserFoundException;
 import com.sunilson.bachelorthesis.domain.repository.AuthenticationRepository;
 import com.sunilson.bachelorthesis.domain.shared.AbstractUseCase;
 
@@ -31,7 +32,7 @@ public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
     protected Observable<String> buildUseCaseObservable(Object o) {
         return authenticationRepository.getCurrentUser().map(new Function<UserEntity, String>() {
             @Override
-            public String apply(UserEntity userEntity) throws Exception {
+            public String apply(UserEntity userEntity) throws NoUserFoundException {
                 //If a userEntity has been found, check if the access token is still valid
                 if (userEntity != null) {
                     String accessToken = userEntity.getTokens().getAccessToken();
@@ -42,7 +43,7 @@ public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
                         return null;
                     }
                 }
-                throw  new Exception("No UserEntity defined");
+                throw  new NoUserFoundException("No UserEntity defined");
             }
         });
     }
