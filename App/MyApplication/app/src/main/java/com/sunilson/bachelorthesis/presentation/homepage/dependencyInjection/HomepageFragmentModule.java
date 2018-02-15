@@ -1,7 +1,10 @@
 package com.sunilson.bachelorthesis.presentation.homepage.dependencyInjection;
 
+import com.sunilson.bachelorthesis.presentation.homepage.CalendarViewPagerAdapter;
+import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageCalendarContainerFragment;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
+import com.sunilson.bachelorthesis.presentation.homepage.utilities.HomepageCalendarHelper;
 
 import dagger.Module;
 import dagger.Provides;
@@ -12,15 +15,8 @@ import dagger.Provides;
 
 @Module
 public class HomepageFragmentModule {
-
     @Provides
-    HomepageFragmentCalendar provideHomepageFragmentCalendar(HomepageFragmentCalendar homepageFragmentCalendar){
-        return homepageFragmentCalendar;
+    public CalendarViewPagerAdapter provideCalendarViewPagerAdapter (HomepageCalendarContainerFragment homepageCalendarContainerFragment, HomepageCalendarHelper homepageCalendarHelper) {
+        return new CalendarViewPagerAdapter(homepageCalendarContainerFragment.getChildFragmentManager(), homepageCalendarHelper);
     }
-
-    @Provides
-    HomepageCalendarContainerFragment provideHomepageCalendarContainerFragment(HomepageCalendarContainerFragment homepageCalendarContainerFragment){
-        return homepageCalendarContainerFragment;
-    }
-
 }

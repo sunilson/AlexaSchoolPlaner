@@ -12,16 +12,16 @@
 
 const Alexa = require('alexa-sdk');
 const HOME_URL = "http://localhost:5000"
-var request = require('request-promise-native');
-var moment = require("moment");
+const request = require('request-promise-native');
+const moment = require("moment");
+const APP_ID = 'amzn1.ask.skill.db109c0a-8afb-4112-a995-8efc6c392dab'
+const currentAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhMTAzZTY5OWMwNDEyNGQyODEzNjkzYSIsImlhdCI6MTUxODI3MTg4MiwiZXhwIjoxNjA0NjcxODgyfQ.AGkPs3Ae96BhImcYryu1pe6H843lmE_yWLA5_VZKqD8"
 
-const APP_ID = undefined; // TODO replace with your app ID (OPTIONAL).
-
-var states = {
+const states = {
     ADDEVENTMODE: '_ADDEVENTMODE'
 };
 
-var questionTypes = {
+const questionTypes = {
     EVENTTYPE: "eventtype",
     STARTDATE: "startdate",
     ENDDATE: "enddate",
@@ -31,94 +31,140 @@ var questionTypes = {
     DESCRIPTION: "description"
 };
 
+const eventTypes = {
+    "Schulstunde": 0,
+    "Termin": 1,
+    "Abgabe": 2
+}
+
 const languageStrings = {
-    standard: {
-        SKILL_NAME: 'Schulplaner',
-        NEXT_EVENT_DATE: "Dein nächstes Event ist am <say-as interpret-as='date'>",
-        NEXT_SCHOOL_EVENT: " hast du das nächste mal am <say-as interpret-as='date'>",
-        TODAY_SCHOOL_EVENTS: "<s>Heute hast do folgende Schultermine: </s>",
-        WITH_SUMMARY: " mit der Zusammenfassung",
-        TYPES: [
-            'Schultermin',
-            'Termin',
-            'Abgabe Event'
-        ],
-        GET_FACT_MESSAGE: 'Hier sind deine Fakten: ',
-        HELP_MESSAGE: 'Du kannst sagen, „Nenne mir einen Fakt über den Weltraum“, oder du kannst „Beenden“ sagen... Wie kann ich dir helfen?',
-        HELP_REPROMPT: 'Wie kann ich dir helfen?',
-        STOP_MESSAGE: 'Auf Wiedersehen!',
+    "en": {
+        "translation": {
+            SKILL_NAME: 'Schulplaner'
+        }
     },
-    addEvent: {
-        ASK_EVENTTYPE: "Ist das Event eine Schulstunde, ein Termin, oder eine Abgabe?",
-        ASK_STARTDATE: "Wann startet das Event?",
-        ASK_STARTDATE_MISSING: "An welchem Datum?",
-        ASK_ENDDATE: "Wann endet das Event?",
-        ERROR_QUESTION_WITH_TEXT: "Sorry, die Antwort passt nicht zur Frage. Bitte gib einen gültigen Text an!",
-        ASK_TIME: "Zu welcher Uhrzeit?",
-        ERROR_QUESTION_WITH_DATE: "Sorry, die Antwort passt nicht zur Frage. Bitte gib ein gültiges Datum an!",
-        ASK_SUMMARY: "Wie lautet die Zusammenfassung des Events?",
-        ERROR_QUESTION_WITH_TIME: "Sorry, die Antwort passt nicht zur Frage. Bitte gib eine gültige Zeit an!",
-        ERROR_QUESTION_WITH_DATE_TIME: "Sorry, die Antwort passt nicht zur Frage. Bitte gib ein gültiges Datum und/oder eine gültige Zeit an!",
-        ERROR_GENERAL: "Sorry, die Antwort passt nicht zur Frage. Bitte versuche es noch einmal."
+    "de": {
+        "translation": {
+            "Event": {
+                NEXT_EVENT_DATE: "Dein nächstes Event ist am <say-as interpret-as='date'>",
+                NO_NEXT_EVENT: "Du hast kein Event in nächster Zeit!",
+                NEXT_EVENT_CARD_TITLE: "Dein nächstes Event"
+            },
+            "Schulstunde": {
+                NEXT_EVENT_DATE: "Deine nächste Schulstunde ist am <say-as interpret-as='date'>",
+                NO_NEXT_EVENT: "Du hast keine Schulstunde in nächster Zeit!",
+                NEXT_EVENT_CARD_TITLE: "Deine nächste Schulstunde"
+            },
+            "Termin": {
+                NEXT_EVENT_DATE: "Dein nächster Termin ist am <say-as interpret-as='date'>",
+                NO_NEXT_EVENT: "Du hast keinen Termin in nächster Zeit!",
+                NEXT_EVENT_CARD_TITLE: "Dein nächster Termin"
+            },
+            "Abgabe": {
+                NEXT_EVENT_DATE: "Deine nächste Abgabe ist am <say-as interpret-as='date'>",
+                NO_NEXT_EVENT: "Du hast keine Abgabe in nächster Zeit!",
+                NEXT_EVENT_CARD_TITLE: "Deine nächste Abgabe",
+            },
+            SKILL_NAME: 'Schulplaner',
+            YOU_HAVE_EVENT_AT_DATE: " hast du das nächste mal am <say-as interpret-as='date'>",
+            TODAY_SCHOOL_EVENTS: "<s>Heute hast do folgende Schultermine: </s>",
+            WITH_SUMMARY: " mit der Zusammenfassung",
+            GET_FACT_MESSAGE: 'Hier sind deine Fakten: ',
+            HELP_MESSAGE: 'Du kannst sagen, „Nenne mir einen Fakt über den Weltraum“, oder du kannst „Beenden“ sagen... Wie kann ich dir helfen?',
+            HELP_REPROMPT: 'Wie kann ich dir helfen?',
+            STOP_MESSAGE: 'Auf Wiedersehen!',
+            DEFAULT_QUERY_ERROR: "Bei deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es so später erneut!",
+            ASK_EVENTTYPE: "Ist das Event eine Schulstunde, ein Termin, oder eine Abgabe?",
+            ASK_STARTDATE: "Wann startet das Event?",
+            ASK_STARTDATE_MISSING: "An welchem Datum?",
+            ASK_ENDDATE: "Wann endet das Event?",
+            ASK_ENDDATE_OVERLAP: "End Datum liegt vor Start Datum. Bitte erneut versuchen!",
+            ERROR_QUESTION_WITH_TEXT: "Sorry, die Antwort passt nicht zur Frage. Bitte gib einen gültigen Text an!",
+            ASK_TIME: "Zu welcher Uhrzeit?",
+            ERROR_QUESTION_WITH_DATE: "Sorry, die Antwort passt nicht zur Frage. Bitte gib ein gültiges Datum an!",
+            ASK_SUMMARY: "Wie lautet die Zusammenfassung des Events?",
+            ERROR_QUESTION_WITH_TIME: "Sorry, die Antwort passt nicht zur Frage. Bitte gib eine gültige Zeit an!",
+            ERROR_QUESTION_WITH_DATE_TIME: "Sorry, die Antwort passt nicht zur Frage. Bitte gib ein gültiges Datum und/oder eine gültige Zeit an!",
+            ERROR_GENERAL: "Sorry, die Antwort passt nicht zur Frage. Bitte versuche es noch einmal.",
+            ICAL_INFO: "Sie können bestehende Kalenderdaten in der Schulplaner App unter den Einstellungen importieren",
+            NO_SCHOOL_APPOINTMENTS_TODAY: "Heute hast du keine Schultermine!",
+            TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE: "Deine heutigen Schultermine",
+            DEADLINE: "Abgabe",
+            APPOINTMENT: "Termin",
+            SCHULFACH: "Schulfach",
+            ANYTHING_ELSE: "Sonst noch etwas?",
+            UNHANDLED: "Sorry, das habe ich nicht verstanden. Bitte versuche es noch einmal.",
+            NO_LOCATION_GIVEN: "Sie haben keinen Ort angegeben. Bitte erneut versuchen."
+        }
     }
 }
 
 const handlers = {
     'LaunchRequest': function () {
-        this.emit(":ask", "Willkommen zu " + languageStrings.standard.SKILL_NAME + ". Was möchtest du tun?");
+        this.emit(":ask", "Willkommen zu " + this.t("SKILL_NAME") + ". Was möchtest du tun?");
     },
-    'GetNewFactIntent': function () {
-        this.emit('GetFact');
+    'NoEvent': function () {
+        this.emit(':tell', this.t('STOP_MESSAGE'));
     },
-    'GetFact': function () {
-        // Get a random space fact from the space facts list
-        // Use this.t() to get corresponding language data
-        const factArr = this.t('FACTS');
-        const factIndex = Math.floor(Math.random() * factArr.length);
-        const randomFact = factArr[factIndex];
+    'ContinueSearch': function () {
+        if (this.attributes["searchType"] && this.attributes["searchDate"]) {
+            switch (this.attributes["searchType"]) {
 
-        // Create speech output
-        const speechOutput = this.t('GET_FACT_MESSAGE') + randomFact;
-        this.emit(':tellWithCard', speechOutput, this.t('SKILL_NAME'), randomFact);
+            }
+            this.emit('GetNextEvent');
+        } else {
+            this.emit(':tell', this.t("DEFAULT_QUERY_ERROR"));
+        }
+
+    },
+    'GetEvent': function () {
+
+        if (!this.event.request.intent.slots.Type || !this.event.request.intent.slots.Type.value) {
+            this.emit(':tell', this.t("DEFAULT_QUERY_ERROR"));
+        }
+
+        const query = this.event.request.intent.slots.Type.value;
     },
     'GetNextEvent': function () {
 
-        var options = {
-            uri: HOME_URL + "/events/nearestEvent?date=" + Date.now(),
-            headers: {
-                'User-Agent': 'Request-Promise'
-            },
-            json: true // Automatically parses the JSON string in the response
-        };
+        let type;
+        let date;
+        (this.attributes["searchDate"]) ? date = this.attributes["searchDate"]: date = Date.now();
+        if (this.event.request.intent.slots &&
+            this.event.request.intent.slots.Type &&
+            this.event.request.intent.slots.Type.value &&
+            validEventType(this.event.request.intent.slots.Type.value)) {
+            type = this.event.request.intent.slots.Type.value
+        } else {
+            type = "Event"
+        }
+        this.attributes["searchType"] = type;
 
-        request(options).then((response) => {
+        simpleEventNetworkRequest(HOME_URL + "/events/nearestEvent?date=" + date + ((type != "Event") ? ("&type=" + eventTypes[type]) : "")).then((response) => {
+            console.log(response)
 
-            let fromDate = moment(response.from).format('YYYYMMDD');
-            let fromTime = moment(response.from).format('hh:mm:ss');
+            if (!response || response.length == 0) {
+                this.emit(':tell', this.t(type)["NO_NEXT_EVENT"]);
+            } else {
+                let fromDate = formatDate(response.from)
+                let fromTime = formatTime(response.from)
+                this.attributes["searchDate"] = response.from
 
-            this.emit(':tellWithCard',
-                "<s>" + this.t("NEXT_EVENT_DATE") + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s>Es ist ein " + this.t("TYPES")[response.type] + " Event. <s>Zusammenfassung des Events: </s><s>" + response.summary + "</s>", this.t('SKILL_NAME'), "blub");
+                this.emit(":ask", "<s>" + this.t(type)["NEXT_EVENT_DATE"] + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s> <s>Zusammenfassung des Events: </s><s>" + response.summary + "</s>" + this.t("ANYTHING_ELSE"))
+
+                this.emit(':askwithcard',
+                    "<s>" + this.t(type)["NEXT_EVENT_DATE"] + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s> <s>Zusammenfassung des Events: </s><s>" + response.summary + "</s>" + this.t("ANYTHING_ELSE"),
+                    this.t(type)["NEXT_EVENT_CARD_TITLE"],
+                    formatEventForCardContent(response)
+                );
+            }
         }).catch((e) => {
-            this.emit(':tellWithCard', "Du hast in den nächsten 3 Stunden kein Event!" + e, this.t('SKILL_NAME'), "blub");
-        });
-    },
-    'GetNextSchoolAppointment': function () {
-
-        var options = {
-            uri: HOME_URL + "/events/searchNextEvent?type=0&query=" + this.event.request.intent.slots.Schulfach.value,
-            headers: {
-                'User-Agent': 'Request-Promise'
-            },
-            json: true // Automatically parses the JSON string in the response
-        };
-
-        request(options).then((response) => {
-            let fromDate = moment(response.from).format('YYYYMMDD');
-            let fromTime = moment(response.from).format('hh:mm:ss');
-
-            this.emit(':tellWithCard', "<s>" + this.event.request.intent.slots.Schulfach.value + this.t("WITH_SUMMARY") + response.summary + this.t("NEXT_SCHOOL_EVENT") + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s>");
-        }).catch((e) => {
-            this.emit(':tell', "yo");
+            console.log(e)
+            this.emit(':tellwithcard',
+                this.t("DEFAULT_QUERY_ERROR"),
+                this.t(type)["NEXT_EVENT_CARD_TITLE"],
+                this.t("DEFAULT_QUERY_ERROR")
+            );
         });
     },
     'GetTodaysSchoolAppointments': function () {
@@ -128,7 +174,8 @@ const handlers = {
         var options = {
             uri: HOME_URL + "/events?from=" + fromDate.valueOf() + "&to=" + toDate.valueOf() + "&type=0",
             headers: {
-                'User-Agent': 'Request-Promise'
+                'User-Agent': 'Request-Promise',
+                Authorization: 'Bearer ' + currentAccessToken
             },
             json: true // Automatically parses the JSON string in the response
         };
@@ -144,28 +191,73 @@ const handlers = {
                     }
                     result += " um " + fromTime.toString() + "</s>"
                 }
-
-                this.emit(':tellWithCard', result, this.t('SKILL_NAME'), "blub");
+                this.emit(':tellwithcard',
+                    result,
+                    this.t("TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE"),
+                    result);
             } else {
-
+                this.emit(':tellwithcard',
+                    this.t("NO_SCHOOL_APPOINTMENTS_TODAY"),
+                    this.t("TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE"),
+                    this.t("NO_SCHOOL_APPOINTMENTS_TODAY")
+                );
             }
-
-            //this.emit(':tell', "ya");
-            this.emit(':tellWithCard', "<s>" + this.event.request.intent.slots.Schulfach.value + this.t("WITH_SUMMARY") + response.summary + this.t("NEXT_SCHOOL_EVENT") + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s>");
         }).catch((e) => {
-            console.log(e);
-            this.emit(':tell', "yo");
+            this.emit(':tellwithcard',
+                this.t("DEFAULT_QUERY_ERROR"),
+                this.t("TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE"),
+                this.t("DEFAULT_QUERY_ERROR")
+            );
         });
     },
-    'AddEvent': function () {
+    'GetNextEventAtLocation': function () {
 
-        if (this.event.request.intent && this.event.request.intent.slots.EventType && !this.event.request.intent.slots.EventType.value) {
+        let date;
+        (this.attributes["searchDate"]) ? date = this.attributes["searchDate"]: date = Date.now();
+        this.attributes["searchType"] = searchType.NEXT_APPOINTMENT;
+
+        if (this.event.request.intent && (!this.event.request.intent.slots.query || !this.event.request.intent.slots.query.value)) {
+            this.emit(':ask', this.t("NO_LOCATION_GIVEN"));
+        } else {
+            this.attributes["searchLocation"] = this.event.request.intent.slots.query.value
+        }
+
+        simpleEventNetworkRequest(HOME_URL + "/events/searchNextEventAtLocation?query=" + this.event.request.intent.slots.query.value + "&date=" + date).then((response) => {
+            if (!response || response.length == 0) {
+                this.emit(':tell', this.t("NO_NEXT_EVENT_AT_LOCATION"));
+                return;
+            }
+
+            let fromDate = formatDate(response.from)
+            let fromTime = formatTime(response.from);
+            this.attributes["searchDate"] = response.from;
+
+            this.emit(':askwithcard',
+                "<s>" + this.t("APPOINTMENT") + " " + this.t("WITH_SUMMARY") + response.summary + this.t("NEXT_SCHOOL_EVENT") + " " + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s>" + this.t("ANYTHING_ELSE"),
+                this.t("NEXT_APPOINTMENT_CARD_TITLE"),
+                formatEventForCardContent(response)
+            );
+        }).catch((e) => {
+            this.emit(':tellwithcard',
+                this.t("NO_NEXT_APPOINTMENT"),
+                this.t("NEXT_APPOINTMENT_CARD_TITLE"),
+                this.t("NO_NEXT_APPOINTMENT")
+            );
+        });
+    },
+    'GetIcalInfo': function () {
+        this.emit(':tell', this.t("ICAL_INFO"));
+    },
+    'AddEvent': function () {
+        if (this.event.request.intent && (!this.event.request.intent.slots.EventType || !this.event.request.intent.slots.EventType.value)) {
             this.handler.state = states.ADDEVENTMODE;
             this.attributes["questionType"] = questionTypes.EVENTTYPE;
-            this.emit(':ask', languageStrings.addEvent.ASK_EVENTTYPE);
+            this.emit(':ask', this.t("ASK_EVENTTYPE"));
         } else if (this.event.request.intent && this.event.request.intent.slots.EventType && this.event.request.intent.slots.EventType.value) {
+            this.handler.state = states.ADDEVENTMODE;
+            this.attributes[questionTypes.EVENTTYPE] = this.event.request.intent.slots.EventType.value;
             this.attributes["questionType"] = questionTypes.STARTDATE;
-            this.emit(":ask", languageStrings.addEvent.ASK_STARTDATE);
+            this.emit(":ask", this.t("ASK_STARTDATE"));
         }
     },
     'AMAZON.HelpIntent': function () {
@@ -180,15 +272,16 @@ const handlers = {
         this.emit(':tell', this.t('STOP_MESSAGE'));
     },
     'Unhandled': function () {
-        this.emit(':ask', 'Sorry, I didn\'t get that. Try saying a number.', 'Try saying a number.');
+        this.emit(':ask', this.t("UNHANDLED"));
     }
 };
 
+//Events used when user wants to add an event. Will only be accessed when in "ADDEVENT" state
 var addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
     'QuestionAnsweredWithEventType': function () {
         this.attributes["eventType"] = this.event.request.intent.slots.EventType.value;
         this.attributes["questionType"] = questionTypes.STARTDATE;
-        this.emit(':ask', languageStrings.addEvent.ASK_STARTDATE);
+        this.emit(':ask', this.t("ASK_STARTDATE"));
     },
     'QuestionAnsweredWithText': function () {
         switch (this.attributes["questionType"]) {
@@ -196,24 +289,26 @@ var addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
                 this.emit(':ask', 'Summary!');
                 break;
             default:
-                this.emit(':ask', languageStrings.addEvent.ERROR_QUESTION_WITH_TEXT);
+                this.emit(':ask', this.t("ERROR_QUESTION_WITH_TEXT"));
                 break;
         }
     },
     'QuestionAnsweredWithDate': function () {
         if (!this.event.request.intent.slots.Date || !this.event.request.intent.slots.Date.value) {
-            this.emit(':ask', languageStrings.addEvent.ERROR_QUESTION_WITH_DATE);
+            this.emit(':ask', this.t("ERROR_QUESTION_WITH_DATE"));
         } else {
             switch (this.attributes["questionType"]) {
                 case questionTypes.STARTDATE:
-                    this.attributes["startDate"] = this.event.request.intent.slots.Date.value;
+                    this.attributes[questionTypes.STARTDATE] = this.event.request.intent.slots.Date.value;
                     this.attributes["questionType"] = questionTypes.STARTTIME;
-                    this.emit(':ask', languageStrings.addEvent.ASK_TIME);
+                    this.emit(':ask', this.t("ASK_TIME"));
                     break;
                 case questionTypes.ENDDATE:
+                    const value = this.event.request.intent.slots.Date.value;
+                    //TODO Overlap check
                     break;
                 default:
-                    this.emit(':ask', languageStrings.addEvent.ERROR_QUESTION_WITH_DATE);
+                    this.emit(':ask', this.t("ERROR_QUESTION_WITH_DATE"));
                     break;
             }
         }
@@ -223,7 +318,7 @@ var addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
             !this.event.request.intent.slots.Time ||
             !this.event.request.intent.slots.Date.value ||
             !this.event.request.intent.slots.Time.value) {
-            this.emit(':ask', languageStrings.addEvent.ERROR_QUESTION_WITH_DATE_TIME);
+            this.emit(':ask', this.t("ERROR_QUESTION_WITH_DATE_TIME"));
         } else {
             switch (this.attributes["questionType"]) {
                 case questionTypes.STARTDATE:
@@ -231,49 +326,116 @@ var addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
                     this.attributes[questionTypes.STARTTIME] = this.event.request.intent.slots.Time.value;
                     if (this.attributes["eventType"] != "deadline") {
                         this.attributes["questionType"] = questionTypes.ENDDATE;
-                        this.emit(':ask', languageStrings.addEvent.ASK_ENDDATE);
+                        this.emit(':ask', this.t("ASK_ENDDATE"));
                     } else {
                         this.attributes["questionType"] = questionTypes.SUMMARY;
-                        this.emit(':ask', languageStrings.addEvent.ASK_SUMMARY);
+                        this.emit(':ask', this.t("ASK_SUMMARY"));
                     }
                     break;
                 case "endDate":
+                    //TODO
+                    //TODO Overlap check
                     break;
                 default:
-                    this.emit(':ask', languageStrings.addEvent.ERROR_QUESTION_WITH_TIME);
+                    this.emit(':ask', this.t("ERROR_QUESTION_WITH_DATE_TIME"));
                     break;
             }
         }
     },
     'QuestionAnsweredWithTime': function () {
         if (!this.event.request.intent.slots.Time || !this.event.request.intent.slots.Time.value) {
-            this.emit(':ask', languageStrings.addEvent.ERROR_QUESTION_WITH_TIME);
+            this.emit(':ask', this.t("ERROR_QUESTION_WITH_TIME"));
         } else {
             switch (this.attributes["questionType"]) {
                 case questionTypes.STARTTIME:
                     this.attributes[questionTypes.STARTTIME] = this.event.request.intent.slots.Time.value;
                     if (!this.attributes[questionTypes.STARTDATE]) {
                         this.attributes["questionType"] = questionTypes.STARTDATE;
-                        this.emit(':ask', languageStrings.addEvent.ASK_STARTDATE_MISSING);
+                        this.emit(':ask', this.t("ASK_STARTDATE_MISSING"));
                     } else if (this.attributes["eventType"] != "deadline") {
                         this.attributes["questionType"] = questionTypes.ENDDATE;
-                        this.emit(':ask', languageStrings.addEvent.ASK_ENDDATE);
+                        this.emit(':ask', this.t("ASK_ENDDATE"));
                     } else {
                         this.attributes["questionType"] = questionTypes.SUMMARY;
-                        this.emit(':ask', languageStrings.addEvent.ASK_SUMMARY);
+                        this.emit(':ask', this.t("ASK_SUMMARY"));
                     }
+                    break;
+                default:
+                    this.emit(':ask', this.t("ERROR_QUESTION_WITH_TIME"));
                     break;
             }
         }
     },
     'Unhandled': function () {
-        this.emit(':ask', languageStrings.addEvent.ERROR_GENERAL);
+        this.emit(':ask', this.t("ERROR_GENERAL"));
     },
 });
 
+function formatDate(date) {
+    return moment(date).format('YYYYMMDD');
+}
+
+function formatTime(time) {
+    return moment(time).format('hh:mm:ss');
+}
+
+function formatEventForCardContent(event) {
+    let result = "";
+
+    if (event.summary) {
+        result += "Event Zusammenfassung: " + event.summary + " - "
+    }
+
+    if (event.description) {
+        result += "Event Beschreibung: " + event.description + " - "
+    }
+
+    if (event.location) {
+        result += "Event Location: " + event.location + " - "
+    }
+
+    if (event.from) {
+        result += "Startet am: " + event.from + " - "
+    }
+
+    if (event.to) {
+        result += "Endet am: " + event.to + " - "
+    }
+
+    return result
+}
+
+function validEventType(type) {
+    for (let foundType in eventTypes) {
+        if (type == foundType) return true
+    }
+
+    return false
+}
+
+function simpleEventNetworkRequest(uri) {
+    const options = {
+        uri: uri,
+        headers: {
+            'User-Agent': 'Request-Promise',
+            Authorization: 'Bearer ' + currentAccessToken
+        },
+        json: true // Automatically parses the JSON string in the response
+    };
+
+    return request(options);
+}
+
+function checkOverlappingDates(startDate, endDate) {
+
+}
+
 exports.handler = function (event, context) {
     const alexa = Alexa.handler(event, context);
-    alexa.APP_ID = APP_ID;
+    if ('undefined' === typeof process.env.DEBUG) {
+        alexa.APP_ID = APP_ID;
+    }
+    alexa.resources = languageStrings;
     alexa.registerHandlers(handlers, addEventHandlers);
     alexa.execute();
 };

@@ -161,6 +161,7 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
         eventModel.setTo(to);
         eventModel.setEventType(Constants.EVENT_TYPES[eventType]);
 
+        //TODO Disposable
         addEventUseCase.execute(AddEventUseCase.Params
                 .forDaySpan(domainEventToEventModelMapper.toDomainEvent(eventModel)))
                 .subscribe(new Observer<DomainEvent>() {

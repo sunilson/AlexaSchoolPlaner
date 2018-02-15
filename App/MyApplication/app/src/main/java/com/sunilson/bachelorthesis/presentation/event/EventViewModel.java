@@ -8,6 +8,7 @@ import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventM
 
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 
 /**
@@ -25,13 +26,26 @@ public class EventViewModel extends ViewModel {
         this.domainEventToEventModelMapper = domainEventToEventModelMapper;
     }
 
-    public io.reactivex.Observable<EventModel> getSingleEvent(String id) throws IllegalArgumentException {
+    public Observable<EventModel> getSingleEvent(String id) throws IllegalArgumentException {
 
         if(id == null) {
             throw new IllegalArgumentException("ID can't be null!");
         }
 
-        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id)).map(new Function<DomainEvent, EventModel>() {
+        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, false)).map(new Function<DomainEvent, EventModel>() {
+            @Override
+            public EventModel apply(DomainEvent domainEvent) throws Exception {
+                return domainEventToEventModelMapper.toEvent(domainEvent);
+            }
+        });
+    }
+
+    public Observable<EventModel> getOfflineSingleEvent(String id) throws IllegalArgumentException {
+        if(id == null) {
+            throw new IllegalArgumentException("ID can't be null!");
+        }
+
+        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, true)).map(new Function<DomainEvent, EventModel>() {
             @Override
             public EventModel apply(DomainEvent domainEvent) throws Exception {
                 return domainEventToEventModelMapper.toEvent(domainEvent);

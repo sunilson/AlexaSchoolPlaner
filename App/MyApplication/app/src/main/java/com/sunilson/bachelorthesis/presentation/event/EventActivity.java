@@ -1,10 +1,12 @@
 package com.sunilson.bachelorthesis.presentation.event;
 
+import android.animation.AnimatorSet;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.transition.Transition;
 import android.view.MenuItem;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.databinding.ActivityEventBinding;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.ConnectionManager;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.DisposableManager;
 import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
@@ -66,6 +69,9 @@ public class EventActivity extends BaseActivity {
     @Inject
     DisposableManager disposableManager;
 
+    @Inject
+    ConnectionManager connectionManager;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         AndroidInjection.inject(this);
@@ -86,7 +92,6 @@ public class EventActivity extends BaseActivity {
 
         if(savedInstanceState != null) {
             disposableManager.add(eventViewModel.getSingleEvent(getIntent().getStringExtra(Constants.INTENT_EVENT_ID)).subscribeWith(new SingleEventObserver()));
-            fab.startAnimation(scaleIn);
         } else {
             //Listen to Activity Transition and start loading data after its done
             getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
@@ -97,9 +102,8 @@ public class EventActivity extends BaseActivity {
 
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    //Load Event data
-                    disposableManager.add(eventViewModel.getSingleEvent(getIntent().getStringExtra(Constants.INTENT_EVENT_ID)).subscribeWith(new SingleEventObserver()));
-                    fab.startAnimation(scaleIn);
+                    //Load offline Event data first
+                    disposableManager.add(eventViewModel.getOfflineSingleEvent(getIntent().getStringExtra(Constants.INTENT_EVENT_ID)).subscribeWith(new SingleEventObserver()));
                 }
 
                 @Override
@@ -160,18 +164,46 @@ public class EventActivity extends BaseActivity {
         super.onDestroy();
     }
 
+    private final class SingleEventObserverOnline extends DisposableObserver<EventModel> {
+        @Override
+        public void onNext(EventModel eventModel) {
+            binding.setEvent(eventModel);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            //TODO If network error load offline
+        }
+
+        @Override
+        public void onComplete() {
+
+        }
+    }
+
+
     private final class SingleEventObserver extends DisposableObserver<EventModel> {
 
         @Override
         public void onNext(EventModel eventModel) {
             binding.setEvent(eventModel);
+            fab.startAnimation(scaleIn);
             title.startAnimation(fadeInMoveUp);
             contentContainer.startAnimation(slideUp);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //Load online data
+                    disposableManager.add(eventViewModel.getSingleEvent(getIntent().getStringExtra(Constants.INTENT_EVENT_ID)).subscribeWith(new SingleEventObserverOnline()));
+                }
+            }, 500);
+
         }
 
         @Override
         public void onError(Throwable e) {
-
+            //TODO If network error load offline
         }
 
         @Override

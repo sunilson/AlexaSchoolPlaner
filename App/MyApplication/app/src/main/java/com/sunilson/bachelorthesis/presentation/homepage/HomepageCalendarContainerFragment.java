@@ -22,6 +22,8 @@ import dagger.android.support.AndroidSupportInjection;
 
 /**
  * @author Linus Weiss
+ *
+ * Fragment containing Viewpager with multiple HomepageCalendarFragments
  */
 
 public class HomepageCalendarContainerFragment extends Fragment {
@@ -32,6 +34,7 @@ public class HomepageCalendarContainerFragment extends Fragment {
     @Inject
     HomepageCalendarHelper homepageCalendarHelper;
 
+    @Inject
     CalendarViewPagerAdapter calendarViewPagerAdapter;
 
     private Unbinder unbinder;
@@ -63,7 +66,6 @@ public class HomepageCalendarContainerFragment extends Fragment {
 
     private void initializeNewViewPager() {
         viewPager.setOffscreenPageLimit(1);
-        calendarViewPagerAdapter = new CalendarViewPagerAdapter(getChildFragmentManager(), homepageCalendarHelper);
         viewPager.setAdapter(calendarViewPagerAdapter);
         viewPager.setCurrentItem((int)(Integer.MAX_VALUE/2));
     }

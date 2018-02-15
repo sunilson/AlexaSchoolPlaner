@@ -288,9 +288,9 @@ public class CalendarDayView extends RelativeLayout {
         LinearLayout content = new LinearLayout(getContext());
         LinearLayout.LayoutParams layoutParamsContent = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         content.setPadding((int) getResources().getDimension(R.dimen.day_field_content_padding),
+                (int) getResources().getDimension(R.dimen.day_field_content_padding_large),
                 (int) getResources().getDimension(R.dimen.day_field_content_padding),
-                (int) getResources().getDimension(R.dimen.day_field_content_padding),
-                (int) getResources().getDimension(R.dimen.day_field_content_padding));
+                (int) getResources().getDimension(R.dimen.day_field_content_padding_large));
         content.setLayoutParams(layoutParamsContent);
         Drawable drawable = getResources().getDrawable(R.drawable.event_background);
         drawable.setColorFilter(new PorterDuffColorFilter(getResources().getColor(event.getEventType().getVal()), PorterDuff.Mode.SRC_IN));

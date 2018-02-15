@@ -20,13 +20,19 @@ public class DisposableManager {
 
     public void dispose() {
         getCompositeDisposable().dispose();
+        getCompositeDisposable().clear();
     }
 
     private CompositeDisposable getCompositeDisposable() {
         if (compositeDisposable == null || compositeDisposable.isDisposed()) {
             compositeDisposable = new CompositeDisposable();
         }
+
         return compositeDisposable;
+    }
+
+    public boolean hasDisposables() {
+        return getCompositeDisposable().size() != 0;
     }
 
     @Inject

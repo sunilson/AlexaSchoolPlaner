@@ -1,5 +1,7 @@
 package com.sunilson.bachelorthesis.domain.authentication.interactors;
 
+import android.util.Log;
+
 import com.auth0.android.jwt.JWT;
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
 import com.sunilson.bachelorthesis.domain.authentication.exceptions.NoUserFoundException;
@@ -37,7 +39,7 @@ public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
                 if (userEntity != null) {
                     String accessToken = userEntity.getTokens().getAccessToken();
                     JWT jwt = new JWT(accessToken);
-                    if (jwt.getExpiresAt().getTime() < new Date().getTime() + 300000) {
+                    if (jwt.getExpiresAt().getTime() > new Date().getTime() + 300000) {
                         return accessToken;
                     } else {
                         return null;

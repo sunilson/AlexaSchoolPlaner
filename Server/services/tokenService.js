@@ -18,7 +18,6 @@ tokenService.generateToken = function (id) {
 }
 
 tokenService.generateTokens = function (id) {
-
     return new Promise((resolve, reject) => {
         if (id) {
             //Payload of access token

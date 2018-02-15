@@ -33,7 +33,6 @@ public class GetCurrentUser extends AbstractUseCase<DomainUser, GetCurrentUser.P
         return authenticationRepository.getCurrentUser().map(new Function<UserEntity, DomainUser>() {
             @Override
             public DomainUser apply(UserEntity userEntity) throws Exception {
-                Log.d("Linus", userEntity.toString());
                 return userEntityToDomainUserMapper.toDomainUser(userEntity);
             }
         });

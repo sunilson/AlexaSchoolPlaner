@@ -9,6 +9,7 @@ import com.sunilson.bachelorthesis.presentation.addEvent.AddEventActivity;
 import com.sunilson.bachelorthesis.presentation.authentication.AuthenticationActivity;
 import com.sunilson.bachelorthesis.presentation.event.EventActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
+import com.sunilson.bachelorthesis.presentation.settings.SettingsActivity;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
 
 /**
@@ -17,12 +18,11 @@ import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
 
 public class Navigator {
 
-
-    public static void navigateToLogin(AppCompatActivity context) {
+    public static void navigateToLogin(Context context) {
         if(context != null) {
-            Intent intent = AuthenticationActivity.getCallingIntent(context);
+            Intent intent = new Intent(context, AuthenticationActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(intent);
-            context.finish();
         }
     }
 
@@ -48,5 +48,10 @@ public class Navigator {
             Intent intent = AddEventActivity.getCallingIntent(activity, eventType);
             activity.startActivityForResult(intent, Constants.ADD_EVENT_REQUEST);
         }
+    }
+
+    public static void navigateToSettings(Context context) {
+        Intent intent = SettingsActivity.getCallingIntent(context);
+        context.startActivity(intent);
     }
 }

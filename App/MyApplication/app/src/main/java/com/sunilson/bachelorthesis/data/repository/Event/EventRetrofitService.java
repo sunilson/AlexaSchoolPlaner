@@ -1,10 +1,14 @@
 package com.sunilson.bachelorthesis.data.repository.Event;
 
 import com.sunilson.bachelorthesis.data.model.EventEntity;
+import com.sunilson.bachelorthesis.data.repository.BodyModels.EventForPostBody;
+import com.sunilson.bachelorthesis.data.repository.BodyModels.UrlForPostBody;
 
 import java.util.List;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -26,5 +30,8 @@ public interface EventRetrofitService {
     Observable<EventEntity> getEvent(@Path("event_id") String event_id);
 
     @POST("events/new")
-    Observable<EventEntity> addEvent(@Body Object body);
+    Observable<EventEntity> addEvent(@Body EventForPostBody body);
+
+    @POST("events/import")
+    Observable<Response<Void>> importCalendar(@Body UrlForPostBody body);
 }

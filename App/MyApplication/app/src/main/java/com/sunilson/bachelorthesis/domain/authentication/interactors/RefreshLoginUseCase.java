@@ -42,7 +42,7 @@ public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUse
                     public Observable<String> apply(String s) throws Exception {
                         if(s != null && s.length() > 0) {
                             userEntity.getTokens().setAccessToken(s);
-                            applicationDatabase.applicationDao().changeAccessToken(userEntity);
+                            applicationDatabase.applicationDao().updateUser(userEntity);
                             return Observable.just(s);
                         }
 

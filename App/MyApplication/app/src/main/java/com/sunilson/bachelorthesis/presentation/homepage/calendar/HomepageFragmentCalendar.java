@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.calendarDay.CalendarDayModel;
@@ -37,6 +38,8 @@ import io.reactivex.observers.DisposableObserver;
 
 /**
  * @author Linus Weiss
+ *
+ * A fragment containing multiple days in a certain date range
  */
 
 public class HomepageFragmentCalendar extends Fragment {
@@ -98,6 +101,7 @@ public class HomepageFragmentCalendar extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_homepage_day, container, false);
+        //Butterknife binding
         unbinder = ButterKnife.bind(this, view);
         initializeHeader(inflater);
         return view;
@@ -106,15 +110,22 @@ public class HomepageFragmentCalendar extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        //Butterknife unbinding
         unbinder.unbind();
     }
 
     @Override
     public void onDestroy() {
+        //Clear all RXJava requests
         disposableManager.dispose();
         super.onDestroy();
     }
 
+    /**
+     * Sets up the top of the calender view depending on the date range
+     *
+     * @param inflater
+     */
     private void initializeHeader(LayoutInflater inflater) {
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("MMMM");
@@ -143,6 +154,10 @@ public class HomepageFragmentCalendar extends Fragment {
      * Load event data from current dates from the server
      */
     public void loadData() {
+
+        //First check if a request has already been started, if yes dispose it
+        if(disposableManager.hasDisposables()) disposableManager.dispose();
+
         //Check if Activity implements HasViewModel interface and returns the correct type of ViewModel
         if (getActivity() instanceof HasViewModel && ((HasViewModel) getActivity()).getViewModel() instanceof CalendarViewModel) {
             //Show loading
@@ -185,7 +200,7 @@ public class HomepageFragmentCalendar extends Fragment {
 
         @Override
         public void onError(Throwable e) {
-
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
         @Override

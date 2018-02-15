@@ -23,4 +23,10 @@
     <string name="password_hint">Enter password</string>
     <string name="repeat_password_hint">Repeat password</string>
     <string name="email_hint">Enter email address</string>
+    <string name="ical_url_placeholder">Paste iCal URL here</string>
+    <string name="import_text">Import</string>
+    <string name="refresh">Refresh</string>
+    <string name="importing_now">Now importing your iCal file. Please wait!</string>
+    <string name="import_error">An error occurred while importing your events. Please make sure you have an active internet connection and your URL is valid!</string>
+    <string name="import_success">Your events were imported successfully! They will be synced from now on every 15 minutes. Please refresh your calendar to view them.</string>
 </resources>

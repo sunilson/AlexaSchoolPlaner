@@ -25,7 +25,7 @@
         android:id="@+id/menu_homepage_navigation_group"
         >
         <item
-            android:id="@+id/menu_homepage_bfew"
+            android:id="@+id/menu_homepage_settings"
             android:title="@string/settings"
             android:icon="@drawable/ic_settings_white_24dp"
             />

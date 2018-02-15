@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Lazy;
 import okhttp3.Authenticator;
@@ -18,6 +19,7 @@ import okhttp3.Route;
  * @author Linus Weiss
  */
 
+@Singleton
 public class TokenAuthenticator implements Authenticator {
 
     Lazy<RefreshLoginUseCase> refreshLoginUseCaseLazy;
@@ -40,9 +42,11 @@ public class TokenAuthenticator implements Authenticator {
         //Refresh the current access token
         String accessToken = refreshLoginUseCaseLazy.get().execute(null).blockingFirst();
 
-        //If refresh was successful set the header of the previous request, otherwise do nothing
+        //If refresh was successful set the header of the previous request, otherwise log out
         if(accessToken != null && !accessToken.isEmpty()) {
-            return response.request().newBuilder().header("Authorization", accessToken).build();
+            //TODO Store access token?
+
+            return response.request().newBuilder().header("Authorization", "Bearer " + accessToken).build();
         } else {
             return null;
         }

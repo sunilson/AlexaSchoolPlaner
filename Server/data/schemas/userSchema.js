@@ -58,6 +58,9 @@ var userSchema = new Schema({
     activated: {
         type: Boolean
     },
+    icalurl: {
+        type: String
+    },
     type: {
         type: String,
         required: true

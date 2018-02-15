@@ -12,7 +12,7 @@ module.exports = {
         google: "google"
     },
     auth: {
-        accessExpire: "60m",
+        accessExpire: "1000d",
         refreshExpire: "1000d"
     }
 }

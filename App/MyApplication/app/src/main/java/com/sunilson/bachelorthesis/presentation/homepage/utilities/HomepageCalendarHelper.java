@@ -74,8 +74,6 @@ public class HomepageCalendarHelper {
         };
     }
 
-
-
     public void setDayAmount(int dayAmount) {
         DateTime[] dateTimes = getCurrentCalendarDates();
         setCurrentCalendarDates(null, dateTimes[0].plusDays(dayAmount));

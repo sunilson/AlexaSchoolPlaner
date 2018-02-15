@@ -1,15 +1,16 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var events = require('./routes/event-route');
-var auth = require('./routes/auth-route');
-var cors = require("cors");
-var mongoose = require("mongoose");
-var cfg = require("./config.js");
-
-var app = express();
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const events = require('./routes/event-route');
+const auth = require('./routes/auth-route');
+const cors = require("cors");
+const mongoose = require("mongoose");
+const cfg = require("./config.js");
+const passport = require('passport');
+const strategy = require('./strategies/local-strategy.js');
+const app = express();
 
 //Db setup
 mongoose.connect(cfg.mongoDBURL, {
@@ -21,7 +22,6 @@ mongoose.Promise = global.Promise;
 
 //Allow cross origin 
 app.use(cors());
-
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -30,7 +30,11 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/events', events);
+//Setup authentication
+passport.use(strategy);
+app.use(passport.initialize());
+
+app.use('/events', passport.authenticate('jwt', cfg.jwtSession), events);
 app.use('/auth', auth);
 
 // catch 404 and forward to error handler

@@ -4,7 +4,7 @@ import com.sunilson.bachelorthesis.data.model.EventEntity;
 import com.sunilson.bachelorthesis.domain.shared.AbstractUseCase;
 import com.sunilson.bachelorthesis.domain.calendar.mappers.EventEntityToDomainEventMapper;
 import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
-import com.sunilson.bachelorthesis.domain.calendar.model.EventForPostBody;
+import com.sunilson.bachelorthesis.data.repository.BodyModels.EventForPostBody;
 import com.sunilson.bachelorthesis.domain.repository.EventRepository;
 
 import javax.inject.Inject;

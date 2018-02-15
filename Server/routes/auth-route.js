@@ -22,6 +22,7 @@ var UserVariables = require("../variables/UserVariables");
 var ObjectOperations = require("../utils/objectOperations");
 var validationService = require("../services/validationService");
 
+//Route for new access token
 router.get('/refreshToken', function (req, res) {
     //Get data from request
     var refreshToken = req.query.refreshToken;
@@ -170,21 +171,23 @@ router.post('/verify', function (req, res, next) {
 
 //Check if login data is correct and return access/refresh tokens and the user details
 function checkLoginData(user, password, res, next) {
-    console.log(user);
     if (user && user.type === UserVariables.type.standard && passwordHash.verify(password, user.password)) {
         //Generate fresh tokens
         tokenService.generateTokens(user._id).then((tokens) => {
             //Return the tokens to the requester
+
+            const tempUser = {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            }
+            if (user.icalurl) tempUser["icalurl"] = user.icalurl
             res.json({
                 tokens: {
                     accessToken: tokens.accessToken,
                     refreshToken: tokens.refreshToken
                 },
-                user: {
-                    id: user._id,
-                    username: user.username,
-                    email: user.email
-                }
+                user: tempUser
             });
         }).catch((error) => {
             return next(error);

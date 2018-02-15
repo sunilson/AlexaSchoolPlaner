@@ -2,6 +2,7 @@ package com.sunilson.bachelorthesis.data.repository.authentication;
 
 import com.sunilson.bachelorthesis.data.model.user.UserEntity;
 import com.sunilson.bachelorthesis.data.repository.database.ApplicationDatabase;
+import com.sunilson.bachelorthesis.domain.authentication.model.DomainUser;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

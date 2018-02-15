@@ -17,6 +17,6 @@ public class UserEntityToDomainUserMapper {
     }
 
     public DomainUser toDomainUser(UserEntity userEntity) {
-        return new DomainUser(userEntity.getUser().getUsername(), userEntity.getUser().getEmail(), null);
+        return new DomainUser(userEntity.getUser().getUsername(), userEntity.getUser().getEmail(), null, userEntity.getUser().getIcalurl());
     }
 }

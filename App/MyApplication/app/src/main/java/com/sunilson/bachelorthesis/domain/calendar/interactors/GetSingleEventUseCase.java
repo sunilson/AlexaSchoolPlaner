@@ -29,23 +29,34 @@ public class GetSingleEventUseCase extends AbstractUseCase<DomainEvent, GetSingl
 
     @Override
     protected Observable<DomainEvent> buildUseCaseObservable(GetSingleEventUseCase.Params params) {
-        return this.eventRepository.getSingleEvent(params.id).map(new Function<EventEntity, DomainEvent>() {
-            @Override
-            public DomainEvent apply(EventEntity eventEntity) throws Exception {
-                return entityToDomainEventMapper.mapToDomainEvent(eventEntity);
-            }
-        });
+        if (params.offline) {
+            return this.eventRepository.getOfflineSingleEvent(params.id).map(new Function<EventEntity, DomainEvent>() {
+                @Override
+                public DomainEvent apply(EventEntity eventEntity) throws Exception {
+                    return entityToDomainEventMapper.mapToDomainEvent(eventEntity);
+                }
+            });
+        } else {
+            return this.eventRepository.getSingleEvent(params.id).map(new Function<EventEntity, DomainEvent>() {
+                @Override
+                public DomainEvent apply(EventEntity eventEntity) throws Exception {
+                    return entityToDomainEventMapper.mapToDomainEvent(eventEntity);
+                }
+            });
+        }
     }
 
     public static final class Params {
         private final String id;
+        private final boolean offline;
 
-        private Params(String id) {
+        private Params(String id, boolean offline) {
             this.id = id;
+            this.offline = offline;
         }
 
-        public static Params forSingleEvent(String id) {
-            return new Params(id);
+        public static Params forSingleEvent(String id, boolean offline) {
+            return new Params(id, offline);
         }
     }
 }

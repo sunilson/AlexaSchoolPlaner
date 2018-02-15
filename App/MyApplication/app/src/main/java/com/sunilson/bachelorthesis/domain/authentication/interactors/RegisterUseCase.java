@@ -26,7 +26,7 @@ public class RegisterUseCase extends AbstractUseCase<Boolean, RegisterUseCase.Pa
     @Override
     protected Observable<Boolean> buildUseCaseObservable(Params params) {
 
-        DomainUser domainUser = new DomainUser(params.name, params.email, params.password);
+        DomainUser domainUser = new DomainUser(params.name, params.email, params.password, null);
 
         return authenticationRepository.signUp(domainUser).map(new Function<UserEntity, Boolean>() {
             @Override

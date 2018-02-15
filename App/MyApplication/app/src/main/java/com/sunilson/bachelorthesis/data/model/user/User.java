@@ -28,4 +28,10 @@ public class User {
     @SerializedName("email")
     @Expose
     private String email;
+
+    @Getter
+    @Setter
+    @SerializedName("icalurl")
+    @Expose
+    private String icalurl;
 }

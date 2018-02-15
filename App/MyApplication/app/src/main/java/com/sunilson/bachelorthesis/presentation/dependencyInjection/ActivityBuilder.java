@@ -10,6 +10,8 @@ import com.sunilson.bachelorthesis.presentation.event.EventModule;
 import com.sunilson.bachelorthesis.presentation.homepage.HomepageActivity;
 import com.sunilson.bachelorthesis.presentation.homepage.dependencyInjection.HomepageFragmentBuilder;
 import com.sunilson.bachelorthesis.presentation.homepage.dependencyInjection.HomepageModule;
+import com.sunilson.bachelorthesis.presentation.settings.SettingsActivity;
+import com.sunilson.bachelorthesis.presentation.settings.dependencyInjection.SettingsModule;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -29,6 +31,9 @@ public abstract class ActivityBuilder {
 
     @ContributesAndroidInjector(modules = AddEventModule.class)
     abstract AddEventActivity bindAddEventActivity();
+
+    @ContributesAndroidInjector(modules = SettingsModule.class)
+    abstract SettingsActivity bindSettingsActivity();
 
     @ContributesAndroidInjector(modules = {AuthenticationModule.class, AuthenticationFragmentBuilder.class})
     abstract AuthenticationActivity bindAuthenticationActivity();

@@ -9,12 +9,16 @@ import dagger.Provides;
 
 /**
  * @author Linus Weiss
+ *
+ * Provides dependencies for the Homepage Activity
  */
 
 @Module
 public class HomepageModule {
+    /*
     @Provides
     public CalendarViewPagerAdapter provideCalendarViewPagerAdapter (HomepageActivity homepageActivity, HomepageCalendarHelper homepageCalendarHelper) {
         return new CalendarViewPagerAdapter(homepageActivity.getSupportFragmentManager(), homepageCalendarHelper);
     }
+    */
 }

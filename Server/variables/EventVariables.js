@@ -1,6 +1,6 @@
 module.exports = {
     description: {
-        maxLength: 20,
+        maxLength: 999,
         minLength: 5
     },
     types: {

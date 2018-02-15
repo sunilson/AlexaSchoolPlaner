@@ -7,6 +7,9 @@ import com.sunilson.bachelorthesis.presentation.addEvent.AddEventViewModel;
 import com.sunilson.bachelorthesis.presentation.authentication.AuthenticationViewModel;
 import com.sunilson.bachelorthesis.presentation.event.EventViewModel;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
+import com.sunilson.bachelorthesis.presentation.settings.SettingsViewModel;
+
+import java.util.Set;
 
 import dagger.Binds;
 import dagger.Module;
@@ -38,6 +41,11 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(AuthenticationViewModel.class)
     abstract ViewModel bindAuthenticationViewModel(AuthenticationViewModel authenticationViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(SettingsViewModel.class)
+    abstract ViewModel bindSettingsViewModel(SettingsViewModel settingsViewModel);
 
     @Binds
     abstract ViewModelProvider.Factory provideViewModelFactory(ViewModelFactory viewModelFactory);

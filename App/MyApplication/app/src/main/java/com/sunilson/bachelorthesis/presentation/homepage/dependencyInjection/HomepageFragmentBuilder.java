@@ -13,7 +13,7 @@ import dagger.android.ContributesAndroidInjector;
 @Module
 public abstract class HomepageFragmentBuilder {
 
-    @ContributesAndroidInjector(modules = HomepageFragmentModule.class)
+    @ContributesAndroidInjector()
     abstract HomepageFragmentCalendar provideHomepageCalendarFragment();
 
     @ContributesAndroidInjector(modules = HomepageFragmentModule.class)

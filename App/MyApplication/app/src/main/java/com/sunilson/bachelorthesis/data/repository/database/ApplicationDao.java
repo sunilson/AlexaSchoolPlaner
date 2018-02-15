@@ -24,7 +24,7 @@ public interface ApplicationDao {
     void addUser(UserEntity userEntity);
 
     @Update
-    void changeAccessToken(UserEntity userEntity);
+    void updateUser(UserEntity userEntity);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addEvent(EventEntity eventEntity);

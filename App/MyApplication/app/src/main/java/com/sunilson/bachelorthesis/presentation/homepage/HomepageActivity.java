@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.DatePicker;
+import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.domain.authentication.interactors.CheckLoginStatusUseCase;
@@ -49,7 +50,7 @@ import io.reactivex.functions.Action;
  * @author Linus Weiss
  */
 
-public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector, DatePickerDialog.OnDateSetListener {
+public class HomepageActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector, DatePickerDialog.OnDateSetListener {
 
     @OnClick(R.id.activity_homepage_add_deadline)
     public void addDeadlineEvent() {
@@ -137,6 +138,9 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
                         this, this, dateTime.getYear(), dateTime.getMonthOfYear() - 1, dateTime.getDayOfMonth());
                 datePickerDialog.show();
                 break;
+            case R.id.menu_homepage_refresh:
+                changeContainerFragment();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -161,7 +165,11 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
                 drawerLayout.closeDrawers();
                 return true;
             case R.id.menu_homepage_log_out:
+                //TODO Logout UseCase
                 Navigator.navigateToLogin(this);
+                return true;
+            case R.id.menu_homepage_settings:
+                Navigator.navigateToSettings(this);
                 return true;
             case R.id.menu_homepage_checkLogin:
                 checkLoginStatusUseCase.execute(null).doFinally(new Action() {
@@ -217,8 +225,10 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
         changeContainerFragment();
     }
 
-    @Override
-    public void onRefresh() {
+    //TODO
+    private void refreshCurrentFragments() {
+        /*
+        //TODO Multiple fragments
         HomepageFragmentCalendar homepageFragmentCalendar = (HomepageFragmentCalendar) getSupportFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_DAY);
 
         if (homepageFragmentCalendar != null) {
@@ -226,6 +236,7 @@ public class HomepageActivity extends BaseActivity implements SwipeRefreshLayout
         } else {
             this.loading(false);
         }
+         */
     }
 
     private void changeContainerFragment() {
