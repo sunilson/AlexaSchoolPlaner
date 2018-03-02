@@ -21,5 +21,6 @@ public interface EventRepository {
     Observable<EventEntity> getSingleEvent(String id);
     Observable<EventEntity> getOfflineSingleEvent(String id);
     Observable<EventEntity> addEvent(EventForPostBody body);
+    Observable<EventEntity> editEvent(EventForPostBody body);
     Observable<Response<Void>> importCalendar(UrlForPostBody body);
 }

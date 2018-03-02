@@ -1,6 +1,10 @@
 package com.sunilson.bachelorthesis.presentation.event;
 
+import com.sunilson.bachelorthesis.presentation.shared.utilities.DateUtilities;
+
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +14,8 @@ import lombok.Setter;
 
 /**
  * @author Linus Weiss
- *
- * Base Model class of a single event for the Presentation layer
+ *         <p>
+ *         Base Model class of a single event for the Presentation layer
  */
 
 @NoArgsConstructor
@@ -54,4 +58,20 @@ public class EventModel {
     @Setter
     @NonNull
     private EventType eventType;
+
+    public String formatDateTime() {
+        String result = "Am " + DateTimeFormat.forPattern("dd.MM.yyyy").print(from) + " um " + DateTimeFormat.forPattern("HH:mm").print(from);
+
+        if (from.withTimeAtStartOfDay().isEqual(to.withTimeAtStartOfDay())) {
+            result += " bis um " + DateTimeFormat.forPattern("HH:mm").print(to);
+        } else {
+            result += " bis am " + DateTimeFormat.forPattern("dd.MM.yyyy").print(to) + " um " + DateTimeFormat.forPattern("HH:mm").print(to);
+        }
+
+        return result;
+    }
+
+    public String simpleFormatDateTime(DateTime dateTime) {
+        return DateUtilities.formatDateTime(dateTime);
+    }
 }

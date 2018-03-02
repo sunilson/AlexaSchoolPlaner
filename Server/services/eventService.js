@@ -3,9 +3,10 @@ const userModel = require("../data/models/userModel");
 const eventService = module.exports = {};
 const eventVariables = require('../variables/EventVariables');
 const Transaction = require('mongoose-transactions');
+const mongoose = require('mongoose')
 var ical = require('ical')
 
-eventService.executeImport = (url, userId, index) => {
+eventService.executeImport = (url, userId, index, icaltype) => {
     return new Promise((resolve, reject) => {
         const options = {};
         ical.fromURL(url, options, (err, data) => {
@@ -15,7 +16,7 @@ eventService.executeImport = (url, userId, index) => {
 
             if (data) {
                 //Store new ones to database
-                saveIcalEvents(data, userId, index).then(() => {
+                saveIcalEvents(data, userId, index, icaltype).then(() => {
                     resolve();
                 }).catch(e => {
                     reject(e);
@@ -25,17 +26,15 @@ eventService.executeImport = (url, userId, index) => {
     });
 }
 
-function saveIcalEvents(events, userId, index) {
+function saveIcalEvents(events, userId, index, icaltype) {
     return new Promise((resolve, reject) => {
         async function start() {
             try {
-                //Delete all previous versions
 
+                //Delete all previous versions
                 await eventModel.remove({
                     author: userId,
-                    icalid: {
-                        $ne: null
-                    }
+                    icalevent: true
                 });
 
                 const eventsToStore = [];
@@ -61,12 +60,13 @@ function saveIcalEvents(events, userId, index) {
                     if (value.start && value.end) {
                         //Construct event from data and store it
                         const event = {
+                            _id: key,
                             author: userId,
-                            icalid: key,
+                            icalevent: true,
                             summary: summary,
                             description: description,
                             location: location,
-                            type: 0,
+                            type: (icaltype) ? icaltype : 0,
                             from: new Date(value.start).getTime(),
                             to: new Date(value.end).getTime()
                         }
@@ -79,14 +79,15 @@ function saveIcalEvents(events, userId, index) {
                 results.forEach(result => {
                     indexObjects.push({
                         author: result.author,
-                        objectID: result.icalid,
+                        eventID: result.id,
+                        objectID: result.id,
                         summary: result.summary,
                         description: result.description,
                         location: result.location,
                         type: result.type,
-                        from: result.from,
-                        to: result.to,
-                        eventID: result.id,
+                        from: Date.parse(result.from),
+                        to: Date.parse(result.to),
+                        icalevent: result.icalevent
                     })
                 });
                 index.addObjects(indexObjects);
@@ -136,14 +137,16 @@ eventService.saveEvent = (event, userId) => {
 
         //If event is a deadline, offset to date by 1 hour
         //Also if to Date is smaller than the from date offset it
-        if ((event.type && event.type === eventVariables.types.deadline) || (event.from.getUTCMilliseconds() > event.to)) {
-            event.to = new Date(event.from.getUTCMilliseconds() + eventVariables.dates.deadlineOffset);
+        if ((event.type && event.type === eventVariables.types.deadline) || (event.from.getTime() > event.to)) {
+            event.to = new Date(event.from.getTime() + eventVariables.dates.deadlineOffset);
         } else {
             event.to = new Date(event.to);
         }
 
         //Add author
         event.author = userId;
+
+        event._id = new mongoose.Types.ObjectId().toString()
 
         new eventModel(event).save().then((result) => {
             resolve(result);

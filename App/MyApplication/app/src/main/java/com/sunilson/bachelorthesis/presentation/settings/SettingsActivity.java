@@ -14,8 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
@@ -31,6 +33,10 @@ import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModel
 
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -53,6 +59,7 @@ import retrofit2.Response;
 public class SettingsActivity extends BaseActivity {
 
     private SettingsViewModel settingsViewModel;
+    private Map<String, Integer> typeMap = new HashMap<>();
 
     @Inject
     ViewModelFactory viewModelFactory;
@@ -63,12 +70,15 @@ public class SettingsActivity extends BaseActivity {
     @BindView(R.id.settings_activity_import_button)
     Button importButton;
 
+    @BindView(R.id.settings_activity_import_type)
+    Spinner typesSpinner;
+
     @OnClick(R.id.settings_activity_import_button)
     public void importCal(View button) {
-        if(!importURL.getText().toString().isEmpty()) {
+        if(!importURL.getText().toString().isEmpty() && !typesSpinner.getSelectedItem().toString().isEmpty()) {
             disposableManager.add(
                     settingsViewModel
-                            .importCalendar(importURL.getText().toString())
+                            .importCalendar(importURL.getText().toString(), typeMap.get(typesSpinner.getSelectedItem().toString()))
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeWith(new ImportObserver()));
@@ -94,6 +104,18 @@ public class SettingsActivity extends BaseActivity {
         //Get ViewModel from factory
         settingsViewModel = ViewModelProviders.of(this, viewModelFactory).get(SettingsViewModel.class);
         disposableManager.add(settingsViewModel.getCurrentUser().subscribeWith(new UserObserver()));
+
+        //Setup spinner
+        List<String> types = new ArrayList<>();
+        typeMap.put(getResources().getString(R.string.school_appointment), 0);
+        typeMap.put(getResources().getString(R.string.appointment), 1);
+        typeMap.put(getResources().getString(R.string.deadline), 2);
+        types.add(getResources().getString(R.string.school_appointment));
+        types.add(getResources().getString(R.string.appointment));
+        types.add(getResources().getString(R.string.deadline));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, types);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typesSpinner.setAdapter(adapter);
     }
 
     /**
@@ -130,6 +152,10 @@ public class SettingsActivity extends BaseActivity {
         public void onNext(DomainUser domainUser) {
             if (domainUser.getIcalurl() != null) {
                 importURL.setText(domainUser.getIcalurl());
+            }
+
+            if (domainUser.getIcaltype() != null) {
+                typesSpinner.setSelection(domainUser.getIcaltype());
             }
         }
 

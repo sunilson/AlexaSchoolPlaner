@@ -2,7 +2,9 @@ package com.sunilson.bachelorthesis.presentation.shared.utilities;
 
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.format.DateTimeFormat;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -38,4 +40,8 @@ public class DateUtilities {
         }
     }
 
+    public static  String formatDateTime(DateTime dateTime) {
+        org.joda.time.format.DateTimeFormatter dtfOut = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
+        return dtfOut.print(dateTime);
+    }
 }

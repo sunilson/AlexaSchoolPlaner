@@ -55,6 +55,10 @@ var summaryValidator = [
 ];
 
 var eventSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        required: true
+    },
     author: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
@@ -90,9 +94,11 @@ var eventSchema = new mongoose.Schema({
         index: "2dsphere",
         validate: geoValidator
     },
-    icalid: {
-        type: String
+    icalevent: {
+        type: Boolean
     }
+}, {
+    _id: false
 });
 
 module.exports = eventSchema;

@@ -12,6 +12,7 @@ import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -31,6 +32,9 @@ public interface EventRetrofitService {
 
     @POST("events/new")
     Observable<EventEntity> addEvent(@Body EventForPostBody body);
+
+    @PUT("events")
+    Observable<EventEntity> editEvent(@Body EventForPostBody body);
 
     @POST("events/import")
     Observable<Response<Void>> importCalendar(@Body UrlForPostBody body);

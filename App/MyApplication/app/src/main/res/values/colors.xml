@@ -9,7 +9,7 @@
 
     <!-- Calendar colors -->
     <color name="schoolAppointment">#FF4081</color>
-    <color name="specialAppointment">#FF4081</color>
+    <color name="specialAppointment">#61c742</color>
     <color name="deadline">#3F51B5</color>
 
     <!-- Basic Colors -->

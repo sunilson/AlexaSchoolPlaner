@@ -2,6 +2,7 @@ package com.sunilson.bachelorthesis.presentation.event;
 
 import android.arch.lifecycle.ViewModel;
 
+import com.sunilson.bachelorthesis.domain.calendar.interactors.EditEventUseCase;
 import com.sunilson.bachelorthesis.domain.calendar.interactors.GetSingleEventUseCase;
 import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
 import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
@@ -18,10 +19,13 @@ import io.reactivex.functions.Function;
 public class EventViewModel extends ViewModel {
 
     GetSingleEventUseCase getSingleEventUseCase;
+    EditEventUseCase editEventUseCase;
     DomainEventToEventModelMapper domainEventToEventModelMapper;
 
+
     @Inject
-    public EventViewModel(GetSingleEventUseCase getSingleEventUseCase, DomainEventToEventModelMapper domainEventToEventModelMapper) {
+    public EventViewModel(GetSingleEventUseCase getSingleEventUseCase, DomainEventToEventModelMapper domainEventToEventModelMapper, EditEventUseCase editEventUseCase) {
+        this.editEventUseCase = editEventUseCase;
         this.getSingleEventUseCase = getSingleEventUseCase;
         this.domainEventToEventModelMapper = domainEventToEventModelMapper;
     }
@@ -36,6 +40,15 @@ public class EventViewModel extends ViewModel {
             @Override
             public EventModel apply(DomainEvent domainEvent) throws Exception {
                 return domainEventToEventModelMapper.toEvent(domainEvent);
+            }
+        });
+    }
+
+    public Observable<EventModel> editEvent(EventModel eventModel) {
+        return editEventUseCase.execute(new EditEventUseCase.Params(domainEventToEventModelMapper.toDomainEvent(eventModel))).map(new Function<DomainEvent, EventModel>() {
+            @Override
+            public EventModel apply(DomainEvent domainEvent) throws Exception {
+                return null;
             }
         });
     }

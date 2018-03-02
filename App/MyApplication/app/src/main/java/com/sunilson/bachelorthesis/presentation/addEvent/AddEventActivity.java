@@ -23,6 +23,7 @@ import com.sunilson.bachelorthesis.presentation.event.EventModel;
 import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
+import com.sunilson.bachelorthesis.presentation.shared.utilities.DisposableManager;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.ValidationHelper;
 import com.sunilson.bachelorthesis.presentation.shared.viewmodelBasics.ViewModelFactory;
 
@@ -36,6 +37,7 @@ import butterknife.OnClick;
 import dagger.android.AndroidInjection;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 
 /**
  * @author Linus Weiss
@@ -84,6 +86,9 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
 
     @Inject
     ValidationHelper validationHelper;
+
+    @Inject
+    DisposableManager disposableManager;
 
     @Inject
     AddEventUseCase addEventUseCase;
@@ -161,14 +166,9 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
         eventModel.setTo(to);
         eventModel.setEventType(Constants.EVENT_TYPES[eventType]);
 
-        //TODO Disposable
-        addEventUseCase.execute(AddEventUseCase.Params
+        disposableManager.add(addEventUseCase.execute(AddEventUseCase.Params
                 .forDaySpan(domainEventToEventModelMapper.toDomainEvent(eventModel)))
-                .subscribe(new Observer<DomainEvent>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
+                .subscribeWith(new DisposableObserver<DomainEvent>() {
 
                     @Override
                     public void onNext(DomainEvent domainEvent) {
@@ -177,14 +177,15 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
 
                     @Override
                     public void onError(Throwable e) {
-
+                        Toast.makeText(AddEventActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onComplete() {
 
                     }
-                });
+                })
+        );
     }
 
     private void openTimePicker() {
@@ -221,4 +222,9 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposableManager.dispose();
+    }
 }

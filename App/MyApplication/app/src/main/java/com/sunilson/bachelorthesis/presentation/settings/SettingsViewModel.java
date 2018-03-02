@@ -37,8 +37,8 @@ public class SettingsViewModel extends ViewModel {
         return this.getCurrentUser.execute(null);
     }
 
-    public Observable<retrofit2.Response<Void>> importCalendar(String url) {
-        return importCalendarUseCase.execute(ImportCalendarUseCase.Params.forImport(url));
+    public Observable<retrofit2.Response<Void>> importCalendar(String url, Integer type) {
+        return importCalendarUseCase.execute(ImportCalendarUseCase.Params.forImport(url, type));
     }
 
 }

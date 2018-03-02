@@ -18,5 +18,5 @@
     <dimen name="header_height">60dp</dimen>
 
     <!-- Event -->
-    <dimen name="event_padding">20dp</dimen>
+    <dimen name="event_padding">15dp</dimen>
 </resources>

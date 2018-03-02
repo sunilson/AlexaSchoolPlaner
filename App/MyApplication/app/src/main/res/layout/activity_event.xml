@@ -1,94 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
+
     <data>
+
         <variable
             name="Event"
             type="com.sunilson.bachelorthesis.presentation.event.EventModel" />
     </data>
 
-    <android.support.design.widget.CoordinatorLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v4.widget.NestedScrollView
+        <android.support.design.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/activity_event_show"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <LinearLayout
+            <android.support.v4.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <RelativeLayout
-                    android:id="@+id/activity_event_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="@color/colorAccent"
-                    android:padding="@dimen/event_padding">
-
-                    <TextView
-                        android:id="@+id/activity_event_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_alignParentLeft="true"
-                        android:text="@{Event.summary}"
-                        android:textColor="@color/white"
-                        android:textSize="32sp"
-                        android:visibility="invisible" />
-                </RelativeLayout>
+                android:layout_height="match_parent">
 
                 <LinearLayout
-                    android:id="@+id/activity_event_content_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/activity_event_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/colorAccent"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="@dimen/event_padding">
+
+                            <ImageView
+                                android:id="@+id/activity_event_close"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_close_white_24dp" />
+                        </LinearLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="100dp"
+                            android:padding="@dimen/event_padding">
+
+                            <TextView
+                                android:id="@+id/activity_event_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentLeft="true"
+                                android:text="@{Event.summary}"
+                                android:textColor="@color/white"
+                                android:textSize="32sp"
+                                android:visibility="invisible" />
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/activity_event_content_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="@dimen/event_padding"
+                        android:visibility="invisible">
+
+                        <TextView
+                            style="@style/event_headline"
+                            android:text="Zeitraum" />
+
+                        <TextView
+                            android:id="@+id/activity_event_from"
+                            style="@style/event_text"
+                            android:text="@{Event.formatDateTime()}" />
+
+                        <TextView
+                            style="@style/event_headline"
+                            android:text="Beschreibung" />
+
+                        <TextView
+                            android:id="@+id/activity_event_description"
+                            style="@style/event_text"
+                            android:text="@{Event.description}" />
+
+                        <TextView
+                            style="@style/event_headline"
+                            android:text="Location" />
+
+                        <TextView
+                            android:id="@+id/activity_event_location"
+                            style="@style/event_text"
+                            android:text='@{Event.location ?? "-"}' />
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v4.widget.NestedScrollView>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/activity_event_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit_white_24dp"
+                android:visibility="invisible"
+                app:layout_anchor="@id/activity_event_header"
+                app:layout_anchorGravity="bottom|right" />
+
+        </android.support.design.widget.CoordinatorLayout>
+
+        <android.support.design.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/activity_event_edit_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible">
+
+            <android.support.v4.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="@dimen/event_padding"
-                    android:visibility="invisible">
+                    android:orientation="vertical">
 
-                    <TextView
-                        style="@style/event_headline"
-                        android:text="Beschreibung" />
+                    <LinearLayout
+                        android:id="@+id/activity_event_edit_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/activity_event_description"
-                        style="@style/event_text"
-                        android:text="@{Event.description}"
-                        />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/colorAccent"
+                            android:padding="@dimen/event_padding">
 
-                    <TextView
-                        style="@style/event_headline"
-                        android:text="Zeitraum" />
+                            <ImageView
+                                android:id="@+id/activity_event_edit_back"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_arrow_back_white_24dp" />
+                        </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/activity_event_from"
-                        style="@style/event_text"
-                        android:text="@{Event.from.toString()}"/>
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@color/colorAccent"
+                            android:minHeight="100dp"
+                            android:padding="@dimen/event_padding">
 
-                    <TextView
-                        android:id="@+id/activity_event_to"
-                        style="@style/event_text"
-                        android:text="@{Event.to.toString()}"
-                        />
+                            <EditText
+                                android:id="@+id/activity_event_edit_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentStart="true"
+                                android:backgroundTint="@color/white"
+                                android:text="@{Event.summary}"
+                                android:textColor="@color/white"
+                                android:textCursorDrawable="@null"
+                                android:textSize="32sp" />
+                        </RelativeLayout>
+                    </LinearLayout>
 
-                    <TextView
-                        style="@style/event_headline"
-                        android:text="Location" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="@dimen/event_padding">
+
+                        <TextView
+                            style="@style/event_headline"
+                            android:text="Zeitraum" />
+
+                        <TextView
+                            android:id="@+id/activity_event_edit_from"
+                            style="@style/event_text"
+                            android:text="@{Event.simpleFormatDateTime(Event.from)}" />
+
+                        <Button
+                            android:id="@+id/activity_event_edit_from_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/edit"
+                            />
+
+                        <TextView
+                            android:id="@+id/activity_event_edit_to"
+                            style="@style/event_text"
+                            android:text="@{Event.simpleFormatDateTime(Event.to)}" />
+
+                        <Button
+                            android:id="@+id/activity_event_edit_to_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/edit"
+                            />
+
+                        <TextView
+                            style="@style/event_headline"
+                            android:text="Beschreibung" />
+
+                        <EditText
+                            android:id="@+id/activity_event_edit_description"
+                            style="@style/event_text"
+                            android:hint="@string/event_description_hint"
+                            android:text="@{Event.description}" />
+
+                        <EditText
+                            android:id="@+id/activity_event_edit_location"
+                            style="@style/event_headline"
+                            android:hint="@string/event_location_hint"
+                            android:text="@{Event.location}" />
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </android.support.v4.widget.NestedScrollView>
+            </android.support.v4.widget.NestedScrollView>
 
-
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/activity_event_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            app:fab_colorNormal="@color/colorAccent"
-            app:fab_icon="@drawable/ic_edit_white_24dp"
-            app:layout_anchor="@id/activity_event_header"
-            app:layout_anchorGravity="bottom|right" />
-
-    </android.support.design.widget.CoordinatorLayout>
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/activity_event_edit_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorAccent"
+                android:src="@drawable/ic_check_white_24dp"
+                app:layout_anchor="@id/activity_event_edit_header"
+                app:layout_anchorGravity="bottom|right" />
+        </android.support.design.widget.CoordinatorLayout>
+    </RelativeLayout>
 </layout>

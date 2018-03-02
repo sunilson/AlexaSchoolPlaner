@@ -27,4 +27,8 @@ public class DomainUser {
     @Setter
     private String icalurl;
 
+    @Getter
+    @Setter
+    private Integer icaltype;
+
 }

@@ -26,6 +26,9 @@ public interface ApplicationDao {
     @Update
     void updateUser(UserEntity userEntity);
 
+    @Update
+    void updateEvent(EventEntity eventEntity);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void addEvent(EventEntity eventEntity);
 
@@ -40,4 +43,7 @@ public interface ApplicationDao {
 
     @Query("SELECT * FROM Users WHERE id = 1")
     Single<UserEntity> getCurrentUser();
+
+    @Query("DELETE FROM Events")
+    void deleteAllEvents();
 }

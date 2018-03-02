@@ -27,6 +27,7 @@ public class DomainEventToEventModelMapper {
         domainEvent.setDescription(eventModel.getDescription());
         domainEvent.setFrom(eventModel.getFrom());
         domainEvent.setTo(eventModel.getTo());
+        domainEvent.setId(eventModel.getId());
         domainEvent.setEventType(Arrays.asList(Constants.EVENT_TYPES).indexOf(eventModel.getEventType()));
         return domainEvent;
     }

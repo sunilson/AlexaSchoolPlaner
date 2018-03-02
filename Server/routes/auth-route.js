@@ -2,15 +2,13 @@ var express = require('express');
 var router = express.Router();
 var ObjectOperations = require("../utils/objectOperations");
 var UserModel = require("../data/models/userModel");
-
 var express = require('express');
 var router = express.Router();
 var jwt = require("jsonwebtoken");
 var cfg = require("../config.js");
 var mongoose = require("mongoose");
 var tokenService = require("../services/tokenService");
-var refreshTokenModel = require("../data/models/RefreshTokenModel");
-var UserModel = require("../data/models/UserModel");
+var refreshTokenModel = require("../data/models/refreshTokenModel");
 var passwordHash = require("password-hash");
 var validator = require("validator");
 var GoogleAuth = require('google-auth-library');

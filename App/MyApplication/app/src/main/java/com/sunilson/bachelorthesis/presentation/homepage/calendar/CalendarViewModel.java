@@ -37,12 +37,7 @@ public class CalendarViewModel extends ViewModel {
         }
 
        return getDaySpanUseCase.execute(GetDaySpanUseCase.Params.forDaySpan(from, to, offline)).map(
-               new Function<List<DomainDay>, CalendarDaySpanModel>() {
-                   @Override
-                   public CalendarDaySpanModel apply(List<DomainDay> domainDays) throws Exception {
-                       return daySpanModelMapper.toCalendarDaySpanModel(domainDays);
-                   }
-               }
+               domainDays -> daySpanModelMapper.toCalendarDaySpanModel(domainDays)
        );
     }
 

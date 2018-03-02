@@ -25,19 +25,21 @@ public class ImportCalendarUseCase extends AbstractUseCase<Response<Void>, Impor
 
     @Override
     protected Observable<Response<Void>> buildUseCaseObservable(Params params) {
-        return eventRepository.importCalendar(new UrlForPostBody(params.url));
+        return eventRepository.importCalendar(new UrlForPostBody(params.url, params.type));
     }
 
     public static final class Params {
 
         private final String url;
+        private final Integer type;
 
-        private Params(String url) {
+        private Params(String url, Integer type) {
             this.url = url;
+            this.type = type;
         }
 
-        public static Params forImport(String url) {
-            return new Params(url);
+        public static Params forImport(String url, Integer type) {
+            return new Params(url, type);
         }
     }
 }

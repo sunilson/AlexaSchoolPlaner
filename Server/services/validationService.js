@@ -1,5 +1,5 @@
 var randtoken = require("rand-token");
-var ValidationTokenModel = require("../data/models/ValidationTokenModel");
+var ValidationTokenModel = require("../data/models/validationTokenModel");
 var cfg = require("../config.js");
 var mailgun = require('mailgun-js')({
     apiKey: cfg.mailGunKey,

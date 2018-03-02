@@ -1,6 +1,6 @@
 var jwt = require("jsonwebtoken");
 var randtoken = require("rand-token");
-var refreshTokenModel = require("../data/models/RefreshTokenModel");
+var refreshTokenModel = require("../data/models/refreshTokenModel");
 var cfg = require("../config.js");
 var UserVariables = require("../variables/UserVariables");
 var tokenService = module.exports = {};

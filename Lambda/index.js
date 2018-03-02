@@ -11,14 +11,17 @@
 'use strict';
 
 const Alexa = require('alexa-sdk');
-const HOME_URL = "http://localhost:5000"
+const HOME_URL = "https://bachelorthesis17.herokuapp.com"
 const request = require('request-promise-native');
 const moment = require("moment");
 const APP_ID = 'amzn1.ask.skill.db109c0a-8afb-4112-a995-8efc6c392dab'
-const currentAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhMTAzZTY5OWMwNDEyNGQyODEzNjkzYSIsImlhdCI6MTUxODI3MTg4MiwiZXhwIjoxNjA0NjcxODgyfQ.AGkPs3Ae96BhImcYryu1pe6H843lmE_yWLA5_VZKqD8"
+const currentAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhMTAzZTY5OWMwNDEyNGQyODEzNjkzYSIsImlhdCI6MTUxODcwODE5MiwiZXhwIjoxNjA1MTA4MTkyfQ.SPoZfImr2EYtLEY5bn0YW1tQocuLhSr5eqk92C0pjKY"
+const AmazonDateParser = require('amazon-date-parser');
 
 const states = {
-    ADDEVENTMODE: '_ADDEVENTMODE'
+    ADDEVENTMODE: '_ADDEVENTMODE',
+    NEXTEVENTMODE: '_NEXTEVENTMODE',
+    DEFAULTMODE: '_DEFAULTMODE'
 };
 
 const questionTypes = {
@@ -45,29 +48,41 @@ const languageStrings = {
     },
     "de": {
         "translation": {
+            NEXT_EVENTS: "Du hast mehrere Events am <say-as interpret-as='date'>",
             "Event": {
+                EVENT: "Ein Event",
                 NEXT_EVENT_DATE: "Dein nächstes Event ist am <say-as interpret-as='date'>",
                 NO_NEXT_EVENT: "Du hast kein Event in nächster Zeit!",
-                NEXT_EVENT_CARD_TITLE: "Dein nächstes Event"
+                NEXT_EVENT_CARD_TITLE: "Dein nächstes Event",
+                TODAY_EVENTS: "Hier sind die Events am Datum <say-as interpret-as='date'>",
+                NO_NEXT_EVENT_IN_LIMIT: "Du hast kein Event zu dieser Zeit"
             },
             "Schulstunde": {
+                EVENT: "Eine Schulstunde",
                 NEXT_EVENT_DATE: "Deine nächste Schulstunde ist am <say-as interpret-as='date'>",
                 NO_NEXT_EVENT: "Du hast keine Schulstunde in nächster Zeit!",
-                NEXT_EVENT_CARD_TITLE: "Deine nächste Schulstunde"
+                NEXT_EVENT_CARD_TITLE: "Deine nächste Schulstunde",
+                TODAY_EVENTS: "Hier sind die Schulstunden am Datum <say-as interpret-as='date'>",
+                NO_NEXT_EVENT_IN_LIMIT: "Du hast keine Schulstunde zu dieser Zeit"
             },
             "Termin": {
+                EVENT: "Ein Termin",
                 NEXT_EVENT_DATE: "Dein nächster Termin ist am <say-as interpret-as='date'>",
                 NO_NEXT_EVENT: "Du hast keinen Termin in nächster Zeit!",
-                NEXT_EVENT_CARD_TITLE: "Dein nächster Termin"
+                NEXT_EVENT_CARD_TITLE: "Dein nächster Termin",
+                TODAY_EVENTS: "Hier sind die Termine am Datum <say-as interpret-as='date'>",
+                NO_NEXT_EVENT_IN_LIMIT: "Du hast keinen Termin zu dieser Zeit"
             },
             "Abgabe": {
+                EVENT: "Eine Abgabe",
                 NEXT_EVENT_DATE: "Deine nächste Abgabe ist am <say-as interpret-as='date'>",
                 NO_NEXT_EVENT: "Du hast keine Abgabe in nächster Zeit!",
                 NEXT_EVENT_CARD_TITLE: "Deine nächste Abgabe",
+                TODAY_EVENTS: "Hier sind die Abgaben am Datum <say-as interpret-as='date'>",
+                NO_NEXT_EVENT_IN_LIMIT: "Du hast keine Abgabe zu dieser Zeit"
             },
             SKILL_NAME: 'Schulplaner',
             YOU_HAVE_EVENT_AT_DATE: " hast du das nächste mal am <say-as interpret-as='date'>",
-            TODAY_SCHOOL_EVENTS: "<s>Heute hast do folgende Schultermine: </s>",
             WITH_SUMMARY: " mit der Zusammenfassung",
             GET_FACT_MESSAGE: 'Hier sind deine Fakten: ',
             HELP_MESSAGE: 'Du kannst sagen, „Nenne mir einen Fakt über den Weltraum“, oder du kannst „Beenden“ sagen... Wie kann ich dir helfen?',
@@ -93,86 +108,107 @@ const languageStrings = {
             APPOINTMENT: "Termin",
             SCHULFACH: "Schulfach",
             ANYTHING_ELSE: "Sonst noch etwas?",
+            ASK_CONTINUE: 'Sage <s>Weiter!</s> um das nächste Event abzufragen oder <s>Abbrechen!</s> um zum Start zurückzukehren. <amazon:effect name="whispered">Übrigens, Sarah stinkt extrem!</amazon:effect> Sie ist so fucking scheiße Lol!',
             UNHANDLED: "Sorry, das habe ich nicht verstanden. Bitte versuche es noch einmal.",
-            NO_LOCATION_GIVEN: "Sie haben keinen Ort angegeben. Bitte erneut versuchen."
+            NO_LOCATION_GIVEN: "Sie haben keinen Ort angegeben. Bitte erneut versuchen.",
+            REPROMPT: "Sind Sie noch da?",
+            UNHANDLED_STATE: "Diese Frage passt nicht. Mit <s>Abbrechen!</s> kehrst du zum Start zurück.",
+            IN_LOCATION: "in"
         }
     }
 }
 
-const handlers = {
+const newSessionHandlers = {
     'LaunchRequest': function () {
+        this.handler.state = states.DEFAULTMODE;
         this.emit(":ask", "Willkommen zu " + this.t("SKILL_NAME") + ". Was möchtest du tun?");
     },
+};
+
+const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
     'NoEvent': function () {
         this.emit(':tell', this.t('STOP_MESSAGE'));
     },
-    'ContinueSearch': function () {
-        if (this.attributes["searchType"] && this.attributes["searchDate"]) {
-            switch (this.attributes["searchType"]) {
-
-            }
-            this.emit('GetNextEvent');
-        } else {
-            this.emit(':tell', this.t("DEFAULT_QUERY_ERROR"));
-        }
-
-    },
     'GetEvent': function () {
-
         if (!this.event.request.intent.slots.Type || !this.event.request.intent.slots.Type.value) {
             this.emit(':tell', this.t("DEFAULT_QUERY_ERROR"));
         }
-
         const query = this.event.request.intent.slots.Type.value;
     },
-    'GetNextEvent': function () {
-
-        let type;
-        let date;
-        (this.attributes["searchDate"]) ? date = this.attributes["searchDate"]: date = Date.now();
-        if (this.event.request.intent.slots &&
-            this.event.request.intent.slots.Type &&
-            this.event.request.intent.slots.Type.value &&
-            validEventType(this.event.request.intent.slots.Type.value)) {
-            type = this.event.request.intent.slots.Type.value
-        } else {
-            type = "Event"
+    'SearchNextEvent': function () {
+        let query = null
+        if (this.event.request.intent.slots.Query) {
+            this.attributes["query"] = extractDateRange(this.event.request.intent.slots)
         }
-        this.attributes["searchType"] = type;
-
-        simpleEventNetworkRequest(HOME_URL + "/events/nearestEvent?date=" + date + ((type != "Event") ? ("&type=" + eventTypes[type]) : "")).then((response) => {
-            console.log(response)
-
-            if (!response || response.length == 0) {
-                this.emit(':tell', this.t(type)["NO_NEXT_EVENT"]);
+        
+        let dates = null
+        if (this.event.request.intent.slots.Date) {
+            dates = extractDateRange(this.event.request.intent.slots)
+        }
+        let time = null
+        if (this.event.request.intent.slots.Time) {
+            time = extractTime(this.event.request.intent.slots)
+            if (dates) {
+                this.attributes["dateTime"] = moment(dates[0] + ' ' + time);
+                this.attributes["limitDateTime"] = moment(dates[1] + ' ' + time);
             } else {
-                let fromDate = formatDate(response.from)
-                let fromTime = formatTime(response.from)
-                this.attributes["searchDate"] = response.from
-
-                this.emit(":ask", "<s>" + this.t(type)["NEXT_EVENT_DATE"] + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s> <s>Zusammenfassung des Events: </s><s>" + response.summary + "</s>" + this.t("ANYTHING_ELSE"))
-
-                this.emit(':askwithcard',
-                    "<s>" + this.t(type)["NEXT_EVENT_DATE"] + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s> <s>Zusammenfassung des Events: </s><s>" + response.summary + "</s>" + this.t("ANYTHING_ELSE"),
-                    this.t(type)["NEXT_EVENT_CARD_TITLE"],
-                    formatEventForCardContent(response)
-                );
+                this.attributes["dateTime"] = moment(time, "HH:mm")
+                this.attributes["limitDateTime"] = moment(time, "HH:mm").add(1, "hour")
             }
-        }).catch((e) => {
-            console.log(e)
-            this.emit(':tellwithcard',
-                this.t("DEFAULT_QUERY_ERROR"),
-                this.t(type)["NEXT_EVENT_CARD_TITLE"],
-                this.t("DEFAULT_QUERY_ERROR")
-            );
-        });
+        } else {
+            if (dates) {
+                this.attributes["dateTime"] = moment(dates[0]);
+                this.attributes["limitDateTime"] = moment(dates[1]);
+            }
+        }
+
+        this.handler.state = states.NEXTEVENTMODE;
+        this.emitWithState('ExecuteGetNextEvent');
     },
-    'GetTodaysSchoolAppointments': function () {
-        let fromDate = moment().startOf('day');
-        let toDate = moment().endOf('day');
+    'GetNextEvent': function () {
+        if (this.event.request.intent && this.event.request.intent.slots.Location && this.event.request.intent.slots.Location.value) this.attributes["location"] = this.event.request.intent.slots.Location.value
+        this.handler.state = states.NEXTEVENTMODE;
+        this.emitWithState('ExecuteGetNextEvent');
+    },
+    'GetNextEventAtDateTime': function () {
+        let fromDateTime;
+        this.attributes["limit"] = true;
+
+        //Get DateTime of given date and time
+        if (this.event.request.intent.slots) {
+            let date;
+            let time;
+
+            if (this.event.request.intent.slots.Date && this.event.request.intent.slots.Date.value) {
+                let tempDates = new AmazonDateParser(this.event.request.intent.slots.Date.value)
+                date = tempDates["startDate"]
+                fromDateTime = moment(date);
+            }
+
+            if (this.event.request.intent.slots.Time && this.event.request.intent.slots.Time.value) {
+                time = extractTime(this.event.request.intent.slots)
+                if (date) {
+                    fromDateTime = moment(date + ' ' + time);
+                } else {
+                    fromDateTime = moment(time, "HH:mm")
+                }
+            } else {
+                this.attributes["limit"] = false;
+            }
+        }
+
+        if (fromDateTime) this.attributes["dateTime"] = fromDateTime.valueOf()
+        this.handler.state = states.NEXTEVENTMODE;
+        this.emitWithState('ExecuteGetNextEvent');
+    },
+    'GetEventsAtDate': function () {
+        //Check if a certain type is given. Otherwise just search for all events
+        let type = extractType(this.event.request.intent.slots)
+
+        let extractedDates = extractDateRange(this.event.request.intent.slots)
 
         var options = {
-            uri: HOME_URL + "/events?from=" + fromDate.valueOf() + "&to=" + toDate.valueOf() + "&type=0",
+            uri: HOME_URL + "/events?from=" + extractedDates[0].valueOf() + "&to=" + extractedDates[1].valueOf() + ((type != "Event") ? ("&type=" + eventTypes[type]) : ""),
             headers: {
                 'User-Agent': 'Request-Promise',
                 Authorization: 'Bearer ' + currentAccessToken
@@ -182,7 +218,7 @@ const handlers = {
 
         request(options).then((response) => {
             if (response && response.length > 0) {
-                let result = this.t("TODAY_SCHOOL_EVENTS");
+                let result = this.t(type)["TODAY_EVENTS"] + formatDate(extractedDates[0]) + "</say-as>";
                 for (let event of response) {
                     let fromTime = moment(event.from).format('hh:mm:ss');
                     result += "<s>" + event.summary;
@@ -191,57 +227,22 @@ const handlers = {
                     }
                     result += " um " + fromTime.toString() + "</s>"
                 }
-                this.emit(':tellwithcard',
+                this.emit(':tellWithCard',
                     result,
                     this.t("TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE"),
                     result);
             } else {
-                this.emit(':tellwithcard',
+                this.emit(':tellWithCard',
                     this.t("NO_SCHOOL_APPOINTMENTS_TODAY"),
                     this.t("TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE"),
                     this.t("NO_SCHOOL_APPOINTMENTS_TODAY")
                 );
             }
         }).catch((e) => {
-            this.emit(':tellwithcard',
+            this.emit(':tellWithCard',
                 this.t("DEFAULT_QUERY_ERROR"),
                 this.t("TODAYS_SCHOOL_APPOINTMENTS_CARD_TITLE"),
                 this.t("DEFAULT_QUERY_ERROR")
-            );
-        });
-    },
-    'GetNextEventAtLocation': function () {
-
-        let date;
-        (this.attributes["searchDate"]) ? date = this.attributes["searchDate"]: date = Date.now();
-        this.attributes["searchType"] = searchType.NEXT_APPOINTMENT;
-
-        if (this.event.request.intent && (!this.event.request.intent.slots.query || !this.event.request.intent.slots.query.value)) {
-            this.emit(':ask', this.t("NO_LOCATION_GIVEN"));
-        } else {
-            this.attributes["searchLocation"] = this.event.request.intent.slots.query.value
-        }
-
-        simpleEventNetworkRequest(HOME_URL + "/events/searchNextEventAtLocation?query=" + this.event.request.intent.slots.query.value + "&date=" + date).then((response) => {
-            if (!response || response.length == 0) {
-                this.emit(':tell', this.t("NO_NEXT_EVENT_AT_LOCATION"));
-                return;
-            }
-
-            let fromDate = formatDate(response.from)
-            let fromTime = formatTime(response.from);
-            this.attributes["searchDate"] = response.from;
-
-            this.emit(':askwithcard',
-                "<s>" + this.t("APPOINTMENT") + " " + this.t("WITH_SUMMARY") + response.summary + this.t("NEXT_SCHOOL_EVENT") + " " + fromDate.toString() + "</say-as> um " + fromTime.toString() + "</s>" + this.t("ANYTHING_ELSE"),
-                this.t("NEXT_APPOINTMENT_CARD_TITLE"),
-                formatEventForCardContent(response)
-            );
-        }).catch((e) => {
-            this.emit(':tellwithcard',
-                this.t("NO_NEXT_APPOINTMENT"),
-                this.t("NEXT_APPOINTMENT_CARD_TITLE"),
-                this.t("NO_NEXT_APPOINTMENT")
             );
         });
     },
@@ -274,10 +275,133 @@ const handlers = {
     'Unhandled': function () {
         this.emit(':ask', this.t("UNHANDLED"));
     }
-};
+});
+
+const nextEventHandlers = Alexa.CreateStateHandler(states.NEXTEVENTMODE, {
+    'LaunchRequest': function () {
+        this.emit("ExecuteGetNextEvent");
+    },
+    'ExecuteGetNextEvent': function () {
+        let date;
+        let location = "";
+        let excluded = "";
+
+        //Check if a certain type is given. Otherwise just search for all events
+        let type = extractType(this.event.request.intent.slots)
+
+        //If this is a continous request, get previous date, also check if a start date is given
+        if (this.attributes["searchDate"] && this.attributes["continue"]) {
+            date = this.attributes["searchDate"]
+        } else if (this.attributes["dateTime"]) {
+            date = this.attributes["dateTime"]
+        } else {
+            date = Date.now();
+        }
+
+        //If this is a continous request, get excluded id's
+        if (!this.attributes["continue"]) {
+            this.attributes["excluded"] = []
+        } else {
+            excluded = "&excluded=" + JSON.stringify(this.attributes["excluded"])
+        }
+
+        //If location is given, add it to request
+        if (this.attributes["location"]) {
+            location = "&location=" + this.attributes["location"]
+        }
+
+        //TODO Max Date UND Query
+
+        //Create network request
+        simpleEventNetworkRequest(HOME_URL + "/events/nextEvent?date=" + date + excluded + location + "&limit=" + this.attributes["limit"] + ((type != "Event") ? ("&type=" + eventTypes[type]) : "")).then((response) => {
+            //Check if results have been found
+            if (!response || response.length == 0) {
+                //Check if event time was limited
+                if (this.attributes["limit"]) {
+                    this.attributes["searchDate"] = this.attributes["dateTime"]
+                    this.emit(':askWithCard',
+                        this.t(type)["NO_NEXT_EVENT_IN_LIMIT"] + ". " + this.t("ASK_CONTINUE"),
+                        this.t("REPROMPT"),
+                        this.t(type)["NEXT_EVENT_CARD_TITLE"],
+                        this.t(type)["NO_NEXT_EVENT_IN_LIMIT"]
+                    );
+                } else {
+                    this.emit(':askWithCard',
+                        this.t(type)["NO_NEXT_EVENT"] + ". " + this.t("ASK_CONTINUE"),
+                        this.t("REPROMPT"),
+                        this.t(type)["NEXT_EVENT_CARD_TITLE"],
+                        this.t(type)["NO_NEXT_EVENT"]
+                    );
+                }
+            } else {
+                let fromDate = formatDate(response[0].from)
+                let fromTime = formatTime(response[0].from)
+
+                let result = "";
+                //Change result string depending on if one ore multiple events have been returned
+                if (response.length != 1) result = this.t("NEXT_EVENTS") + fromDate.toString() + "</say-as> um <say-as interpret-as='time'>" + fromTime.toString() + "</say-as>.";
+                if (response.length == 1) result = this.t(type)["NEXT_EVENT_DATE"] + fromDate.toString() + "</say-as> um <say-as interpret-as='time'>" + fromTime.toString() + "</say-as>";
+
+                //Iterate over all returned events
+                response.forEach(element => {
+                    //Set new session attributes
+                    this.attributes["searchDate"] = element.from
+                    this.attributes["excluded"].push(element.eventID)
+                    this.attributes["continue"] = false
+
+                    //Check if only one or multiple events have been found and change response accordingly
+                    if (response.length == 1) {
+                        result += ((this.attributes["location"]) ? (" " + this.t("IN_LOCATION") + " " + this.attributes["location"]) : "") + ". Zusammenfassung: <s>" + element.summary + "</s> " + this.t("ASK_CONTINUE");
+                    } else {
+                        result += this.t(type)["EVENT"] + ((this.attributes["location"]) ? (this.t("IN_LOCATION") + " " + this.attributes["location"]) : "") + ". Zusammenfassung: <s>" + element.summary + "</s> ";
+                    }
+                });
+
+                //Add "Continue" prompt if multiple events have been found at the end, so it is returned only once
+                if (response.length != 1) result += this.t("ASK_CONTINUE")
+
+                this.emit(':askWithCard',
+                    result,
+                    this.t("REPROMPT"),
+                    this.t(type)["NEXT_EVENT_CARD_TITLE"],
+                    result
+                );
+            }
+        }).catch((e) => {
+            console.log(e)
+            this.emit(':tellWithCard',
+                this.t("DEFAULT_QUERY_ERROR"),
+                this.t(type)["NEXT_EVENT_CARD_TITLE"],
+                this.t("DEFAULT_QUERY_ERROR")
+            );
+        });
+    },
+    'Continue': function () {
+        //Start "GetNextEvent" again, but with session attribute "Continue" set to true
+        this.attributes["continue"] = true
+        this.attributes["limit"] = false
+        this.emitWithState("ExecuteGetNextEvent");
+    },
+    'AMAZON.CancelIntent': function () {
+        //Reset session attributes
+        this.attributes["dateTime"] = false
+        this.attributes["location"] = false
+        this.attributes["excluded"] = []
+        this.attributes["continue"] = false
+        this.attributes["limit"] = false
+        this.handler.state = states.DEFAULTMODE
+        this.emit(':ask', 'Abfrage beendet. Was möchtest du tun?');
+    },
+    'AMAZON.StopIntent': function () {
+        this.emit(':tell', this.t('STOP_MESSAGE'));
+    },
+    'Unhandled': function () {
+        this.emit(':ask', this.t("UNHANDLED_STATE"));
+    },
+})
 
 //Events used when user wants to add an event. Will only be accessed when in "ADDEVENT" state
-var addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
+const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
     'QuestionAnsweredWithEventType': function () {
         this.attributes["eventType"] = this.event.request.intent.slots.EventType.value;
         this.attributes["questionType"] = questionTypes.STARTDATE;
@@ -366,6 +490,11 @@ var addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
             }
         }
     },
+    'AMAZON.CancelIntent': function () {
+        this.handler.state = '' // delete this.handler.state might cause reference errors
+        delete this.attributes['STATE'];
+        this.emit('LaunchRequest');
+    },
     'Unhandled': function () {
         this.emit(':ask', this.t("ERROR_GENERAL"));
     },
@@ -375,8 +504,77 @@ function formatDate(date) {
     return moment(date).format('YYYYMMDD');
 }
 
+function extractDateRange(slots) {
+    result = []
+
+    if (slots && slots.Date && slots.Date.value) {
+        try {
+            let dates = new AmazonDateParser(slots.Date.value)
+            result[0] = dates["startDate"]
+            result[1] = dates["endDate"]
+        } catch (e) {
+            result[0] = moment().startOf('day');
+            result[1] = moment().endOf('day');
+        }
+    } else {
+        result[0] = moment().startOf('day');
+        result[1] = moment().endOf('day');
+    }
+}
+
+function extractQuery(slots) {
+    if (slots && slots.Query && slots.Query.value) {
+        return slots.Query.value
+    } else {
+        return ""
+    }
+}
+
+function extractTime(slots) {
+    if (slots && slots.Time && slots.Time.value) {
+        switch (slots.Time.value) {
+            case "EV":
+                return "18:00"
+                break
+            case "NI":
+                return "24:00"
+                break
+            case "AF":
+                return "12:00"
+                break
+            case "MO":
+                return "06:00"
+                break
+            default:
+                return slots.Time.value
+                break;
+        }
+    } else {
+        return null
+    }
+}
+
+function extractType(slots) {
+    if (slots &&
+        slots.Type &&
+        slots.Type.value &&
+        slots.Type.resolutions &&
+        slots.Type.resolutions.resolutionsPerAuthority &&
+        slots.Type.resolutions.resolutionsPerAuthority[0] &&
+        slots.Type.resolutions.resolutionsPerAuthority[0].status.code === "ER_SUCCESS_MATCH" &&
+        slots.Type.resolutions.resolutionsPerAuthority[0].values &&
+        slots.Type.resolutions.resolutionsPerAuthority[0].values[0] &&
+        slots.Type.resolutions.resolutionsPerAuthority[0].values[0].value &&
+        slots.Type.resolutions.resolutionsPerAuthority[0].values[0].value.name &&
+        validEventType(slots.Type.resolutions.resolutionsPerAuthority[0].values[0].value.name)) {
+        return slots.Type.resolutions.resolutionsPerAuthority[0].values[0].value.name
+    } else {
+        return "Event"
+    }
+}
+
 function formatTime(time) {
-    return moment(time).format('hh:mm:ss');
+    return moment(time).format('HH:mm');
 }
 
 function formatEventForCardContent(event) {
@@ -436,6 +634,6 @@ exports.handler = function (event, context) {
         alexa.APP_ID = APP_ID;
     }
     alexa.resources = languageStrings;
-    alexa.registerHandlers(handlers, addEventHandlers);
+    alexa.registerHandlers(newSessionHandlers, defaultHandlers, addEventHandlers, nextEventHandlers);
     alexa.execute();
 };

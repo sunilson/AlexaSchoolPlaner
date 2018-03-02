@@ -25,6 +25,7 @@ import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import dagger.android.support.AndroidSupportInjection;
 import io.reactivex.observers.DisposableObserver;
+import retrofit2.HttpException;
 
 /**
  * @author Linus Weiss
@@ -63,7 +65,6 @@ public class HomepageFragmentCalendar extends Fragment {
     ConnectionManager connectionManager;
 
     private Unbinder unbinder;
-    private List<CalendarDayModel> days = new ArrayList<>();
     private DateTime[] dateTimes = new DateTime[0];
 
     public static HomepageFragmentCalendar newInstance(Long[] dates) {
@@ -200,7 +201,11 @@ public class HomepageFragmentCalendar extends Fragment {
 
         @Override
         public void onError(Throwable e) {
-            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            if(e instanceof SocketTimeoutException) {
+                Toast.makeText(getContext(), R.string.failed_server_connection, Toast.LENGTH_LONG).show();
+                disposableManager.add(((CalendarViewModel) ((HasViewModel) getActivity()).getViewModel()).getDays(dateTimes[0], dateTimes[1], true).subscribeWith(new EventListObserver()));
+            }
+            //Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
         @Override

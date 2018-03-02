@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class EventForPostBody {
-    String description, location, summary;
+    Integer type;
+    String description, location, summary, id;
     Long  from, to;
 }

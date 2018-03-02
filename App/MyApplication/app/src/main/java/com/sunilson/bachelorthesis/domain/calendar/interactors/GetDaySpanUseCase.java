@@ -33,19 +33,9 @@ public class GetDaySpanUseCase extends AbstractUseCase<List<DomainDay>, GetDaySp
     @Override
     protected Observable<List<DomainDay>> buildUseCaseObservable(final Params params) {
         if(params.offline) {
-            return this.eventRepository.getOfflineEventList(params.from, params.to).map(new Function<List<EventEntity>, List<DomainDay>>() {
-                @Override
-                public List<DomainDay> apply(List<EventEntity> eventEntities) throws Exception {
-                    return eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate());
-                }
-            });
+            return this.eventRepository.getOfflineEventList(params.from, params.to).map(eventEntities -> eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate()));
         } else {
-            return this.eventRepository.getEventList(params.from, params.to).map(new Function<List<EventEntity>, List<DomainDay>>() {
-                @Override
-                public List<DomainDay> apply(List<EventEntity> eventEntities) throws Exception {
-                    return eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate());
-                }
-            });
+            return this.eventRepository.getEventList(params.from, params.to).map(eventEntities -> eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate()));
         }
     }
 

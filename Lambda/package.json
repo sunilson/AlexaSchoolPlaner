@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "alexa-sdk": "^1.0.10",
+    "amazon-date-parser": "^0.2.0",
     "moment": "^2.19.3",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"

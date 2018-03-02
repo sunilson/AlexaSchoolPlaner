@@ -1,5 +1,5 @@
 var userService = module.exports = {};
-var UserModel = require("../data/models/UserModel")
+var UserModel = require("../data/models/userModel")
 var UserVariables = require("../variables/UserVariables");
 var randtoken = require("rand-token");
 var ObjectOperations = require("../utils/objectOperations");

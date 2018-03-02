@@ -1,4 +1,5 @@
 /Server/config.js
+/Server/node_modules
 App/www/build/vendor.js
 App/www/build/main.css
 App/www/build/main.js

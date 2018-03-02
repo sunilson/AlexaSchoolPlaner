@@ -34,4 +34,12 @@ public class User {
     @SerializedName("icalurl")
     @Expose
     private String icalurl;
+
+    @Getter
+    @Setter
+    @SerializedName("icaltype")
+    @Expose
+    private Integer icaltype;
+
+
 }

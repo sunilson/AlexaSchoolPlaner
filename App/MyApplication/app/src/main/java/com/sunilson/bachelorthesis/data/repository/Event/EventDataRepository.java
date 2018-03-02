@@ -44,14 +44,11 @@ public class EventDataRepository implements com.sunilson.bachelorthesis.domain.r
     public Observable<List<EventEntity>> getEventList(DateTime from, DateTime to) {
         return eventRetrofitService
                 .getEventSpan(from.getMillis(), to.getMillis())
-                .doOnNext(new Consumer<List<EventEntity>>() {
-                              @Override
-                              public void accept(List<EventEntity> eventEntities) throws Exception {
-                                  if (eventEntities != null && eventEntities.size() > 0) {
-                                      applicationDatabase.applicationDao().addEvents(eventEntities);
-                                  }
-                              }
-                          }
+                .doOnNext(eventEntities -> {
+                    if (eventEntities != null && eventEntities.size() > 0) {
+                        applicationDatabase.applicationDao().addEvents(eventEntities);
+                    }
+                }
                 );
     }
 
@@ -68,38 +65,36 @@ public class EventDataRepository implements com.sunilson.bachelorthesis.domain.r
 
     @Override
     public Observable<EventEntity> getSingleEvent(String id) {
-        return eventRetrofitService.getEvent(id).doOnNext(new Consumer<EventEntity>() {
-            @Override
-            public void accept(EventEntity eventEntity) throws Exception {
+        return eventRetrofitService.getEvent(id).doOnNext(eventEntity -> applicationDatabase.applicationDao().addEvent(eventEntity));
+    }
+
+    @Override
+    public Observable<EventEntity> addEvent(EventForPostBody body) {
+        return eventRetrofitService.addEvent(body).doOnNext(eventEntity -> {
+            if (eventEntity != null) {
                 applicationDatabase.applicationDao().addEvent(eventEntity);
             }
         });
     }
 
     @Override
-    public Observable<EventEntity> addEvent(EventForPostBody body) {
-        return eventRetrofitService.addEvent(body).doOnNext(new Consumer<EventEntity>() {
-            @Override
-            public void accept(EventEntity eventEntity) throws Exception {
-                applicationDatabase.applicationDao().addEvent(eventEntity);
+    public Observable<EventEntity> editEvent(EventForPostBody body) {
+        return eventRetrofitService.editEvent(body).doOnNext(eventEntity -> {
+            if (eventEntity != null) {
+                applicationDatabase.applicationDao().updateEvent(eventEntity);
             }
         });
     }
 
     @Override
     public Observable<Response<Void>> importCalendar(final UrlForPostBody body) {
-        return eventRetrofitService.importCalendar(new UrlForPostBody(body.getUrl())).doOnNext(new Consumer<Response<Void>>() {
-            @Override
-            public void accept(Response<Void> response) throws Exception {
-                if (response.code() == 200) {
-                    applicationDatabase.applicationDao().getCurrentUser().subscribe(new Consumer<UserEntity>() {
-                        @Override
-                        public void accept(UserEntity userEntity) throws Exception {
-                            userEntity.getUser().setIcalurl(body.getUrl());
-                            applicationDatabase.applicationDao().updateUser(userEntity);
-                        }
-                    });
-                }
+        return eventRetrofitService.importCalendar(body).doOnNext(response -> {
+            if (response.code() == 200) {
+                applicationDatabase.applicationDao().getCurrentUser().subscribe(userEntity -> {
+                    userEntity.getUser().setIcalurl(body.getUrl());
+                    userEntity.getUser().setIcaltype(body.getType());
+                    applicationDatabase.applicationDao().updateUser(userEntity);
+                });
             }
         });
     }

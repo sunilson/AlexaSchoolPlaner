@@ -12,4 +12,6 @@ import lombok.Setter;
 public class UrlForPostBody {
     @Getter
     private String url;
+    @Getter
+    private Integer type;
 }

@@ -16,11 +16,12 @@ algoliaEventIndex.setSettings(config.algoliaIndexSettings);
 router.post('/import', (req, res, next) => {
     const url = req.body.url;
     const user = req.user;
+    const type = req.body.type;
 
-    if (!url || !isUrl(url)) {
+    if (!url || !isUrl(url) || type == null || !Number.isInteger(type) || type < 0 || type > 2) {
         return next({
             status: 400,
-            message: "Invalid URL"
+            message: "Invalid URL or type"
         });
     }
 
@@ -32,10 +33,11 @@ router.post('/import', (req, res, next) => {
 
     //Add url to user object
     userDoc.update({
-        icalurl: url
+        icalurl: url,
+        icaltype: type
     }).then(() => {
         //Execute import for new URL now
-        return eventService.executeImport(url, user._id, algoliaEventIndex);
+        return eventService.executeImport(url, user._id, algoliaEventIndex, type);
     }).then(() => {
         res.sendStatus(200);
     }).catch(e => {
@@ -71,7 +73,7 @@ router.get('/executeImports', (req, res, next) => {
         }
     }).lean().exec().then(result => {
         for (let i = 0; i < result.length; i++) {
-            eventService.executeImport(result[i].icalurl, result[i]._id, algoliaEventIndex);
+            eventService.executeImport(result[i].icalurl, result[i]._id, algoliaEventIndex, result.icaltype);
         }
         res.sendStatus(200);
     }).catch(e => {
@@ -85,6 +87,8 @@ router.post('/new', (req, res, next) => {
     //Parse Event from request and trim it
     const event = ObjectOperations.trimObject(req.body);
 
+    console.log(event)
+
     //Get user from authentication
     const user = req.user;
 
@@ -97,6 +101,7 @@ router.post('/new', (req, res, next) => {
         searchIndex["description"] = result.description;
         searchIndex["summary"] = result.summary;
         searchIndex["eventID"] = result.id;
+        searchIndex["objectID"] = result.id;
         searchIndex["type"] = result.type;
         searchIndex["location"] = result.location;
         searchIndex["from"] = Date.parse(result.from);
@@ -109,6 +114,28 @@ router.post('/new', (req, res, next) => {
     });
 });
 
+router.put('/', (req, res, next) => {
+    //Parse Event from request and trim it
+    const event = ObjectOperations.trimObject(req.body);
+
+    //Get user from authentication
+    const user = req.user;
+
+    eventModel.findById(event.id).exec().then(oldEvent => {
+        oldEvent.summary = event.summary;
+        oldEvent.description = event.description;
+        oldEvent.from = new Date(event.from);
+        oldEvent.to = new Date(event.to);
+        oldEvent.location = event.location;
+        return oldEvent.save();
+    }).then((result) => {
+        res.status(201).json(result);
+    }).catch(e => {
+        next(e);
+    });
+});
+
+/*
 //Search for an event in the future containing the search query term
 router.get('/searchNextEvent', (req, res, next) => {
     const query = {};
@@ -130,62 +157,76 @@ router.get('/searchNextEvent', (req, res, next) => {
         res.status(200).json(content.hits[0]);
     });
 });
+*/
 
-//Route for searching the index for the next event at a certain location
-router.get('/searchNextEventAtLocation', (req, res, next) => {
-
+//Get the event/events nearest to a specific date of type and location (type and location are optional)
+router.get('/nextEvent', (req, res, next) => {
+    const user = req.user;
     const query = {};
 
-    if (req.query.query) {
-        query.query = req.query.query;
-    }
-
-    let date;
-    (req.query.date) ? (date = req.query.date) : (date = Date.now());
-    query.filters = "from > " + date;
-
-    if (req.query.type) {
-        query.filters += "AND type = " + req.query.type;
-    }
-
-    query.hitsPerPage = 1;
-
-    algoliaEventIndex.search({
-            query,
-            restrictSearchableAttributes: [
-                'location'
-            ]
-        },
-        (err, content) => {
-            if (err) return next(err);
-            res.status(200).json(content.hits[0]);
-        });
-});
-
-//Get the event nearest to a specific date
-router.get('/nearestEvent', (req, res, next) => {
     let date;
     (req.query.date) ? date = parseInt(req.query.date): date = Date.now();
 
-    const user = req.user;
-    const query = {
-        author: user._id,
-        from: {
-            $gte: new Date(date)
-        }
+    //Check if request is limited, which means that only events inside of a one hour timeframe should be found
+    if (req.query.limit === "true") {
+        query.filters = "from >= " + date + " AND from <= " + (date + 3600000) + " AND author:" + user._id;
+    } else {
+        query.filters = "from >= " + date + " AND author:" + user._id;
+    }
+
+    //Exclude already found events
+    if (req.query.excluded) {
+        let excluded = JSON.parse(req.query.excluded)
+        excluded.forEach(id => {
+            query.filters += " AND NOT eventID:" + id
+        });
     }
 
     if (req.query.type) {
-        query["type"] = req.query.type
+        query.filters += " AND type = " + req.query.type;
     }
 
-    eventModel.findOne(query).sort({
-        "from": 1
-    }).lean().exec().then((result) => {
-        res.status(200).json(result);
-    }).catch((error) => {
-        next(error);
-    });
+    if (req.query.location) {
+        query["query"] = req.query.location
+        query["restrictSearchableAttributes"] = [
+            'location'
+        ]
+    } else if (req.query.query) {
+        query["query"] = req.query.query
+        query["restrictSearchableAttributes"] = [
+            'summary',
+            'description'
+        ]
+    }
+
+    //Limit to max 5, so we don't get the whole dataset after the from date. There shouldn't be more than 5 appointments at the exact same time
+    query.hitsPerPage = 5;
+
+    algoliaEventIndex.search(query,
+        (err, content) => {
+            if (err) return next(err);
+
+            //Only return events that start at the exact same time
+            const result = []
+            for (let i = 0; i < content.hits.length; i++) {
+                if (i == 0) {
+                    result.push(content.hits[i])
+                } else {
+                    if (content.hits[0].from == content.hits[i].from) {
+                        result.push(content.hits[i]);
+                    } else {
+                        i = content.hits.length;
+                    }
+                }
+            }
+
+            result.forEach(element => {
+                element["id"] = element["eventID"];
+                delete element["eventID"];
+            })
+
+            res.status(200).json(result);
+        });
 });
 
 router.get('/:id', (req, res, next) => {

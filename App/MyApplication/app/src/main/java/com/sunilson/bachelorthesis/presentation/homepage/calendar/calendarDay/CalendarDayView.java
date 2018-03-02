@@ -61,13 +61,10 @@ public class CalendarDayView extends RelativeLayout {
                 .fromCallable(new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
-
                         //Iterate over all events and start the calculations
                         for (EventModel event : calendarDayModel.getEventList()) {
                             checkOverlappingEvents(event);
                         }
-
-
                         return true;
                     }
                 })
@@ -309,12 +306,7 @@ public class CalendarDayView extends RelativeLayout {
         container.addView(content);
 
         //Set click listener to view
-        container.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Navigator.navigateToEvent(getContext(), event.getId(), event.getEventType().getVal());
-            }
-        });
+        container.setOnClickListener(v -> Navigator.navigateToEvent(getContext(), event.getId(), event.getEventType().getVal()));
 
         return container;
     }

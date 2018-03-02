@@ -32,11 +32,15 @@ public class AddEventUseCase extends AbstractUseCase<DomainEvent, AddEventUseCas
 
         DomainEvent domainEvent = params.domainEvent;
 
-        EventForPostBody eventForPostBody = new EventForPostBody(domainEvent.getDescription(),
+        EventForPostBody eventForPostBody = new EventForPostBody(
+                domainEvent.getEventType(),
+                domainEvent.getDescription(),
                 domainEvent.getLocation(),
                 domainEvent.getSummary(),
+                null,
                 domainEvent.getFrom().getMillis(),
-                domainEvent.getTo().getMillis());
+                domainEvent.getTo().getMillis()
+        );
 
         return this.eventRepository.addEvent(eventForPostBody).map(new Function<EventEntity, DomainEvent>() {
             @Override

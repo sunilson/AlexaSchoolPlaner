@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-var ValidationTokenSchema = require("../schemas/ValidationTokenSchema");
+var ValidationTokenSchema = require("../schemas/validationTokenSchema");
 
 var validationToken = mongoose.model("ValidationToken", ValidationTokenSchema);
 

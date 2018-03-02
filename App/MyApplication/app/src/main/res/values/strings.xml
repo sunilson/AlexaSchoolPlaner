@@ -23,10 +23,17 @@
     <string name="password_hint">Enter password</string>
     <string name="repeat_password_hint">Repeat password</string>
     <string name="email_hint">Enter email address</string>
+    <string name="edit_event">Updating event</string>
+    <string name="loading">Loading...</string>
     <string name="ical_url_placeholder">Paste iCal URL here</string>
     <string name="import_text">Import</string>
     <string name="refresh">Refresh</string>
     <string name="importing_now">Now importing your iCal file. Please wait!</string>
     <string name="import_error">An error occurred while importing your events. Please make sure you have an active internet connection and your URL is valid!</string>
     <string name="import_success">Your events were imported successfully! They will be synced from now on every 15 minutes. Please refresh your calendar to view them.</string>
+    <string name="appointment">Termin</string>
+    <string name="school_appointment">Schulstunde</string>
+    <string name="deadline">Abgabe</string>
+    <string name="failed_server_connection">Failed to connect to server, loading cached data...</string>
+    <string name="edit">Bearbeiten</string>
 </resources>
