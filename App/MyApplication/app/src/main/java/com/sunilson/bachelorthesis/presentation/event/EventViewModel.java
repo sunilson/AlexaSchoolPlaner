@@ -18,9 +18,9 @@ import io.reactivex.functions.Function;
 
 public class EventViewModel extends ViewModel {
 
-    GetSingleEventUseCase getSingleEventUseCase;
-    EditEventUseCase editEventUseCase;
-    DomainEventToEventModelMapper domainEventToEventModelMapper;
+    private GetSingleEventUseCase getSingleEventUseCase;
+    private EditEventUseCase editEventUseCase;
+    private DomainEventToEventModelMapper domainEventToEventModelMapper;
 
 
     @Inject
@@ -36,21 +36,11 @@ public class EventViewModel extends ViewModel {
             throw new IllegalArgumentException("ID can't be null!");
         }
 
-        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, false)).map(new Function<DomainEvent, EventModel>() {
-            @Override
-            public EventModel apply(DomainEvent domainEvent) throws Exception {
-                return domainEventToEventModelMapper.toEvent(domainEvent);
-            }
-        });
+        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, false)).map(domainEvent -> domainEventToEventModelMapper.toEvent(domainEvent));
     }
 
     public Observable<EventModel> editEvent(EventModel eventModel) {
-        return editEventUseCase.execute(new EditEventUseCase.Params(domainEventToEventModelMapper.toDomainEvent(eventModel))).map(new Function<DomainEvent, EventModel>() {
-            @Override
-            public EventModel apply(DomainEvent domainEvent) throws Exception {
-                return null;
-            }
-        });
+        return editEventUseCase.execute(new EditEventUseCase.Params(domainEventToEventModelMapper.toDomainEvent(eventModel))).map(domainEvent -> domainEventToEventModelMapper.toEvent(domainEvent));
     }
 
     public Observable<EventModel> getOfflineSingleEvent(String id) throws IllegalArgumentException {
@@ -58,22 +48,6 @@ public class EventViewModel extends ViewModel {
             throw new IllegalArgumentException("ID can't be null!");
         }
 
-        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, true)).map(new Function<DomainEvent, EventModel>() {
-            @Override
-            public EventModel apply(DomainEvent domainEvent) throws Exception {
-                return domainEventToEventModelMapper.toEvent(domainEvent);
-            }
-        });
+        return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, true)).map(domainEvent -> domainEventToEventModelMapper.toEvent(domainEvent));
     }
-
-    /*
-    public LiveData<EventModel> getSingleEvent(String id) {
-        return LiveDataReactiveStreams.fromPublisher(getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id)).map(new Function<DomainEvent, EventModel>() {
-            @Override
-            public EventModel apply(DomainEvent domainEvent) throws Exception {
-                return domainEventToEventModelMapper.toEvent(domainEvent);
-            }
-        }));
-    }
-*/
 }

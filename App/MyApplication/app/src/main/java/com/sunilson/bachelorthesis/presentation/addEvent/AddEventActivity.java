@@ -35,8 +35,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import dagger.android.AndroidInjection;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
 /**
@@ -44,6 +42,46 @@ import io.reactivex.observers.DisposableObserver;
  */
 
 public class AddEventActivity extends BaseActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+
+    @BindView(R.id.activity_add_event_from_date_text)
+    TextView fromDateText;
+    @BindView(R.id.activity_add_event_to_date_text)
+    TextView toDateText;
+    @BindView(R.id.activity_add_event_description)
+    EditText description;
+    @BindView(R.id.activity_add_event_summary)
+    EditText summary;
+    @BindView(R.id.activity_add_event_location)
+    EditText location;
+    @Inject
+    ViewModelFactory viewModelFactory;
+    @Inject
+    ValidationHelper validationHelper;
+    @Inject
+    DisposableManager disposableManager;
+    @Inject
+    AddEventUseCase addEventUseCase;
+    @Inject
+    DomainEventToEventModelMapper domainEventToEventModelMapper;
+    private DateTime temp;
+    private DateTime from = new DateTime();
+    private DateTime to = from.plusHours(1);
+    private AddEventViewModel addEventViewModel;
+    private int eventType;
+    private String pickerType;
+    private ActivityAddEventBinding binding;
+
+    /**
+     * Creates an Intent that can be used to navigate to this Activity
+     *
+     * @param context
+     * @return Intent to navigate to this Activity
+     */
+    public static Intent getCallingIntent(Context context, int eventType) {
+        Intent intent = new Intent(context, AddEventActivity.class);
+        intent.putExtra(Constants.INTENT_EVENT_TYPE, eventType);
+        return intent;
+    }
 
     @OnClick(R.id.activity_add_event_from_date_button)
     public void fromClick() {
@@ -65,44 +103,6 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
     public void submit() {
         addEvent();
     }
-
-    @BindView(R.id.activity_add_event_from_date_text)
-    TextView fromDateText;
-
-    @BindView(R.id.activity_add_event_to_date_text)
-    TextView toDateText;
-
-    @BindView(R.id.activity_add_event_description)
-    EditText description;
-
-    @BindView(R.id.activity_add_event_summary)
-    EditText summary;
-
-    @BindView(R.id.activity_add_event_location)
-    EditText location;
-
-    @Inject
-    ViewModelFactory viewModelFactory;
-
-    @Inject
-    ValidationHelper validationHelper;
-
-    @Inject
-    DisposableManager disposableManager;
-
-    @Inject
-    AddEventUseCase addEventUseCase;
-
-    @Inject
-    DomainEventToEventModelMapper domainEventToEventModelMapper;
-
-    private DateTime temp;
-    private DateTime from = new DateTime();
-    private DateTime to = from.plusHours(1);
-    private AddEventViewModel addEventViewModel;
-    private int eventType;
-    private String pickerType;
-    private ActivityAddEventBinding binding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -131,18 +131,6 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
         }
 
         ButterKnife.bind(this);
-    }
-
-    /**
-     * Creates an Intent that can be used to navigate to this Activity
-     *
-     * @param context
-     * @return Intent to navigate to this Activity
-     */
-    public static Intent getCallingIntent(Context context, int eventType) {
-        Intent intent = new Intent(context, AddEventActivity.class);
-        intent.putExtra(Constants.INTENT_EVENT_TYPE, eventType);
-        return intent;
     }
 
     private void addEvent() {

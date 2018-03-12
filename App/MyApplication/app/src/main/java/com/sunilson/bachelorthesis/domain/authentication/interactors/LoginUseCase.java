@@ -28,17 +28,12 @@ public class LoginUseCase extends AbstractUseCase<Boolean, LoginUseCase.Params> 
 
     @Override
     protected Observable<Boolean> buildUseCaseObservable(Params params) {
-        return authenticationRepository.signIn(new DomainLoginData(params.name, params.password)).map(new Function<UserEntity, Boolean>() {
-            @Override
-            public Boolean apply(UserEntity userEntity) throws Exception {
-
-                if(userEntity == null) {
-                    return false;
-                }
-
-                applicationDatabase.applicationDao().addUser(userEntity);
-                return true;
+        return authenticationRepository.signIn(new DomainLoginData(params.name, params.password)).map(userEntity -> {
+            if(userEntity == null) {
+                return false;
             }
+            applicationDatabase.applicationDao().addUser(userEntity);
+            return true;
         });
     }
 

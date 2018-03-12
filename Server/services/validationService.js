@@ -10,10 +10,8 @@ var AccountActivationTemplate = require("../mail-templates/en/account-activation
 var tokenService = module.exports = {};
 
 tokenService.sendVerification = function (id, email) {
-
     return new Promise((resolve, reject) => {
-        var token = randtoken.generate(24);
-
+        const token = randtoken.generate(24);
         new ValidationTokenModel({
             userID: id,
             validationToken: token
@@ -29,4 +27,13 @@ tokenService.sendVerification = function (id, email) {
             });
         });
     });
+}
+
+tokenService.generateAmazonCode = async function (id) {
+    const token = randtoken.generate(24);
+    await new ValidationTokenModel({
+        userID: id,
+        validationToken: token
+    }).save()
+    return token
 }

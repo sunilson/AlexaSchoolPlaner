@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <link rel="icon" href="images/favicon.png">
+</head>
+
+<body>
+
+    <ul>
+        <li>{{=it.error}}</li><br><br>
+        <li>{{=it.state}}</li><br><br>
+        <li>{{=it.redirect_uri}}</li>
+    </ul>
+
+    <div class="row">
+        <form class="col s12" action="/auth/alexaLoginPage" method="post">
+            <h2>Schulplaner Login</h2>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="text" name="name" type="text" class="validate">
+                    <label for="email">Email or username</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input id="password" name="password" type="password" class="validate">
+                    <label for="password">Password</label>
+                </div>
+            </div>
+            <input type="hidden" name="state" value="{{=it.state}}" />
+            <input type="hidden" name="redirect_uri" value="{{=it.redirect_uri}}" />
+            <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+            </button>
+        </form>
+    </div>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</body>
+
+</html>

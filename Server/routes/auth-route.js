@@ -1,85 +1,118 @@
-var express = require('express');
-var router = express.Router();
-var ObjectOperations = require("../utils/objectOperations");
-var UserModel = require("../data/models/userModel");
-var express = require('express');
-var router = express.Router();
-var jwt = require("jsonwebtoken");
-var cfg = require("../config.js");
-var mongoose = require("mongoose");
-var tokenService = require("../services/tokenService");
-var refreshTokenModel = require("../data/models/refreshTokenModel");
-var passwordHash = require("password-hash");
-var validator = require("validator");
-var GoogleAuth = require('google-auth-library');
-var auth = new GoogleAuth;
-var client = new auth.OAuth2(cfg.googleAuthClientId, '', '');
-var userService = require("../services/userService");
-var tokenService = require("../services/tokenService");
-var UserVariables = require("../variables/UserVariables");
-var ObjectOperations = require("../utils/objectOperations");
-var validationService = require("../services/validationService");
+const UserModel = require("../data/models/userModel");
+const express = require('express');
+const router = express.Router();
+const jwt = require("jsonwebtoken");
+const cfg = require("../config.js");
+const mongoose = require("mongoose");
+const refreshTokenModel = require("../data/models/refreshTokenModel");
+const passwordHash = require("password-hash");
+const validator = require("validator");
+const GoogleAuth = require('google-auth-library');
+const auth = new GoogleAuth;
+const client = new auth.OAuth2(cfg.googleAuthClientId, '', '');
+const userService = require("../services/userService");
+const tokenService = require("../services/tokenService");
+const UserVariables = require("../variables/UserVariables");
+const ObjectOperations = require("../utils/objectOperations");
+const validationService = require("../services/validationService");
+const randtoken = require("rand-token");
+const dots = require("dot").process({
+    path: "./views"
+});
+var ValidationTokenModel = require("../data/models/validationTokenModel")
+
 
 //Route for new access token
-router.get('/refreshToken', function (req, res) {
-    //Get data from request
-    var refreshToken = req.query.refreshToken;
-    if (!refreshToken) {
-        return res.sendStatus(400);
-    }
 
-    //Get token from database
-    refreshTokenModel.findOne({
-        refreshToken: refreshToken
-    }).lean().exec((err, token) => {
-        if (err) throw err;
+router.get('/alexaLoginPage', (req, res, next) => {
+    res.send(dots.loginPage({
+        state: req.query.state,
+        redirect_uri: req.query.redirect_uri
+    }));
+});
 
-        //Check if token is valid and not expired
-        if (!token) {
+router.post('/alexaLoginPage', (req, res, next) => {
+
+    const name = req.body.name
+    const password = req.body.password
+    const state = req.body.state
+    const redirect_uri = req.body.redirect_uri
+
+    UserModel.findOne((validator.isEmail(name)) ? {
+        email: name
+    } : {
+        username: name
+    }).lean().exec().then(result => {
+        if (checkLoginData(result, password)) {
+            return validationService.generateAmazonCode(result._id);
+        } else {
+            throw new Error("Invalid data")
+        };
+    }).then(amazonToken => {
+        res.writeHead(302, {
+            'Location': `${redirect_uri}?state=${state}&code=${amazonToken}`
+        });
+        res.end();
+    }).catch(e => {
+        return res.status(401).send(dots.loginPage({
+            state: state,
+            redirect_uri: redirect_uri,
+            error: "Invalid data!"
+        }));
+    })
+});
+
+//Route used for authentication with Access and Refresh tokens
+router.post('/', (req, res, next) => {
+    //Check if request comes from alexa service
+    if (req.body.grant_type === "authorization_code" && req.body.code) {
+        //Check if given code is valid
+        ValidationTokenModel.findOne({
+            validationToken: req.body.code
+        }).lean().exec().then(result => {
+            //Generate access and refresh token
+            return tokenService.generateTokens(result.userID, null)
+        }).then(tokens => {
+            //Return tokens to alexa service
+            res.status(200).json(tokens)
+        }).catch(e => {
+            next(e)
+        })
+    } else if (req.body.refresh_token) {
+        //Get data from request
+        const refreshToken = req.body.refresh_token;
+        if (!refreshToken) {
             return res.sendStatus(400);
         }
 
-        //Check if refresh token is valid and not expired
-        jwt.verify(token.refreshToken, cfg.jwtRefreshSecret, (error, decoded) => {
-            if (error) {
-                res.sendStatus(401);
-            } else {
-                var userId = decoded.id;
-                var accessToken = tokenService.generateToken(userId);
-                res.status(200).json(accessToken);
-            }
-        });
-    });
-});
-
-//Login route
-router.post('/login', function (req, res, next) {
-
-    let user = ObjectOperations.trimObject(req.body);
-    console.log(user);
-
-    //Compare request data with database and retrieve user object
-    if (validator.isEmail(user.name)) {
-        UserModel.findOne({
-            email: user.name
-        }).lean().exec((error, result) => {
-            if (error) return next(error);
-            checkLoginData(result, user.password, res, next);
-        });
+        //Check if refresh token is valid
+        tokenService.checkRefreshToken(refreshToken).then(userId => {
+            return tokenService.generateTokens(userId, refreshToken)
+        }).then(tokens => {
+            res.send(tokens);
+        }).catch(e => {
+            next(e)
+        })
     } else {
-        UserModel.findOne({
+        let user = ObjectOperations.trimObject(req.body);
+        //Compare request data with database and retrieve user object
+        UserModel.findOne((validator.isEmail(user.name)) ? {
+            email: user.name
+        } : {
             username: user.name
         }).lean().exec((error, result) => {
             if (error) return next(error);
-            checkLoginData(result, user.password, res, next);
-        });
+            checkLoginDataAndReturnUser(result, user.password, res, next);
+        })
     }
 });
 
+/**
+ * Route for registering a new user
+ */
 router.post('/register', function (req, res, next) {
 
     var parsedUser = ObjectOperations.trimObject(req.body);
-    console.log(parsedUser);
 
     var results = {}
     //Validate and save data to database
@@ -87,34 +120,20 @@ router.post('/register', function (req, res, next) {
         //User was succesfully inserted
         //Generate fresh tokens so user can login immediately
         results.user = user;
-        return tokenService.generateTokens(user.id);
+        return tokenService.generateTokens(user.id, null);
     }).then((tokens) => {
         //Send verification mail to new user
         results.tokens = tokens;
         //return validationService.sendVerification(results.user.id, results.user.email);
     }).then((validationResult) => {
         //Return login tokens to the requester
-        console.log({
-            user: {
-                id: results.user.id,
-                username: results.user.username,
-                email: results.user.email
-            },
-            tokens: {
-                accessToken: results.tokens.accessToken,
-                refreshToken: results.tokens.refreshToken
-            }
-        });
         return res.status(201).json({
             user: {
                 id: results.user.id,
                 username: results.user.username,
                 email: results.user.email
             },
-            tokens: {
-                accessToken: results.tokens.accessToken,
-                refreshToken: results.tokens.refreshToken
-            }
+            tokens: result.tokens
         });
     }).catch((err) => {
         //If user can't be saved, give error to error handler
@@ -168,12 +187,19 @@ router.post('/verify', function (req, res, next) {
 
 
 //Check if login data is correct and return access/refresh tokens and the user details
-function checkLoginData(user, password, res, next) {
+function checkLoginData(user, password) {
     if (user && user.type === UserVariables.type.standard && passwordHash.verify(password, user.password)) {
-        //Generate fresh tokens
-        tokenService.generateTokens(user._id).then((tokens) => {
-            //Return the tokens to the requester
+        return true
+    }
 
+    return false
+}
+
+function checkLoginDataAndReturnUser(user, password, res, next) {
+    if (checkLoginData(user, password)) {
+        //Generate fresh tokens
+        tokenService.generateTokens(user._id, null).then((tokens) => {
+            //Return the tokens to the requester
             const tempUser = {
                 id: user._id,
                 username: user.username,
@@ -181,10 +207,7 @@ function checkLoginData(user, password, res, next) {
             }
             if (user.icalurl) tempUser["icalurl"] = user.icalurl
             res.json({
-                tokens: {
-                    accessToken: tokens.accessToken,
-                    refreshToken: tokens.refreshToken
-                },
+                tokens: tokens,
                 user: tempUser
             });
         }).catch((error) => {

@@ -37,15 +37,11 @@ public class TokenAuthenticator implements Authenticator {
             return null;
         }
 
-        //TODO CHECKEN OB ACCESS TOKEN ÜBERHAUPT NOCH GÜLTIG IST?
-
         //Refresh the current access token
         String accessToken = refreshLoginUseCaseLazy.get().execute(null).blockingFirst();
 
         //If refresh was successful set the header of the previous request, otherwise log out
         if(accessToken != null && !accessToken.isEmpty()) {
-            //TODO Store access token?
-
             return response.request().newBuilder().header("Authorization", "Bearer " + accessToken).build();
         } else {
             return null;

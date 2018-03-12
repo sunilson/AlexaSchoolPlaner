@@ -23,6 +23,8 @@ import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.domain.authentication.interactors.CheckLoginStatusUseCase;
+import com.sunilson.bachelorthesis.domain.authentication.interactors.GetCurrentUser;
+import com.sunilson.bachelorthesis.domain.authentication.model.DomainUser;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.CalendarViewModel;
 import com.sunilson.bachelorthesis.presentation.homepage.calendar.HomepageFragmentCalendar;
 import com.sunilson.bachelorthesis.presentation.homepage.utilities.HomepageCalendarHelper;
@@ -44,6 +46,8 @@ import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 
 /**
@@ -79,6 +83,10 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
 
     @Inject
     CheckLoginStatusUseCase checkLoginStatusUseCase;
+
+
+    @Inject
+    GetCurrentUser getCurrentUser;
 
     CalendarViewModel calendarViewModel;
 
@@ -172,12 +180,28 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
                 Navigator.navigateToSettings(this);
                 return true;
             case R.id.menu_homepage_checkLogin:
-                checkLoginStatusUseCase.execute(null).doFinally(new Action() {
+                getCurrentUser.execute(null).subscribeWith(new Observer<DomainUser>() {
                     @Override
-                    public void run() throws Exception {
-                        Log.d("Linus", "Complete!");
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(DomainUser domainUser) {
+                        Log.d("Linus", domainUser.getEmail());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
                     }
                 });
+                //checkLoginStatusUseCase.execute(null).doFinally(() -> Log.d("Linus", "Complete!"));
                 return true;
         }
 

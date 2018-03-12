@@ -38,12 +38,9 @@ public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
                 //If a userEntity has been found, check if the access token is still valid
                 if (userEntity != null) {
                     String accessToken = userEntity.getTokens().getAccessToken();
-                    JWT jwt = new JWT(accessToken);
-                    if (jwt.getExpiresAt().getTime() > new Date().getTime() + 300000) {
-                        return accessToken;
-                    } else {
-                        return null;
-                    }
+                    //JWT jwt = new JWT(accessToken);
+                    //if (jwt.getExpiresAt().getTime() > new Date().getTime() + 300000) {
+                    return accessToken;
                 }
                 throw  new NoUserFoundException("No UserEntity defined");
             }

@@ -11,15 +11,29 @@ import lombok.Setter;
  */
 
 public class Tokens {
+
     @Getter
     @Setter
-    @SerializedName("accessToken")
+    @SerializedName("token_type")
+    @Expose
+    private String tokenType;
+
+    @Getter
+    @Setter
+    @SerializedName("access_token")
     @Expose
     private String accessToken;
 
     @Getter
     @Setter
-    @SerializedName("refreshToken")
+    @SerializedName("refresh_token")
     @Expose
     private String refreshToken;
+
+    @Getter
+    @Setter
+    @SerializedName("expires_in")
+    @Expose
+    private Long expiresIn;
+
 }

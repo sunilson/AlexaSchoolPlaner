@@ -1,5 +1,4 @@
 var jwt = require("jsonwebtoken");
-var randtoken = require("rand-token");
 var refreshTokenModel = require("../data/models/refreshTokenModel");
 var cfg = require("../config.js");
 var UserVariables = require("../variables/UserVariables");
@@ -17,40 +16,58 @@ tokenService.generateToken = function (id) {
     });
 }
 
-tokenService.generateTokens = function (id) {
-    return new Promise((resolve, reject) => {
-        if (id) {
-            //Payload of access token
-            var payload = {
-                id: id
-            };
+tokenService.checkRefreshToken = async function (token) {
+    const tokenResult = await refreshTokenModel.findOne({
+        refreshToken: token
+    }).lean().exec()
 
-            //Generate new access token
-            var accessToken = jwt.sign(payload, cfg.jwtSecret, {
-                expiresIn: UserVariables.auth.accessExpire
-            });
+    //Check if token is valid and not expired
+    if (!tokenResult) {
+        const error = new Error("No token found")
+        error.status = 400
+        throw error
+    }
 
-            //Generate new refresh token
-            var refreshToken = jwt.sign(payload, cfg.jwtRefreshSecret, {
-                expiresIn: UserVariables.auth.refreshExpire
-            });
+    //Check if refresh token is valid and not expired
+    const payload = jwt.verify(tokenResult.refreshToken, cfg.jwtRefreshSecret)
+    return payload.id
+}
 
-            //Store refresh token in database with user id and expiration date
-            new refreshTokenModel({
-                userID: id,
-                refreshToken: refreshToken
-            }).save((err, result) => {
-                if (err) reject(err);
-                resolve({
-                    accessToken: accessToken,
-                    refreshToken: refreshToken
-                });
-            });
-        } else {
-            reject({
-                message: "User ID was empty!",
-                status: 400
-            });
-        }
+/**
+ * Creates a pair of access and refresh tokens from a user ID
+ * 
+ * @param id User id of author
+ * @param refreshToken If an existing refreshToken should be used
+ */
+tokenService.generateTokens = async function (id, refreshToken) {
+
+    if (!id) throw new Error("User ID was empty")
+
+    const payload = {
+        id: id
+    };
+
+    //Generate new access token
+    const accessToken = jwt.sign(payload, cfg.jwtSecret, {
+        expiresIn: UserVariables.auth.accessExpire
     });
+
+    if (refreshToken == null) {
+        //Generate new refresh token
+        refreshToken = jwt.sign(payload, cfg.jwtRefreshSecret, {
+            expiresIn: UserVariables.auth.refreshExpire
+        });
+        //Store refresh token in database with user id and expiration date
+        await new refreshTokenModel({
+            userID: id,
+            refreshToken: refreshToken
+        }).save()
+    }
+
+    return {
+        access_token: accessToken,
+        token_type: "bearer",
+        expires_in: UserVariables.auth.accessExpire,
+        refresh_token: refreshToken
+    }
 }

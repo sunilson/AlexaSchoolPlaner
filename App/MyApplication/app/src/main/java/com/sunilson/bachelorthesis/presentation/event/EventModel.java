@@ -4,7 +4,6 @@ import com.sunilson.bachelorthesis.presentation.shared.utilities.DateUtilities;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,6 +57,16 @@ public class EventModel {
     @Setter
     @NonNull
     private EventType eventType;
+
+    public EventModel(EventModel eventModel) {
+        this.from = eventModel.from;
+        this.to = eventModel.to;
+        this.description = eventModel.description;
+        this.id = eventModel.id;
+        this.summary = eventModel.summary;
+        this.location = eventModel.location;
+        this.eventType = eventModel.eventType;
+    }
 
     public String formatDateTime() {
         String result = "Am " + DateTimeFormat.forPattern("dd.MM.yyyy").print(from) + " um " + DateTimeFormat.forPattern("HH:mm").print(from);

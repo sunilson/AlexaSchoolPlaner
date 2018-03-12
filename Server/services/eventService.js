@@ -100,6 +100,11 @@ function saveIcalEvents(events, userId, index, icaltype) {
     })
 }
 
+/**
+ * Extracts a string from an ical element
+ * 
+ * @param element ical element
+ */
 function extractStringFromIcal(element) {
     let result = null;
 
@@ -112,6 +117,12 @@ function extractStringFromIcal(element) {
     return result;
 }
 
+/**
+ * Creates a new event in the database
+ * 
+ * @param event The event to be saved  
+ * @param userId  The event author
+ */
 eventService.saveEvent = (event, userId) => {
 
     return new Promise((resolve, reject) => {
