@@ -25,11 +25,9 @@ router.post('/import', (req, res, next) => {
         });
     }
 
-    const userDoc = userModel.findById(user._id);
+    const userDoc = userModel.findById(user._id)
 
-    if (userDoc.icalurl === url) {
-        return res.sendStatus(200);
-    }
+    if (userDoc.icalurl === url) return res.sendStatus(200)
 
     //Add url to user object
     userDoc.update({
@@ -50,18 +48,12 @@ router.post('/import', (req, res, next) => {
     });
 });
 
-router.delete('/removeImport', (req, res, next) => {
-    const user = req.user;
-});
-
-router.get('/executeSingleImport', (req, res, next) => {
-
-});
-
+//Updates iCal imports for all users
 router.get('/executeImports', (req, res, next) => {
 
     const token = req.query.token;
 
+    //Check if authorized
     if (token !== cfg.importToken) {
         return res.sendStatus(401);
     }
@@ -72,6 +64,7 @@ router.get('/executeImports', (req, res, next) => {
             $ne: null
         }
     }).lean().exec().then(result => {
+        //Do import for evvery user
         for (let i = 0; i < result.length; i++) {
             eventService.executeImport(result[i].icalurl, result[i]._id, algoliaEventIndex, result.icaltype);
         }
@@ -182,10 +175,12 @@ router.get('/nextEvent', (req, res, next) => {
         });
     }
 
+    //Filter for event type
     if (req.query.type) {
         query.filters += " AND type = " + req.query.type;
     }
 
+    //Filter for specific location or general search term
     if (req.query.location) {
         query["query"] = req.query.location
         query["restrictSearchableAttributes"] = [
@@ -209,17 +204,14 @@ router.get('/nextEvent', (req, res, next) => {
             //Only return events that start at the exact same time
             const result = []
             for (let i = 0; i < content.hits.length; i++) {
-                if (i == 0) {
-                    result.push(content.hits[i])
-                } else {
-                    if (content.hits[0].from == content.hits[i].from) {
-                        result.push(content.hits[i]);
-                    } else {
-                        i = content.hits.length;
-                    }
+                if (i == 0) result.push(content.hits[i])
+                else {
+                    if (content.hits[0].from == content.hits[i].from) result.push(content.hits[i]);
+                    else i = content.hits.length;
                 }
             }
 
+            //Rename id 
             result.forEach(element => {
                 element["id"] = element["eventID"];
                 delete element["eventID"];
@@ -229,6 +221,7 @@ router.get('/nextEvent', (req, res, next) => {
         });
 });
 
+//Getting a single event by id
 router.get('/:id', (req, res, next) => {
 
     //Get user from authentication
@@ -245,26 +238,21 @@ router.get('/:id', (req, res, next) => {
             status: 400,
             message: "Nothing found!"
         });
-    }).catch((e) => {
-        next(e);
-    });
+    }).catch(e => next(e));
 });
 
+//Gettings multiple events in a specific time range of a specific type
 router.get('/', (req, res, next) => {
-    let from = parseInt(req.query.from);
-    let to = parseInt(req.query.to);
-    const type = parseInt(req.query.type);
-    const user = req.user;
+    let from = parseInt(req.query.from)
+    let to = parseInt(req.query.to)
+    const type = parseInt(req.query.type)
+    const user = req.user
 
-    if (!from || !Number.isInteger(from)) {
-        from = moment().startOf('day').valueOf();
-    }
+    //Check if start and end values are set, if not, set them to today
+    if (!from || !Number.isInteger(from)) from = moment().startOf('day').valueOf()
+    if (!to || !Number.isInteger(to)) to = moment(from).add(1, 'days').valueOf()
 
-    if (!to || !Number.isInteger(to)) {
-        to = moment(from).add(1, 'days').valueOf();
-    }
-
-    var searchOptions = {
+    const searchOptions = {
         author: user._id,
         from: {
             $lt: new Date(to)
@@ -274,15 +262,14 @@ router.get('/', (req, res, next) => {
         }
     }
 
-    if (type) {
-        searchOptions["type"] = type;
-    }
+    //Limit to specific event type
+    if (type) searchOptions["type"] = type
 
-    eventModel.find(searchOptions).lean().exec().then((result) => {
+    eventModel.find(searchOptions).lean().exec().then(result => {
         res.status(200).json(result);
-    }).catch((error) => {
+    }).catch(error => {
         next(error);
     });
 });
 
-module.exports = router;
+module.exports = router

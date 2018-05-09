@@ -5,7 +5,6 @@ const HOME_URL = "https://bachelorthesis17.herokuapp.com"
 const request = require('request-promise-native');
 const moment = require("moment");
 const APP_ID = 'amzn1.ask.skill.db109c0a-8afb-4112-a995-8efc6c392dab'
-const currentAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhMTAzZTY5OWMwNDEyNGQyODEzNjkzYSIsImlhdCI6MTUxODcwODE5MiwiZXhwIjoxNjA1MTA4MTkyfQ.SPoZfImr2EYtLEY5bn0YW1tQocuLhSr5eqk92C0pjKY"
 const AmazonDateParser = require('amazon-date-parser');
 
 const states = {
@@ -112,11 +111,12 @@ const languageStrings = {
 
 const newSessionHandlers = {
     'LaunchRequest': function () {
-
-        //Ask for user login if no token is here
-        this.emit(':tellWithLinkAccountCard',
-            'to start using this skill, please use the companion app to authenticate on Amazon');
-        return;
+        if (!this.event.session.user.accessToken) {
+            //Ask for user login if no token is here
+            this.emit(':tellWithLinkAccountCard',
+                'Um diesen Skill zu verwenden müssen Sie sich mit Ihrem Schulplaner Account einloggen. Bitte verwenden Sie dazu die Alexa App. Sie sollten dort eine Aufforderung sehen.');
+            return;
+        }
 
         this.handler.state = states.DEFAULTMODE;
         this.emit(":ask", "Willkommen zu " + this.t("SKILL_NAME") + ". Was möchtest du tun?");
@@ -144,7 +144,7 @@ const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
             dates = extractDateRange(this.event.request.intent.slots)
         }
         let time = null
-        if (this.event.request.intent.slots.Time) {
+        if (this.event.request.intent.slots.Time.value) {
             time = extractTime(this.event.request.intent.slots)
             if (dates) {
                 const date1 = moment(dates[0])
@@ -229,7 +229,7 @@ const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
             uri: HOME_URL + "/events?from=" + extractedDates[0].valueOf() + "&to=" + extractedDates[1].valueOf() + ((type != "Event") ? ("&type=" + eventTypes[type]) : ""),
             headers: {
                 'User-Agent': 'Request-Promise',
-                Authorization: 'Bearer ' + currentAccessToken
+                Authorization: 'Bearer ' + this.event.session.user.accessToken
             },
             json: true // Automatically parses the JSON string in the response
         };
@@ -332,7 +332,7 @@ const nextEventHandlers = Alexa.CreateStateHandler(states.NEXTEVENTMODE, {
         //TODO Max Date UND Query
 
         //Create network request
-        simpleEventNetworkRequest(HOME_URL + "/events/nextEvent?date=" + date + excluded + location + "&limit=" + this.attributes["limit"] + ((type != "Event") ? ("&type=" + eventTypes[type]) : "")).then((response) => {
+        simpleEventNetworkRequest(HOME_URL + "/events/nextEvent?date=" + date + excluded + location + "&limit=" + this.attributes["limit"] + ((type != "Event") ? ("&type=" + eventTypes[type]) : ""), this.event.session.user.accessToken).then((response) => {
             //Check if results have been found
             if (!response || response.length == 0) {
                 //Check if event time was limited
@@ -711,12 +711,12 @@ function validEventType(type) {
     return false
 }
 
-function simpleEventNetworkRequest(uri) {
+function simpleEventNetworkRequest(uri, accessToken) {
     const options = {
         uri: uri,
         headers: {
             'User-Agent': 'Request-Promise',
-            Authorization: 'Bearer ' + currentAccessToken
+            Authorization: 'Bearer ' + accessToken
         },
         json: true // Automatically parses the JSON string in the response
     };

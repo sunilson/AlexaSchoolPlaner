@@ -14,7 +14,7 @@ var descriptionValidator = [
 
 var typeValidator = [
     validate({
-        validator: (val) => {
+        validator: val => {
             return Number.isInteger(val) && val <= eventVariables.types.deadline && val >= eventVariables.types.schoolAppointment;
         },
         message: 'Type is invalid!'
@@ -102,3 +102,27 @@ var eventSchema = new mongoose.Schema({
 });
 
 module.exports = eventSchema;
+
+//Apply text search query and restrict to specific properties
+query["query"] = textSearchQuery
+query["restrictSearchableAttributes"] = [
+    'summary',
+    'description'
+]
+
+//Filter for a specific date range, event type and  event author
+query["filters"] = "from >= " + date + " AND from <= " + (date + 3600000)
+query["filters"] += " AND author:" + user._id
+query["filters"] += " AND type = " + eventType
+
+//Exclude specific events from the results
+excluded.forEach(id => {
+    query["filters"] += " AND NOT eventID:" + id
+})
+
+query["hitsPerPage"] = 5;
+
+//Execute the search
+algoliaEventIndex.search(query, (err, content) => {
+    //...
+})

@@ -43,17 +43,16 @@ router.post('/alexaLoginPage', (req, res, next) => {
     } : {
         username: name
     }).lean().exec().then(result => {
-        if (checkLoginData(result, password)) {
-            return validationService.generateAmazonCode(result._id);
-        } else {
-            throw new Error("Invalid data")
-        };
+        if (checkLoginData(result, password)) return validationService.generateAmazonCode(result._id)
+        else throw new Error("Invalid data")
     }).then(amazonToken => {
+        //Form data was correct, redirect to given URL
         res.writeHead(302, {
             'Location': `${redirect_uri}?state=${state}&code=${amazonToken}`
         });
         res.end();
     }).catch(e => {
+        //Form data was invalid, render form again
         return res.status(401).send(dots.loginPage({
             state: state,
             redirect_uri: redirect_uri,
@@ -66,6 +65,7 @@ router.post('/alexaLoginPage', (req, res, next) => {
 router.post('/', (req, res, next) => {
     //Check if request comes from alexa service
     if (req.body.grant_type === "authorization_code" && req.body.code) {
+        //TODO: Check if client id is correct and request is from Amazon
         //Check if given code is valid
         ValidationTokenModel.findOne({
             validationToken: req.body.code
@@ -75,10 +75,8 @@ router.post('/', (req, res, next) => {
         }).then(tokens => {
             //Return tokens to alexa service
             res.status(200).json(tokens)
-        }).catch(e => {
-            next(e)
-        })
-    } else if (req.body.refresh_token) {
+        }).catch(e => next(e))
+    } else if (req.body.grant_type === "refresh_token" || req.body.refresh_token) {
         //Get data from request
         const refreshToken = req.body.refresh_token;
         if (!refreshToken) {
@@ -135,7 +133,7 @@ router.post('/register', function (req, res, next) {
             },
             tokens: result.tokens
         });
-    }).catch((err) => {
+    }).catch(err => {
         //If user can't be saved, give error to error handler
         return next(err);
     });
@@ -188,13 +186,11 @@ router.post('/verify', function (req, res, next) {
 
 //Check if login data is correct and return access/refresh tokens and the user details
 function checkLoginData(user, password) {
-    if (user && user.type === UserVariables.type.standard && passwordHash.verify(password, user.password)) {
-        return true
-    }
-
+    if (user && user.type === UserVariables.type.standard && passwordHash.verify(password, user.password)) return true
     return false
 }
 
+//Checks login data, generates tokens for the user and returns the user 
 function checkLoginDataAndReturnUser(user, password, res, next) {
     if (checkLoginData(user, password)) {
         //Generate fresh tokens
@@ -210,12 +206,8 @@ function checkLoginDataAndReturnUser(user, password, res, next) {
                 tokens: tokens,
                 user: tempUser
             });
-        }).catch((error) => {
-            return next(error);
-        });
-    } else {
-        res.sendStatus(401);
-    }
+        }).catch(error => next(error));
+    } else res.sendStatus(401)
 }
 
 module.exports = router;

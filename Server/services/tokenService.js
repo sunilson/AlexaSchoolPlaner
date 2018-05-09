@@ -4,6 +4,7 @@ var cfg = require("../config.js");
 var UserVariables = require("../variables/UserVariables");
 var tokenService = module.exports = {};
 
+//Generate a JWT Token and pass given id as payload
 tokenService.generateToken = function (id) {
     //Payload of access token
     var payload = {
@@ -16,6 +17,7 @@ tokenService.generateToken = function (id) {
     });
 }
 
+//Check in database if a given refresh token is valid and not expired
 tokenService.checkRefreshToken = async function (token) {
     const tokenResult = await refreshTokenModel.findOne({
         refreshToken: token

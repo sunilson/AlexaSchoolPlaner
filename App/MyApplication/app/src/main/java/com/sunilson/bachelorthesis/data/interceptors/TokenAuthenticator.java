@@ -33,7 +33,7 @@ public class TokenAuthenticator implements Authenticator {
     @Override
     public Request authenticate(Route route, Response response) throws IOException {
         //Don't handle auth requests, because the user doesn't have to already be authenticated for them
-        if(response.request().url().toString().startsWith(Constants.HOME_URL + "auth")) {
+        if (response.request().url().toString().startsWith(Constants.HOME_URL + "auth")) {
             return null;
         }
 
@@ -41,10 +41,32 @@ public class TokenAuthenticator implements Authenticator {
         String accessToken = refreshLoginUseCaseLazy.get().execute(null).blockingFirst();
 
         //If refresh was successful set the header of the previous request, otherwise log out
-        if(accessToken != null && !accessToken.isEmpty()) {
+        if (accessToken != null && !accessToken.isEmpty()) {
             return response.request().newBuilder().header("Authorization", "Bearer " + accessToken).build();
         } else {
             return null;
         }
+    }
+}
+
+@Nullable
+@Override
+public Request authenticate(Route route, Response response) throws IOException {
+    //Don't handle auth requests, because the user doesn't have to already be authenticated for them
+    if (response.request().url().toString()
+            .startsWith(Constants.HOME_URL + "auth")) {
+        return null;
+    }
+
+    //Refresh the current access token
+    String accessToken = refreshLoginUseCaseLazy
+            .get().execute(null).blockingFirst();
+
+    //If refresh was successful set the header of the previous request, otherwise log out
+    if (accessToken != null && !accessToken.isEmpty()) {
+        return response.request().newBuilder()
+                .header("Authorization", "Bearer " + accessToken).build();
+    } else {
+        return null;
     }
 }

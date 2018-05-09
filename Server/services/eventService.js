@@ -6,26 +6,20 @@ const Transaction = require('mongoose-transactions');
 const mongoose = require('mongoose')
 var ical = require('ical')
 
+//Imports all events from a specific URL
 eventService.executeImport = (url, userId, index, icaltype) => {
     return new Promise((resolve, reject) => {
         const options = {};
-        ical.fromURL(url, options, (err, data) => {
-            if (err) {
-                reject("Invalid request");
-            }
 
-            if (data) {
-                //Store new ones to database
-                saveIcalEvents(data, userId, index, icaltype).then(() => {
-                    resolve();
-                }).catch(e => {
-                    reject(e);
-                });
-            }
+        //Get .ics file and parse it
+        ical.fromURL(url, options, (err, data) => {
+            if (err) reject("Invalid request");
+            if (data) saveIcalEvents(data, userId, index, icaltype).then(() => resolve()).catch(e => reject(e))
         });
     });
 }
 
+//Creates events in the database from an .ics file
 function saveIcalEvents(events, userId, index, icaltype) {
     return new Promise((resolve, reject) => {
         async function start() {
@@ -108,11 +102,8 @@ function saveIcalEvents(events, userId, index, icaltype) {
 function extractStringFromIcal(element) {
     let result = null;
 
-    if (typeof (element) == "string") {
-        result = element;
-    } else if (element && element.val) {
-        result = element.val;
-    }
+    if (typeof (element) == "string") result = element;
+    else if (element && element.val) result = element.val
 
     return result;
 }
@@ -148,21 +139,15 @@ eventService.saveEvent = (event, userId) => {
 
         //If event is a deadline, offset to date by 1 hour
         //Also if to Date is smaller than the from date offset it
-        if ((event.type && event.type === eventVariables.types.deadline) || (event.from.getTime() > event.to)) {
-            event.to = new Date(event.from.getTime() + eventVariables.dates.deadlineOffset);
-        } else {
-            event.to = new Date(event.to);
-        }
+        if ((event.type && event.type === eventVariables.types.deadline) || (event.from.getTime() > event.to)) event.to = new Date(event.from.getTime() + eventVariables.dates.deadlineOffset)
+        else event.to = new Date(event.to);
 
         //Add author
         event.author = userId;
-
         event._id = new mongoose.Types.ObjectId().toString()
 
         new eventModel(event).save().then((result) => {
-            resolve(result);
-        }).catch((error) => {
-            reject(error);
-        });
+            resolve(result)
+        }).catch(error => reject(error))
     });
 }

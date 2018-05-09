@@ -15,14 +15,11 @@ userService.saveUser = (user) => {
                     status: 400
                 });
             }
-        } else if (user.type !== UserVariables.type.standard) {
-            user.username = user.type.charAt(0) + "." + formatSocialUsername();
-        }
+        } else if (user.type !== UserVariables.type.standard) user.username = user.type.charAt(0) + "." + formatSocialUsername()
+
 
         //Check if "activated" field is set. If yes, remove it to prevent the user to set this himself
-        if (user.activated) {
-            delete user.activated;
-        }
+        if (user.activated) delete user.activated
 
         //Check if username and email are unique
         Promise.all([checkUniqueValue(user.email, "email"), checkUniqueValue(user.username, "username")]).then((result) => {
@@ -31,10 +28,7 @@ userService.saveUser = (user) => {
                 if (err) reject(err);
                 resolve(result);
             });
-        }).catch((err) => {
-            //Username or email are not unique
-            reject(err);
-        });
+        }).catch(err => reject(err))
     });
 }
 
@@ -54,9 +48,7 @@ function checkUniqueValue(value, key) {
                     status: 400,
                     message: "Username or Email already exists!"
                 });
-            } else {
-                resolve();
-            }
+            } else resolve()
         });
     });
 }

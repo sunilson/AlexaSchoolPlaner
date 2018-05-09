@@ -9,9 +9,12 @@ var AccountActivationTemplate = require("../mail-templates/en/account-activation
 
 var tokenService = module.exports = {};
 
+//Send a randomly generated token to an email to verify it
 tokenService.sendVerification = function (id, email) {
     return new Promise((resolve, reject) => {
         const token = randtoken.generate(24);
+
+        //Store token in database with user id for later verification
         new ValidationTokenModel({
             userID: id,
             validationToken: token
@@ -29,8 +32,10 @@ tokenService.sendVerification = function (id, email) {
     });
 }
 
+//Generate a random token to be used with an Amazon auth request
 tokenService.generateAmazonCode = async function (id) {
     const token = randtoken.generate(24);
+    //Save token in database like an email verify token
     await new ValidationTokenModel({
         userID: id,
         validationToken: token

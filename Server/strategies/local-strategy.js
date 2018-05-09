@@ -10,6 +10,7 @@ var params = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
 };
 
+//Extract JWT and load corresponding user from database and attach it to request
 var strategy = new JwtStrategy(params, function (jwt_payload, next) {
     UserModel.findOne({
         _id: jwt_payload.id
