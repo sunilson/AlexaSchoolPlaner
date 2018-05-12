@@ -17,8 +17,9 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for checking if the user is logged in, by getting the access token
  */
-
 public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
 
     private AuthenticationRepository authenticationRepository;
@@ -32,18 +33,16 @@ public class CheckLoginStatusUseCase extends AbstractUseCase<String, Object> {
 
     @Override
     protected Observable<String> buildUseCaseObservable(Object o) {
-        return authenticationRepository.getCurrentUser().map(new Function<UserEntity, String>() {
-            @Override
-            public String apply(UserEntity userEntity) throws NoUserFoundException {
-                //If a userEntity has been found, check if the access token is still valid
-                if (userEntity != null) {
-                    String accessToken = userEntity.getTokens().getAccessToken();
-                    //JWT jwt = new JWT(accessToken);
-                    //if (jwt.getExpiresAt().getTime() > new Date().getTime() + 300000) {
-                    return accessToken;
-                }
-                throw  new NoUserFoundException("No UserEntity defined");
+        return authenticationRepository.getCurrentUser().map(userEntity -> {
+            //If a userEntity has been found, check if the access token is still valid
+            if (userEntity != null) {
+                String accessToken = userEntity.getTokens().getAccessToken();
+                //We could validate the jwt token here, but at the moment we let the server do it
+                //JWT jwt = new JWT(accessToken);
+                //if (jwt.getExpiresAt().getTime() > new Date().getTime() + 300000) {
+                return accessToken;
             }
+            throw  new NoUserFoundException("No UserEntity defined");
         });
     }
 }

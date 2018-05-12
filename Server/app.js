@@ -34,7 +34,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 passport.use(strategy);
 app.use(passport.initialize());
 
+//Only allow access to the events route when authorized
 app.use('/events', passport.authenticate('jwt', cfg.jwtSession), events);
+//Auth route does not need authorization
 app.use('/auth', auth);
 
 // catch 404 and forward to error handler

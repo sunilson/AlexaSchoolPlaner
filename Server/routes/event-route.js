@@ -77,6 +77,8 @@ router.get('/executeImports', (req, res, next) => {
 //Route for creating a new event
 router.post('/new', (req, res, next) => {
 
+    console.log(req.body)
+
     //Parse Event from request and trim it
     const event = ObjectOperations.trimObject(req.body);
 

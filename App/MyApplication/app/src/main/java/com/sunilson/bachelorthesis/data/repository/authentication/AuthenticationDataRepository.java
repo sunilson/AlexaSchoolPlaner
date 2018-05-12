@@ -14,6 +14,8 @@ import io.reactivex.functions.Consumer;
 
 /**
  * @author Linus Weiss
+ *
+ * Repository implementation for everything authentication related
  */
 
 @Singleton
@@ -30,21 +32,29 @@ public class AuthenticationDataRepository implements com.sunilson.bachelorthesis
 
     @Override
     public Observable<UserEntity> signIn(Object body) {
-        return authenticationRetrofitService.signIn(body).doOnNext(userEntity -> applicationDatabase.applicationDao().addUser(userEntity));
+        return authenticationRetrofitService
+                .signIn(body)
+                .doOnNext(userEntity -> applicationDatabase.applicationDao().addUser(userEntity));
     }
 
     @Override
     public Observable<UserEntity> signUp(Object domainUser) {
-        return this.authenticationRetrofitService.register(domainUser).doOnNext(userEntity -> applicationDatabase.applicationDao().addUser(userEntity));
+        return this.authenticationRetrofitService
+                .register(domainUser)
+                .doOnNext(userEntity -> applicationDatabase.applicationDao().addUser(userEntity));
     }
 
     @Override
     public Observable<Tokens> refreshToken(String refreshToken) {
-        return authenticationRetrofitService.refreshToken(new RefreshtokenForPostBody(refreshToken));
+        return authenticationRetrofitService
+                .refreshToken(new RefreshtokenForPostBody(refreshToken));
     }
 
     @Override
     public Observable<UserEntity> getCurrentUser() {
-        return applicationDatabase.applicationDao().getCurrentUser().toObservable();
+        return applicationDatabase
+                .applicationDao()
+                .getCurrentUser()
+                .toObservable();
     }
 }

@@ -7,7 +7,4 @@ import dagger.Module;
  */
 
 @Module
-public class AuthenticationModule {
-
-
-}
+public class AuthenticationModule { }

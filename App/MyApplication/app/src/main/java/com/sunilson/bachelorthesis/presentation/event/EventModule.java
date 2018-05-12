@@ -11,7 +11,6 @@ import dagger.Provides;
 
 @Module
 public class EventModule {
-
     @Singleton
     @Provides
     EventActivity provideEventActivity(EventActivity eventActivity){

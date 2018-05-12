@@ -13,12 +13,13 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for logging in a certain user
  */
-
 public class LoginUseCase extends AbstractUseCase<Boolean, LoginUseCase.Params> {
 
-    AuthenticationRepository authenticationRepository;
-    ApplicationDatabase applicationDatabase;
+    private AuthenticationRepository authenticationRepository;
+    private ApplicationDatabase applicationDatabase;
 
     @Inject
     public LoginUseCase(AuthenticationRepository authenticationRepository, ApplicationDatabase applicationDatabase) {
@@ -28,10 +29,10 @@ public class LoginUseCase extends AbstractUseCase<Boolean, LoginUseCase.Params> 
 
     @Override
     protected Observable<Boolean> buildUseCaseObservable(Params params) {
-        return authenticationRepository.signIn(new DomainLoginData(params.name, params.password)).map(userEntity -> {
-            if(userEntity == null) {
-                return false;
-            }
+        return authenticationRepository.signIn(new DomainLoginData(params.name, params.password))
+                .map(userEntity -> {
+            if(userEntity == null) return false;
+            //Save user to local database
             applicationDatabase.applicationDao().addUser(userEntity);
             return true;
         });

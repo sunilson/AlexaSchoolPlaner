@@ -19,6 +19,8 @@ import okhttp3.Response;
 
 /**
  * @author Linus Weiss
+ *
+ * This interceptor is used to intercept requests and add the access token in the header
  */
 
 @Singleton
@@ -39,8 +41,10 @@ public class AuthenticationInterceptor implements Interceptor {
 
         String accessToken = null;
 
+        //Only append token on routes that dont start with auth, because it is not needed there
         if (!request.url().toString().contains("auth")) {
             try {
+                //Use blocking execution so request does not get sent before access token is ready
                 accessToken = checkLoginStatusUseCase.get().execute(null).blockingFirst();
             } catch (Exception e) {
                 //No access token was in the database (user was never logged in before),

@@ -93,7 +93,8 @@
                         <TextView
                             android:id="@+id/activity_event_description"
                             style="@style/event_text"
-                            android:text="@{Event.description}" />
+                            android:text="@{Event.description}"
+                            />
 
                         <TextView
                             style="@style/event_headline"

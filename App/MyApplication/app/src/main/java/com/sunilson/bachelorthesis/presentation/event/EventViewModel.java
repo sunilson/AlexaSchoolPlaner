@@ -14,6 +14,8 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * ViewModel for the event activity
  */
 
 public class EventViewModel extends ViewModel {
@@ -21,7 +23,6 @@ public class EventViewModel extends ViewModel {
     private GetSingleEventUseCase getSingleEventUseCase;
     private EditEventUseCase editEventUseCase;
     private DomainEventToEventModelMapper domainEventToEventModelMapper;
-
 
     @Inject
     public EventViewModel(GetSingleEventUseCase getSingleEventUseCase, DomainEventToEventModelMapper domainEventToEventModelMapper, EditEventUseCase editEventUseCase) {
@@ -31,11 +32,7 @@ public class EventViewModel extends ViewModel {
     }
 
     public Observable<EventModel> getSingleEvent(String id) throws IllegalArgumentException {
-
-        if(id == null) {
-            throw new IllegalArgumentException("ID can't be null!");
-        }
-
+        if(id == null) throw new IllegalArgumentException("ID can't be null!");
         return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, false)).map(domainEvent -> domainEventToEventModelMapper.toEvent(domainEvent));
     }
 
@@ -44,10 +41,7 @@ public class EventViewModel extends ViewModel {
     }
 
     public Observable<EventModel> getOfflineSingleEvent(String id) throws IllegalArgumentException {
-        if(id == null) {
-            throw new IllegalArgumentException("ID can't be null!");
-        }
-
+        if(id == null) throw new IllegalArgumentException("ID can't be null!");
         return getSingleEventUseCase.execute(GetSingleEventUseCase.Params.forSingleEvent(id, true)).map(domainEvent -> domainEventToEventModelMapper.toEvent(domainEvent));
     }
 }

@@ -52,6 +52,8 @@ import io.reactivex.functions.Action;
 
 /**
  * @author Linus Weiss
+ *
+ * The main activity of the app. Here the fragments with the calendar data is displayed
  */
 
 public class HomepageActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HasViewModel<CalendarViewModel>, HasSupportFragmentInjector, DatePickerDialog.OnDateSetListener {
@@ -60,31 +62,23 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     public void addDeadlineEvent() {
         Navigator.navigateToAddEvent(this, 2);
     }
-
     @OnClick(R.id.activity_homepage_add_appointment)
     public void addAppEvent() {
         Navigator.navigateToAddEvent(this, 1);
     }
-
     @BindView(R.id.activity_homepage_drawer_layout)
     DrawerLayout drawerLayout;
-
     @BindView(R.id.activity_homepage_navigation)
     NavigationView navigationView;
 
     @Inject
     ViewModelFactory viewModelFactory;
-
     @Inject
     HomepageCalendarHelper homepageCalendarHelper;
-
     @Inject
     DispatchingAndroidInjector<Fragment> fragmentDispatchingAndroidInjector;
-
     @Inject
     CheckLoginStatusUseCase checkLoginStatusUseCase;
-
-
     @Inject
     GetCurrentUser getCurrentUser;
 
@@ -183,28 +177,22 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
                 getCurrentUser.execute(null).subscribeWith(new Observer<DomainUser>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-
                     }
 
                     @Override
                     public void onNext(DomainUser domainUser) {
-                        Log.d("Linus", domainUser.getEmail());
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
                     }
 
                     @Override
                     public void onComplete() {
-
                     }
                 });
-                //checkLoginStatusUseCase.execute(null).doFinally(() -> Log.d("Linus", "Complete!"));
                 return true;
         }
-
         return false;
     }
 
@@ -236,8 +224,7 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
     }
 
     @Override
-    public void loading(boolean value) {
-    }
+    public void loading(boolean value) {}
 
     @Override
     public void onDateSet(DatePicker datePicker, int year, int month, int dayOfMonth) {
@@ -247,20 +234,6 @@ public class HomepageActivity extends BaseActivity implements NavigationView.OnN
         DateTime to = from.plusDays(dayAmount);
         homepageCalendarHelper.setCurrentCalendarDates(from, to);
         changeContainerFragment();
-    }
-
-    //TODO
-    private void refreshCurrentFragments() {
-        /*
-        //TODO Multiple fragments
-        HomepageFragmentCalendar homepageFragmentCalendar = (HomepageFragmentCalendar) getSupportFragmentManager().findFragmentByTag(Constants.FRAGMENT_TAG_DAY);
-
-        if (homepageFragmentCalendar != null) {
-            homepageFragmentCalendar.loadData();
-        } else {
-            this.loading(false);
-        }
-         */
     }
 
     private void changeContainerFragment() {

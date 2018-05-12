@@ -13,7 +13,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
@@ -32,11 +31,15 @@ public class GetDaySpanUseCase extends AbstractUseCase<List<DomainDay>, GetDaySp
 
     @Override
     protected Observable<List<DomainDay>> buildUseCaseObservable(final Params params) {
-        if(params.offline) {
-            return this.eventRepository.getOfflineEventList(params.from, params.to).map(eventEntities -> eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate()));
-        } else {
-            return this.eventRepository.getEventList(params.from, params.to).map(eventEntities -> eventEntityListToDayListMapper.mapToDayList(eventEntities, params.from.toLocalDate(), params.to.toLocalDate()));
-        }
+        Observable<List<EventEntity>> observable;
+
+        if (params.offline) observable = this.eventRepository.getOfflineEventList(params.from, params.to);
+        else observable =  this.eventRepository.getEventList(params.from, params.to);
+
+        return observable.map(eventEntities -> eventEntityListToDayListMapper
+                .mapToDayList(eventEntities,
+                        params.from.toLocalDate(),
+                        params.to.toLocalDate()));
     }
 
 

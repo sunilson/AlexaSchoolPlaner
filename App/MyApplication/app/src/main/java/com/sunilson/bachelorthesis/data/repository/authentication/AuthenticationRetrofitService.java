@@ -11,6 +11,8 @@ import retrofit2.http.Query;
 
 /**
  * @author Linus Weiss
+ *
+ * Retrofit interface for everything authentication related
  */
 
 public interface AuthenticationRetrofitService {

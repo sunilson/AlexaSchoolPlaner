@@ -12,6 +12,9 @@ import lombok.Setter;
 
 /**
  * @author Linus Weiss
+ *
+ * This object encapsulates the response from the retrofit service of a single Event.
+ * It also maps the fields to database fields
  */
 
 @Entity(tableName = "Events")

@@ -14,6 +14,8 @@ import dagger.android.HasActivityInjector;
 
 /**
  * @author Linus Weiss
+ *
+ * The base of the app
  */
 
 public class BaseApplication extends Application implements HasActivityInjector {
@@ -26,12 +28,13 @@ public class BaseApplication extends Application implements HasActivityInjector 
         if(LeakCanary.isInAnalyzerProcess(this)) {
             return;
         }
-
+        //LeakCanary for memory leak detection
         LeakCanary.install(this);
         this.initializeInjector();
     }
 
     private void initializeInjector() {
+        //Entry point for dependency injection
         DaggerApplicationComponent.builder().application(this).build().inject(this);
     }
 

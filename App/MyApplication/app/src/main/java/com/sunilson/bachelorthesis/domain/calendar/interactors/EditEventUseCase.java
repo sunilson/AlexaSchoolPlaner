@@ -14,8 +14,9 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for changing details of an event on the server
  */
-
 public class EditEventUseCase extends AbstractUseCase<DomainEvent, EditEventUseCase.Params> {
 
     private EventRepository eventRepository;

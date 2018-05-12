@@ -17,10 +17,7 @@ import android.widget.Toast;
 
 import com.sunilson.bachelorthesis.R;
 import com.sunilson.bachelorthesis.databinding.ActivityAddEventBinding;
-import com.sunilson.bachelorthesis.domain.calendar.interactors.AddEventUseCase;
-import com.sunilson.bachelorthesis.domain.calendar.model.DomainEvent;
 import com.sunilson.bachelorthesis.presentation.event.EventModel;
-import com.sunilson.bachelorthesis.presentation.event.mapper.DomainEventToEventModelMapper;
 import com.sunilson.bachelorthesis.presentation.shared.baseClasses.BaseActivity;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.Constants;
 import com.sunilson.bachelorthesis.presentation.shared.utilities.DisposableManager;
@@ -39,6 +36,8 @@ import io.reactivex.observers.DisposableObserver;
 
 /**
  * @author Linus Weiss
+ * <p>
+ * Activity with form and validation for creating a new event
  */
 
 public class AddEventActivity extends BaseActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
@@ -53,16 +52,14 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
     EditText summary;
     @BindView(R.id.activity_add_event_location)
     EditText location;
+
     @Inject
     ViewModelFactory viewModelFactory;
     @Inject
     ValidationHelper validationHelper;
     @Inject
     DisposableManager disposableManager;
-    @Inject
-    AddEventUseCase addEventUseCase;
-    @Inject
-    DomainEventToEventModelMapper domainEventToEventModelMapper;
+
     private DateTime temp;
     private DateTime from = new DateTime();
     private DateTime to = from.plusHours(1);
@@ -133,6 +130,7 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
         ButterKnife.bind(this);
     }
 
+    //Add event to web service with viewmodel and validate Input
     private void addEvent() {
         String summary = this.summary.getText().toString();
         String description = this.description.getText().toString();
@@ -154,12 +152,10 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
         eventModel.setTo(to);
         eventModel.setEventType(Constants.EVENT_TYPES[eventType]);
 
-        disposableManager.add(addEventUseCase.execute(AddEventUseCase.Params
-                .forDaySpan(domainEventToEventModelMapper.toDomainEvent(eventModel)))
-                .subscribeWith(new DisposableObserver<DomainEvent>() {
-
+        disposableManager.add(addEventViewModel.addEvent(eventModel)
+                .subscribeWith(new DisposableObserver<EventModel>() {
                     @Override
-                    public void onNext(DomainEvent domainEvent) {
+                    public void onNext(EventModel domainEvent) {
                         finish();
                     }
 
@@ -170,7 +166,6 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
 
                     @Override
                     public void onComplete() {
-
                     }
                 })
         );
@@ -195,6 +190,8 @@ public class AddEventActivity extends BaseActivity implements DatePickerDialog.O
 
     @Override
     public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+
+        //Check that start and end are not switched after setting them
         if (pickerType.equals("from")) {
             from = new DateTime(temp.getYear(), temp.getMonthOfYear(), temp.getDayOfMonth(), hour, minute);
             if (from.isAfter(to) || from.isEqual(to) || eventType == Constants.DEADLINE) {

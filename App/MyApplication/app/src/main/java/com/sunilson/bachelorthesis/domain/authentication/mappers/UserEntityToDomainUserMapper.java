@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 /**
  * @author Linus Weiss
+ *
  */
-
 public class UserEntityToDomainUserMapper {
 
     @Inject
@@ -17,6 +17,10 @@ public class UserEntityToDomainUserMapper {
     }
 
     public DomainUser toDomainUser(UserEntity userEntity) {
-        return new DomainUser(userEntity.getUser().getUsername(), userEntity.getUser().getEmail(), null, userEntity.getUser().getIcalurl(), userEntity.getUser().getIcaltype());
+        return new DomainUser(userEntity.getUser().getUsername(),
+                userEntity.getUser().getEmail(),
+                null,
+                userEntity.getUser().getIcalurl(),
+                userEntity.getUser().getIcaltype());
     }
 }

@@ -17,6 +17,8 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * This is the ViewModel of the calendar. It provides data for whole days of the calendar
  */
 
 public class CalendarViewModel extends ViewModel {
@@ -30,12 +32,17 @@ public class CalendarViewModel extends ViewModel {
         this.daySpanModelMapper = daySpanModelMapper;
     }
 
+    /**
+     * Loads whole days for a certain time range. A day is a holder for multiple events
+     *
+     * @param from
+     * @param to
+     * @param offline Set this to true if data should be loaded from local database
+     * @return A DaySpan which contains multiple days which contain multiple events
+     * @throws IllegalArgumentException
+     */
     public Observable<CalendarDaySpanModel> getDays(DateTime from, DateTime to, Boolean offline) throws  IllegalArgumentException{
-
-        if(from == null || to == null) {
-            throw new IllegalArgumentException("Dates cannot be null!");
-        }
-
+        if(from == null || to == null) throw new IllegalArgumentException("Dates cannot be null!");
        return getDaySpanUseCase.execute(GetDaySpanUseCase.Params.forDaySpan(from, to, offline)).map(
                domainDays -> daySpanModelMapper.toCalendarDaySpanModel(domainDays)
        );
@@ -44,7 +51,5 @@ public class CalendarViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
-
-
     }
 }

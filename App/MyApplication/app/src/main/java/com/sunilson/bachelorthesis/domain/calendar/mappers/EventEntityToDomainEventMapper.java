@@ -21,6 +21,12 @@ public class EventEntityToDomainEventMapper {
 
     }
 
+    /**
+     * Transforms given eventEntity into model class of domain section
+     *
+     * @param eventEntity
+     * @return Transformed DomainEvent
+     */
     public DomainEvent mapToDomainEvent(EventEntity eventEntity) {
         DomainEvent domainEvent = new DomainEvent();
 

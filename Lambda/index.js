@@ -13,22 +13,21 @@ const states = {
     DEFAULTMODE: '_DEFAULTMODE'
 };
 
-const questionTypes = {
-    EVENTTYPE: "eventtype",
-    STARTDATE: "startdate",
-    ENDDATE: "enddate",
-    STARTTIME: "starttime",
-    ENDTIME: "endtime",
-    SUMMARY: "summary",
-    DESCRIPTION: "description"
-};
-
+//Possible event types
 const eventTypes = {
     "Schulstunde": 0,
     "Termin": 1,
     "Abgabe": 2
 }
 
+//TODO: Merge with object above (naming error)
+const eventAlexaTypes = {
+    "schulstunde": 0,
+    "termin": 1,
+    "abgabe": 2
+}
+
+//Strings used in the skill. This is used to translate the skill to different languages (not done yet)
 const languageStrings = {
     "en": {
         "translation": {
@@ -71,6 +70,11 @@ const languageStrings = {
                 NO_NEXT_EVENT_IN_LIMIT: "Du hast keine Abgabe zu dieser Zeit"
             },
             SKILL_NAME: 'Schulplaner',
+            INVALID_DATE: "Die Daten überlappen sich. Bitte neues End Datum auswählen",
+            INVALID_DATE_REPROMPT: "Bitte neues End Datum auswählen",
+            INVALID_TIME: "Die Zeiten überlappen sich. Bitte neue End Zeit auswählen",
+            INVALID_TIME_REPROMPT: "Bitte neue End Zeit auswählen",
+            ASK_CONFIRM_ADD_EVENT: "Alle Daten erfasst. Möchtest du das Event jetzt hinzufügen?",
             YOU_HAVE_EVENT_AT_DATE: " hast du das nächste mal am <say-as interpret-as='date'>",
             WITH_SUMMARY: " mit der Zusammenfassung",
             GET_FACT_MESSAGE: 'Hier sind deine Fakten: ',
@@ -109,8 +113,10 @@ const languageStrings = {
     }
 }
 
+//The Handlers that are used on the skill startup
 const newSessionHandlers = {
     'LaunchRequest': function () {
+        //Check if alexa has authentication  (TODO: Check if token is valid)
         if (!this.event.session.user.accessToken) {
             //Ask for user login if no token is here
             this.emit(':tellWithLinkAccountCard',
@@ -123,6 +129,8 @@ const newSessionHandlers = {
     },
 };
 
+
+//The Handlers that are used by default if no state is set
 const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
     'NoEvent': function () {
         this.emit(':tell', this.t('STOP_MESSAGE'));
@@ -136,16 +144,16 @@ const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
     'SearchNextEvent': function () {
         let query = null
         if (this.event.request.intent.slots.Query) {
-            this.attributes["query"] = extractDateRange(this.event.request.intent.slots)
+            this.attributes["query"] = extractDateRange(this.event.request.intent.slots, null)
         }
 
         let dates = null
         if (this.event.request.intent.slots.Date) {
-            dates = extractDateRange(this.event.request.intent.slots)
+            dates = extractDateRange(this.event.request.intent.slots, null)
         }
         let time = null
         if (this.event.request.intent.slots.Time.value) {
-            time = extractTime(this.event.request.intent.slots)
+            time = extractTime(this.event.request.intent.slots, null)
             if (dates) {
                 const date1 = moment(dates[0])
                 const date2 = moment(dates[1])
@@ -198,7 +206,7 @@ const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
             }
 
             if (this.event.request.intent.slots.Time && this.event.request.intent.slots.Time.value) {
-                time = extractTime(this.event.request.intent.slots)
+                time = extractTime(this.event.request.intent.slots, null)
                 if (date) {
                     date.set({
                         'hour': time.get('hour'),
@@ -223,7 +231,7 @@ const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
         //Check if a certain type is given. Otherwise just search for all events
         let type = extractType(this.event.request.intent.slots)
 
-        let extractedDates = extractDateRange(this.event.request.intent.slots)
+        let extractedDates = extractDateRange(this.event.request.intent.slots, null)
 
         var options = {
             uri: HOME_URL + "/events?from=" + extractedDates[0].valueOf() + "&to=" + extractedDates[1].valueOf() + ((type != "Event") ? ("&type=" + eventTypes[type]) : ""),
@@ -268,16 +276,67 @@ const defaultHandlers = Alexa.CreateStateHandler(states.DEFAULTMODE, {
         this.emit(':tell', this.t("ICAL_INFO"));
     },
     'AddEvent': function () {
-        //Check for given slots and start add Event intent with correct state
-        if (this.event.request.intent && (!this.event.request.intent.slots.EventType || !this.event.request.intent.slots.EventType.value)) {
-            this.handler.state = states.ADDEVENTMODE;
-            this.attributes["questionType"] = questionTypes.EVENTTYPE;
-            this.emit(':ask', this.t("ASK_EVENTTYPE"));
-        } else if (this.event.request.intent && this.event.request.intent.slots.EventType && this.event.request.intent.slots.EventType.value) {
-            this.handler.state = states.ADDEVENTMODE;
-            this.attributes[questionTypes.EVENTTYPE] = this.event.request.intent.slots.EventType.value;
-            this.attributes["questionType"] = questionTypes.STARTDATE;
-            this.emit(":ask", this.t("ASK_STARTDATE"));
+        if (this.event.request.dialogState === 'STARTED' || this.event.request.dialogState !== 'COMPLETED') {
+            this.emit(':delegate');
+        } else {
+            //Parse dates and check dates for overlapping and display error if they are
+            const startDate = extractDateRange(null, this.event.request.intent.slots.StartDate.value)[0]
+            const endDate = extractDateRange(null, this.event.request.intent.slots.EndDate.value)[0]
+            const startTime = extractTime(null, this.event.request.intent.slots.StartTime.value)
+            const endTime = extractTime(null, this.event.request.intent.slots.EndTime.value)
+
+            if (startDate.isAfter(endDate)) {
+                this.emit(':elicitSlot',
+                    "EndDate",
+                    this.t("INVALID_DATE"),
+                    this.t("INVALID_DATE_REPROMPT")
+                )
+            } else if (startDate.isSame(endDate, "day") && startTime.isAfter(endTime)) {
+                this.emit(':elicitSlot',
+                    "EndTime",
+                    this.t("INVALID_TIME"),
+                    this.t("INVALID_TIME_REPROMPT")
+                )
+            } else {
+                //Combine dates and time
+                startDate.set({
+                    'hour': startTime.get('hour'),
+                    'minute': startTime.get('minute'),
+                    'second': startTime.get('second'),
+                    'millisecond': startTime.get('millisecond')
+                })
+
+                endDate.set({
+                    'hour': endTime.get('hour'),
+                    'minute': endTime.get('minute'),
+                    'second': endTime.get('second'),
+                    'millisecond': endTime.get('millisecond')
+                })
+
+                console.log(this.event.request.intent.slots.EventType.value)
+
+                //Add Event to datbase
+                request({
+                    uri: HOME_URL + "/events/new",
+                    method: "POST",
+                    headers: {
+                        'User-Agent': 'Request-Promise',
+                        Authorization: 'Bearer ' + this.event.session.user.accessToken
+                    },
+                    json: {
+                        from: startDate.valueOf(),
+                        to: endDate.valueOf(),
+                        description: this.event.request.intent.slots.Description.value,
+                        summary: this.event.request.intent.slots.Summary.value,
+                        type: eventAlexaTypes[this.event.request.intent.slots.EventType.value],
+                        location: "ToDo"
+                    }
+                }).then(res => {
+                    this.emit(':tell', "Event wurde hinzugefügt!")
+                }).catch(err => {
+                    this.emit(':tell', "Event konnte nicht hinzugefügt werden!")
+                })
+            }
         }
     },
     'AMAZON.HelpIntent': function () {
@@ -419,13 +478,15 @@ const nextEventHandlers = Alexa.CreateStateHandler(states.NEXTEVENTMODE, {
     },
 })
 
-//Events used when user wants to add an event. Will only be accessed when in "ADDEVENT" state
+//Legacy code, was first used to make the AddEvent request, but an Alexa dialog was used instead
+/*
 const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
     'QuestionAnsweredWithEventType': function () {
         this.attributes["eventType"] = this.event.request.intent.slots.EventType.value;
         this.attributes["questionType"] = questionTypes.STARTDATE;
         this.emit(':ask', this.t("ASK_STARTDATE"));
     },
+    //If the user needs to add free text
     'QuestionAnsweredWithText': function () {
         switch (this.attributes["questionType"]) {
             case questionTypes.SUMMARY:
@@ -435,13 +496,14 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
                 break;
             case questionTypes.DESCRIPTION:
                 this.attributes[questionTypes.DESCRIPTION] = this.event.request.intent.slots.TEXTANSWER.value
-                this.emit(':ask', "Yo Motherfucker!");
+                this.emit(':ask', this.t("ASK_CONFIRM_ADD_EVENT"));
                 break;
             default:
                 this.emit(':ask', this.t("ERROR_QUESTION_WITH_TEXT"));
                 break;
         }
     },
+    //If the user needs to set a date
     'QuestionAnsweredWithDate': function () {
         if (!this.event.request.intent.slots.Date || !this.event.request.intent.slots.Date.value) {
             this.emit(':ask', this.t("ERROR_QUESTION_WITH_DATE"));
@@ -467,6 +529,7 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
             }
         }
     },
+    //If the user needs to set date and time
     'QuestionAnsweredWithDateTime': function () {
         if (!this.event.request.intent.slots.Date ||
             !this.event.request.intent.slots.Time ||
@@ -504,7 +567,7 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
                         'second': time.get('second'),
                         'millisecond': time.get('millisecond')
                     })
-                    if (checkOverlappingDates(date, moment(this.attributes[questionTypes.STARTDATE]))) {
+                    if (checkOverlappingDates(moment(this.attributes[questionTypes.STARTDATE]), date)) {
                         this.emit(':ask', this.t("ERROR_QUESTION_WITH_DATE_TIME_OVERLAP"));
                     } else {
                         this.attributes[questionTypes.ENDDATE] = date
@@ -516,6 +579,7 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
             }
         }
     },
+    //If the user needs to set time
     'QuestionAnsweredWithTime': function () {
         if (!this.event.request.intent.slots.Time || !this.event.request.intent.slots.Time.value) {
             this.emit(':ask', this.t("ERROR_QUESTION_WITH_TIME"));
@@ -553,7 +617,6 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
                         'millisecond': time.get('millisecond')
                     })
                     this.attributes[questionTypes.STARTDATE] = date
-
                     if (this.attributes["eventType"] != "deadline") {
                         this.attributes["questionType"] = questionTypes.ENDDATE;
                         this.emit(':ask', this.t("ASK_ENDDATE"));
@@ -581,6 +644,15 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
             }
         }
     },
+    'AMAZON.YesIntent': function () {
+        this.emit(':tell', "Event wird hinzugefügt!")
+        //TODO: Event auf Server hinzufügen und Aufforderung beenden
+    },
+    'AMAZON.NoIntent': function () {
+        this.handler.state = ''
+        delete this.attributes['STATE'];
+        this.emit('LaunchRequest');
+    },
     'AMAZON.CancelIntent': function () {
         this.handler.state = ''
         delete this.attributes['STATE'];
@@ -593,7 +665,9 @@ const addEventHandlers = Alexa.CreateStateHandler(states.ADDEVENTMODE, {
         this.emit(':ask', this.t("ERROR_GENERAL"));
     }
 });
+*/
 
+//Check if start date is before end date
 function checkOverlappingDates(startDate, endDate) {
     return startDate.isAfter(endDate) || startDate.isSame(endDate, 'millisecond');
 }
@@ -602,12 +676,22 @@ function formatDate(date) {
     return moment(date).format('YYYYMMDD');
 }
 
-function extractDateRange(slots) {
+//Extract start end end date of a given AMAZON.Date object
+function extractDateRange(slots, date) {
     let result = []
 
     if (slots && slots.Date && slots.Date.value) {
         try {
             let dates = new AmazonDateParser(slots.Date.value)
+            result[0] = moment(dates["startDate"])
+            result[1] = moment(dates["endDate"])
+        } catch (e) {
+            result[0] = moment().startOf('day');
+            result[1] = moment().endOf('day');
+        }
+    } else if (date) {
+        try {
+            let dates = new AmazonDateParser(date)
             result[0] = moment(dates["startDate"])
             result[1] = moment(dates["endDate"])
         } catch (e) {
@@ -630,7 +714,8 @@ function extractQuery(slots) {
     }
 }
 
-function extractTime(slots) {
+//Read time of a given AMAZON.Time object
+function extractTime(slots, time) {
     if (slots && slots.Time && slots.Time.value) {
         switch (slots.Time.value) {
             case "EV":
@@ -649,11 +734,30 @@ function extractTime(slots) {
                 return moment(slots.Time.value, "HH:mm")
                 break;
         }
+    } else if (time) {
+        switch (time) {
+            case "EV":
+                return moment("18:00", "HH:mm")
+                break
+            case "NI":
+                return moment("24:00", "HH:mm")
+                break
+            case "AF":
+                return moment("12:00", "HH:mm")
+                break
+            case "MO":
+                return moment("06:00", "HH:mm")
+                break
+            default:
+                return moment(time, "HH:mm")
+                break;
+        }
     } else {
         return null
     }
 }
 
+//Get event type from the request object
 function extractType(slots) {
     if (slots &&
         slots.Type &&
@@ -677,6 +781,7 @@ function formatTime(time) {
     return moment(time).format('HH:mm');
 }
 
+//Formats an event for the output in a Card in the Alexa app
 function formatEventForCardContent(event) {
     let result = "";
 
@@ -703,6 +808,7 @@ function formatEventForCardContent(event) {
     return result
 }
 
+//Checks if a string is a valid event type
 function validEventType(type) {
     for (let foundType in eventTypes) {
         if (type == foundType) return true
@@ -730,6 +836,6 @@ exports.handler = function (event, context) {
         alexa.APP_ID = APP_ID;
     }
     alexa.resources = languageStrings;
-    alexa.registerHandlers(newSessionHandlers, defaultHandlers, addEventHandlers, nextEventHandlers);
+    alexa.registerHandlers(newSessionHandlers, defaultHandlers, nextEventHandlers);
     alexa.execute();
 };

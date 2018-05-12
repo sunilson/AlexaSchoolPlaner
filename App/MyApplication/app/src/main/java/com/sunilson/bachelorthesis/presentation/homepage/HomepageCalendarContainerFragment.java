@@ -67,6 +67,6 @@ public class HomepageCalendarContainerFragment extends Fragment {
     private void initializeNewViewPager() {
         viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(calendarViewPagerAdapter);
-        viewPager.setCurrentItem((int)(Integer.MAX_VALUE/2));
+        viewPager.setCurrentItem(Integer.MAX_VALUE/2);
     }
 }

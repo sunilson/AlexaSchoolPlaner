@@ -13,9 +13,9 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for getting the data of a single event
  */
-
-
 public class GetSingleEventUseCase extends AbstractUseCase<DomainEvent, GetSingleEventUseCase.Params> {
 
     private EventRepository eventRepository;
@@ -29,20 +29,13 @@ public class GetSingleEventUseCase extends AbstractUseCase<DomainEvent, GetSingl
 
     @Override
     protected Observable<DomainEvent> buildUseCaseObservable(GetSingleEventUseCase.Params params) {
+        //Differentiate between offline and online status, because data should not be loaded twice
         if (params.offline) {
-            return this.eventRepository.getOfflineSingleEvent(params.id).map(new Function<EventEntity, DomainEvent>() {
-                @Override
-                public DomainEvent apply(EventEntity eventEntity) throws Exception {
-                    return entityToDomainEventMapper.mapToDomainEvent(eventEntity);
-                }
-            });
+            return this.eventRepository.getOfflineSingleEvent(params.id)
+                    .map(eventEntity -> entityToDomainEventMapper.mapToDomainEvent(eventEntity));
         } else {
-            return this.eventRepository.getSingleEvent(params.id).map(new Function<EventEntity, DomainEvent>() {
-                @Override
-                public DomainEvent apply(EventEntity eventEntity) throws Exception {
-                    return entityToDomainEventMapper.mapToDomainEvent(eventEntity);
-                }
-            });
+            return this.eventRepository.getSingleEvent(params.id)
+                    .map(eventEntity -> entityToDomainEventMapper.mapToDomainEvent(eventEntity));
         }
     }
 

@@ -12,6 +12,8 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for registering a new user on the web service
  */
 
 public class RegisterUseCase extends AbstractUseCase<Boolean, RegisterUseCase.Params> {
@@ -25,15 +27,8 @@ public class RegisterUseCase extends AbstractUseCase<Boolean, RegisterUseCase.Pa
 
     @Override
     protected Observable<Boolean> buildUseCaseObservable(Params params) {
-
         DomainUser domainUser = new DomainUser(params.name, params.email, params.password, null, null);
-
-        return authenticationRepository.signUp(domainUser).map(new Function<UserEntity, Boolean>() {
-            @Override
-            public Boolean apply(UserEntity userEntity) throws Exception {
-                return userEntity != null;
-            }
-        });
+        return authenticationRepository.signUp(domainUser).map(userEntity -> userEntity != null);
     }
 
     public static final class Params {

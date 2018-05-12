@@ -25,9 +25,9 @@ import retrofit2.Response;
 
 /**
  * @author Linus Weiss
+ *
+ * Repository implementation for everything event related
  */
-
-
 @Singleton
 public class EventDataRepository implements com.sunilson.bachelorthesis.domain.repository.EventRepository {
 
@@ -40,49 +40,73 @@ public class EventDataRepository implements com.sunilson.bachelorthesis.domain.r
         this.eventRetrofitService = eventRetrofitService;
     }
 
+    /**
+     * Get a list of events between two dates
+     *
+     * @param from
+     * @param to
+     * @return List of EventEntities
+     */
     @Override
     public Observable<List<EventEntity>> getEventList(DateTime from, DateTime to) {
         return eventRetrofitService
                 .getEventSpan(from.getMillis(), to.getMillis())
                 .doOnNext(eventEntities -> {
+                    //Save all returned events to local database
                     if (eventEntities != null && eventEntities.size() > 0) {
                         applicationDatabase.applicationDao().addEvents(eventEntities);
                     }
-                }
-                );
+                });
     }
 
+    /**
+     * Get events between two dates from local database
+     *
+     * @param from
+     * @param to
+     * @return List of EventEntities
+     */
     @Override
     public Observable<List<EventEntity>> getOfflineEventList(DateTime from, DateTime to) {
         DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
-        return applicationDatabase.applicationDao().getEvents(formatter.print(from), formatter.print(to)).toObservable();
+        return applicationDatabase
+                .applicationDao()
+                .getEvents(formatter.print(from), formatter.print(to))
+                .toObservable();
     }
 
     @Override
     public Observable<EventEntity> getOfflineSingleEvent(String id) {
-        return applicationDatabase.applicationDao().getSingleEvent(id).toObservable();
+        return applicationDatabase
+                .applicationDao()
+                .getSingleEvent(id)
+                .toObservable();
     }
 
+    /**
+     * Get single event from server and store it locally
+     *
+     * @param id
+     * @return
+     */
     @Override
     public Observable<EventEntity> getSingleEvent(String id) {
-        return eventRetrofitService.getEvent(id).doOnNext(eventEntity -> applicationDatabase.applicationDao().addEvent(eventEntity));
+        return eventRetrofitService
+                .getEvent(id)
+                .doOnNext(eventEntity -> applicationDatabase.applicationDao().addEvent(eventEntity));
     }
 
     @Override
     public Observable<EventEntity> addEvent(EventForPostBody body) {
         return eventRetrofitService.addEvent(body).doOnNext(eventEntity -> {
-            if (eventEntity != null) {
-                applicationDatabase.applicationDao().addEvent(eventEntity);
-            }
+            if (eventEntity != null) applicationDatabase.applicationDao().addEvent(eventEntity);
         });
     }
 
     @Override
     public Observable<EventEntity> editEvent(EventForPostBody body) {
         return eventRetrofitService.editEvent(body).doOnNext(eventEntity -> {
-            if (eventEntity != null) {
-                applicationDatabase.applicationDao().updateEvent(eventEntity);
-            }
+            if (eventEntity != null) applicationDatabase.applicationDao().updateEvent(eventEntity);
         });
     }
 

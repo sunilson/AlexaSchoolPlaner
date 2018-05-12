@@ -15,6 +15,9 @@ import javax.inject.Singleton;
 
 /**
  * @author Linus Weiss
+ *
+ * This class is used as a helper for the calendar.
+ * It can store and load dates and do operations on the dates
  */
 
 @Singleton

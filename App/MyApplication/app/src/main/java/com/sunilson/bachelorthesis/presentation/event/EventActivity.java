@@ -46,6 +46,7 @@ import io.reactivex.observers.DisposableObserver;
 
 public class EventActivity extends BaseActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
+    //ButterKnife view binding
     @BindView(R.id.activity_event_header)
     View event_header;
     @BindView(R.id.activity_event_fab)
@@ -68,12 +69,15 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
     EditText editLocation;
     @BindView(R.id.activity_event_show)
     View eventContainer;
+
+    //Dagger injection
     @Inject
     ViewModelFactory viewModelFactory;
     @Inject
     DisposableManager disposableManager;
     @Inject
     ConnectionManager connectionManager;
+
     private Animation fadeIn, fadeInMoveUp, scaleIn, slideUp;
     private EventViewModel eventViewModel;
     private ActivityEventBinding binding;
@@ -94,6 +98,7 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
         return intent;
     }
 
+    //Butterknife OnClick Bindings
     @OnClick(R.id.activity_event_edit_from_button)
     public void editFromDate() {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
@@ -139,9 +144,8 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
         progressDoalog.show();
 
         editEvent.setDescription(editDescription.getText().toString());
-        if (!editSummary.getText().toString().isEmpty()) {
+        if (!editSummary.getText().toString().isEmpty())
             editEvent.setSummary(editSummary.getText().toString());
-        }
         editEvent.setLocation(editLocation.getText().toString());
 
         disposableManager.add(eventViewModel.editEvent(editEvent).subscribeWith(new DisposableObserver<EventModel>() {
@@ -162,7 +166,6 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
 
             @Override
             public void onComplete() {
-
             }
         }));
     }
@@ -195,7 +198,6 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
             getWindow().getEnterTransition().addListener(new Transition.TransitionListener() {
                 @Override
                 public void onTransitionStart(Transition transition) {
-
                 }
 
                 @Override
@@ -206,17 +208,14 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
 
                 @Override
                 public void onTransitionCancel(Transition transition) {
-
                 }
 
                 @Override
                 public void onTransitionPause(Transition transition) {
-
                 }
 
                 @Override
                 public void onTransitionResume(Transition transition) {
-
                 }
             });
         }
@@ -236,7 +235,6 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                //supportFinishAfterTransition();
                 finish();
         }
         return super.onOptionsItemSelected(item);
@@ -244,11 +242,14 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
 
     @Override
     protected void onDestroy() {
-        //cleanup
+        //Stop all observables
         disposableManager.dispose();
         super.onDestroy();
     }
 
+    /**
+     * Toggle edit mode of the event
+     */
     private void closeEdit() {
         editContainer.setVisibility(View.INVISIBLE);
         eventContainer.setVisibility(View.VISIBLE);
@@ -299,7 +300,6 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
 
         @Override
         public void onComplete() {
-
         }
     }
 
@@ -307,6 +307,8 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
 
         @Override
         public void onNext(EventModel eventModel) {
+            //Update event databinding. We could also use bindable properties but we always get
+            //the whole event back, so it doesn't really matter if we update the whole thing
             currentEvent = eventModel;
             binding.setEvent(currentEvent);
             fab.startAnimation(scaleIn);
@@ -325,7 +327,6 @@ public class EventActivity extends BaseActivity implements DatePickerDialog.OnDa
 
         @Override
         public void onComplete() {
-
         }
     }
 }

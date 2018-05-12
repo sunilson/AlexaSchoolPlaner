@@ -30,10 +30,7 @@ public class GetCurrentUser extends AbstractUseCase<DomainUser, GetCurrentUser.P
 
     @Override
     protected Observable<DomainUser> buildUseCaseObservable(Params params) {
-        return authenticationRepository.getCurrentUser().map(userEntity -> {
-            Log.d("Linus", userEntity.getTokens().getExpiresIn().toString());
-            return userEntityToDomainUserMapper.toDomainUser(userEntity);
-        });
+        return authenticationRepository.getCurrentUser().map(userEntityToDomainUserMapper::toDomainUser);
     }
 
     public final static class Params{

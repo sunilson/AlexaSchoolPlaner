@@ -35,11 +35,6 @@ public class DomainDay {
             domainEvents.add(event);
         }
 
-        Collections.sort(domainEvents, new Comparator<DomainEvent>() {
-            @Override
-            public int compare(DomainEvent e1, DomainEvent e2) {
-                return e1.getFrom().compareTo(e2.getFrom());
-            }
-        });
+        Collections.sort(domainEvents, (e1, e2) -> e1.getFrom().compareTo(e2.getFrom()));
     }
 }

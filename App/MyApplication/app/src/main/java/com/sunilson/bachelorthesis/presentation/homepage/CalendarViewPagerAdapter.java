@@ -15,8 +15,10 @@ import java.util.List;
 
 /**
  * @author Linus Weiss
+ *
+ * This adapter is used with the main ViewPager. It doesnt end on either side, but instead just
+ * starts over.
  */
-
 public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
 
     private HomepageCalendarHelper homepageCalendarHelper;
@@ -38,6 +40,9 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
 
         DateTime[] tempDateTimes = middleDateTimes;
         int fragmentPos = position % 3;
+
+        //Check if this is the one of the first 3 times the view is requested,
+        // if yes, we know where and with what time we need to add the fragment
         if (firstStart < 3) {
             firstStart++;
             if (fragmentPos == 1) {
@@ -56,6 +61,8 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
                     return HomepageFragmentCalendar.newInstance(homepageCalendarHelper.convertDateTimesToLongDates(tempDateTimes));
             }
         } else {
+            //Else we don't know where to add the Fragment yet, so we need to
+            //determine the direction of the swipe
             if (prevFragmentPos == null) {
                 if (fragmentPos == 1) {
                     direction = false;
@@ -90,6 +97,7 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
                 }
             }
 
+            //Depending on the direction, add or subtract date period
             if (direction) {
                 middleDateTimes = homepageCalendarHelper.addPeriodFromDateTimes(middleDateTimes);
                 tempDateTimes = homepageCalendarHelper.addPeriodFromDateTimes(middleDateTimes);
@@ -98,6 +106,7 @@ public class CalendarViewPagerAdapter extends FragmentPagerAdapter {
                 tempDateTimes = homepageCalendarHelper.subtractPeriodFromDateTimes(middleDateTimes);
             }
 
+            //Create new fragment and add it to the ViewPager
             prevFragmentPos = fragmentPos;
             homepageCalendarHelper.setCurrentCalendarDates(middleDateTimes[0], middleDateTimes[1]);
             return HomepageFragmentCalendar.newInstance(homepageCalendarHelper.convertDateTimesToLongDates(tempDateTimes));

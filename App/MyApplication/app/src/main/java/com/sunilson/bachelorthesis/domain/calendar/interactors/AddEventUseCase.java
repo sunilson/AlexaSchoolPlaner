@@ -14,8 +14,9 @@ import io.reactivex.functions.Function;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for adding a new event to the web service
  */
-
 public class AddEventUseCase extends AbstractUseCase<DomainEvent, AddEventUseCase.Params> {
 
     private EventRepository eventRepository;
@@ -42,12 +43,8 @@ public class AddEventUseCase extends AbstractUseCase<DomainEvent, AddEventUseCas
                 domainEvent.getTo().getMillis()
         );
 
-        return this.eventRepository.addEvent(eventForPostBody).map(new Function<EventEntity, DomainEvent>() {
-            @Override
-            public DomainEvent apply(EventEntity eventEntity) throws Exception {
-                return entityToDomainEventMapper.mapToDomainEvent(eventEntity);
-            }
-        });
+        return this.eventRepository.addEvent(eventForPostBody)
+                .map(eventEntity -> entityToDomainEventMapper.mapToDomainEvent(eventEntity));
     }
 
     public static final class Params {

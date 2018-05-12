@@ -10,6 +10,8 @@ import dagger.android.ContributesAndroidInjector;
 
 /**
  * @author Linus Weiss
+ *
+ * Helper from Dagger for injecting fragments without having to write your own sub components
  */
 
 @Module

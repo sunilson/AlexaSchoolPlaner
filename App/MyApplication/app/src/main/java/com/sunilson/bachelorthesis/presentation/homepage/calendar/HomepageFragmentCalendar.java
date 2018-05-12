@@ -41,7 +41,8 @@ import retrofit2.HttpException;
 /**
  * @author Linus Weiss
  *
- * A fragment containing multiple days in a certain date range
+ * A fragment containing multiple days in a certain date range.
+ * Will be displayed in HomepageCalendarContainerFragment
  */
 
 public class HomepageFragmentCalendar extends Fragment {

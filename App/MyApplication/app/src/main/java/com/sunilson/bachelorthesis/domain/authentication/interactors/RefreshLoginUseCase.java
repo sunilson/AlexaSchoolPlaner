@@ -11,6 +11,8 @@ import io.reactivex.Observable;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for refreshing the access token of the current user
  */
 
 public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUseCase.Params> {
@@ -26,13 +28,15 @@ public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUse
 
     @Override
     protected Observable<String> buildUseCaseObservable(final Params params) {
+        //First load the current user
         return applicationDatabase.applicationDao().getCurrentUser().toObservable().flatMap(userEntity -> {
-            if (userEntity == null) {
-                throw new NoUserFoundException("No UserEntity defined");
-            }
+            if (userEntity == null) throw new NoUserFoundException("No UserEntity defined");
             String refreshToken = userEntity.getTokens().getRefreshToken();
+            //Refresh the token with the repository
             return authenticationRepository.refreshToken(refreshToken).flatMap(tokens -> {
+                //Check if tokens were returned
                 if (tokens != null && tokens.getAccessToken().length() > 0) {
+                    //Set new access tokens and store user to local database
                     userEntity.getTokens().setAccessToken(tokens.getAccessToken());
                     applicationDatabase.applicationDao().updateUser(userEntity);
                     return Observable.just(tokens.getAccessToken());
@@ -43,11 +47,7 @@ public class RefreshLoginUseCase extends AbstractUseCase<String, RefreshLoginUse
     }
 
     public static final class Params {
-
-        private Params() {
-
-        }
-
+        private Params() { }
         public static Params forRefreshLogin() {
             return new Params();
         }

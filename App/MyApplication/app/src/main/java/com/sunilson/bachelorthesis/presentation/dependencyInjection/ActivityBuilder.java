@@ -18,6 +18,9 @@ import dagger.android.ContributesAndroidInjector;
 
 /**
  * @author Linus Weiss
+ *
+ * This is a helper from Dagger. It generates Sub-Components for every activity and injects it
+ * with the given modules
  */
 
 @Module

@@ -11,17 +11,16 @@ import retrofit2.Response;
 
 /**
  * @author Linus Weiss
+ *
+ * Use case for starting the import of an iCal file on the server
  */
-
 public class ImportCalendarUseCase extends AbstractUseCase<Response<Void>, ImportCalendarUseCase.Params> {
 
     @Inject
     EventRepository eventRepository;
 
     @Inject
-    public ImportCalendarUseCase() {
-
-    }
+    public ImportCalendarUseCase() {}
 
     @Override
     protected Observable<Response<Void>> buildUseCaseObservable(Params params) {

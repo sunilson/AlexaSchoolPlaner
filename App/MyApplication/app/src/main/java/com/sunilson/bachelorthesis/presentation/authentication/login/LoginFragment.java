@@ -31,6 +31,8 @@ import io.reactivex.observers.DisposableObserver;
 
 /**
  * @author Linus Weiss
+ *
+ * Fragment with login form and validation of that form
  */
 
 public class LoginFragment extends Fragment {
@@ -57,14 +59,13 @@ public class LoginFragment extends Fragment {
         String name = this.name.getText().toString();
         String password = this.password.getText().toString();
 
+        //Validate inputs
         if(!name.isEmpty() && !password.isEmpty()) {
             if(getActivity() instanceof  HasViewModel) {
                 AuthenticationViewModel authenticationViewModel = ((AuthenticationViewModel) ((HasViewModel) getActivity()).getViewModel());
                 disposableManager.add(authenticationViewModel.login(name, password).subscribeWith(new LoginObserver()));
             }
-        } else {
-            Toast.makeText(getContext(), "Please fill out all fields!", Toast.LENGTH_SHORT).show();
-        }
+        } else Toast.makeText(getContext(), "Please fill out all fields!", Toast.LENGTH_SHORT).show();
     }
 
     private Unbinder unbinder;
@@ -100,7 +101,6 @@ public class LoginFragment extends Fragment {
     }
 
     private class LoginObserver extends DisposableObserver<Boolean> {
-
         @Override
         public void onNext(Boolean aBoolean) {
             if(aBoolean) {
@@ -116,7 +116,6 @@ public class LoginFragment extends Fragment {
 
         @Override
         public void onComplete() {
-
         }
     }
 }
