@@ -1,3 +1,4 @@
+//Event constants
 module.exports = {
     description: {
         maxLength: 999,

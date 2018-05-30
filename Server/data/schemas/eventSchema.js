@@ -3,6 +3,7 @@ var eventVariables = require('../../variables/EventVariables');
 var validate = require('mongoose-validator');
 var isCoordinates = require('is-coordinates');
 
+//Validators for the event schema
 var descriptionValidator = [
     validate({
         validator: 'isLength',
@@ -54,6 +55,7 @@ var summaryValidator = [
     })
 ];
 
+//Schema that defines a single event
 var eventSchema = new mongoose.Schema({
     _id: {
         type: String,
@@ -94,6 +96,7 @@ var eventSchema = new mongoose.Schema({
         index: "2dsphere",
         validate: geoValidator
     },
+    //This is used to define imported events, so they can be deleted when the import is removed
     icalevent: {
         type: Boolean
     }

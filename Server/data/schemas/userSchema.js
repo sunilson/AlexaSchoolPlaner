@@ -6,6 +6,7 @@ var passwordHash = require("password-hash");
 var validate = require('mongoose-validator');
 var Event = require('../schemas/eventSchema');
 
+//User event validators
 var usernameValidator = [
     validate({
         validator: 'isAlphanumeric',
@@ -34,6 +35,7 @@ var emailValidator = [
     })
 ];
 
+//This schema defines a single user in the database
 var userSchema = new Schema({
     username: {
         type: String,
@@ -58,9 +60,11 @@ var userSchema = new Schema({
     activated: {
         type: Boolean
     },
+    //The url that is used to import ical events. Can be transformed to array later on for multiple import support
     icalurl: {
         type: String
     },
+    //Social or standard login
     type: {
         type: String,
         required: true
@@ -70,6 +74,7 @@ var userSchema = new Schema({
     collection: "users"
 });
 
+//Executed before data is written to database, but after validation
 userSchema.pre('save', function (next) {
     //Set creation date
     if (!this.created_at) {

@@ -1,5 +1,7 @@
 var objectOperations = module.exports = {};
 
+//Helper functions for processing request body
+
 function trimObject(object) {
     for (var key in object) {
         if (object[key] === 'string') {

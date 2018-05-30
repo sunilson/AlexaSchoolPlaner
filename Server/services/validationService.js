@@ -9,6 +9,8 @@ var AccountActivationTemplate = require("../mail-templates/en/account-activation
 
 var tokenService = module.exports = {};
 
+//This class is used to generate random tokens forverification mails and the Alexa auth requests 
+
 //Send a randomly generated token to an email to verify it
 tokenService.sendVerification = function (id, email) {
     return new Promise((resolve, reject) => {

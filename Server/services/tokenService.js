@@ -4,6 +4,8 @@ var cfg = require("../config.js");
 var UserVariables = require("../variables/UserVariables");
 var tokenService = module.exports = {};
 
+//This class is used to generate tokens and to save and verify them
+
 //Generate a JWT Token and pass given id as payload
 tokenService.generateToken = function (id) {
     //Payload of access token

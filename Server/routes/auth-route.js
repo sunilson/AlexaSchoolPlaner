@@ -22,8 +22,7 @@ const dots = require("dot").process({
 var ValidationTokenModel = require("../data/models/validationTokenModel")
 
 
-//Route for new access token
-
+//Renders the alexa login page
 router.get('/alexaLoginPage', (req, res, next) => {
     res.send(dots.loginPage({
         state: req.query.state,
@@ -31,6 +30,7 @@ router.get('/alexaLoginPage', (req, res, next) => {
     }));
 });
 
+//Processes the alexa login form
 router.post('/alexaLoginPage', (req, res, next) => {
 
     const name = req.body.name

@@ -4,6 +4,8 @@ var UserVariables = require("../variables/UserVariables");
 var randtoken = require("rand-token");
 var ObjectOperations = require("../utils/objectOperations");
 
+//This class is used to store and manipulate user objects in the database
+
 userService.saveUser = (user) => {
     return new Promise((resolve, reject) => {
         //Check type and if input needs to be validated

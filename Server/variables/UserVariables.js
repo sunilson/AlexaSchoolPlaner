@@ -1,3 +1,4 @@
+//User constants
 module.exports = {
     userName: {
         minLength: 5,

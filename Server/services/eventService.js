@@ -6,6 +6,8 @@ const Transaction = require('mongoose-transactions');
 const mongoose = require('mongoose')
 var ical = require('ical')
 
+//This class is used to store and manipulate events in the database
+
 //Imports all events from a specific URL
 eventService.executeImport = (url, userId, index, icaltype) => {
     return new Promise((resolve, reject) => {

@@ -13,6 +13,7 @@ const isUrl = require("is-url");
 const cfg = require("../config.js");
 algoliaEventIndex.setSettings(config.algoliaIndexSettings);
 
+//Route for setting the import URL of a user
 router.post('/import', (req, res, next) => {
     const url = req.body.url;
     const user = req.user;
