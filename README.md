@@ -8,7 +8,7 @@ Between the Alexa skill and the Android app there is a NodeJS Server that connec
 
 ## Screenshots
 
-<img src="https://i.imgur.com/GcAuDzl.png" width="200"/>
-<img src="https://i.imgur.com/84Z2hj1.png" width="200"/>
-<img src="https://i.imgur.com/FlEpUCv.png" width="200"/>
-<img src="https://i.imgur.com/tSBxlrC.png" width="200"/>
+<img src="https://i.imgur.com/GcAuDzl.png" width="400"/>
+<img src="https://i.imgur.com/84Z2hj1.png" width="400"/>
+<img src="https://i.imgur.com/FlEpUCv.png" width="400"/>
+<img src="https://i.imgur.com/tSBxlrC.png" width="400"/>
