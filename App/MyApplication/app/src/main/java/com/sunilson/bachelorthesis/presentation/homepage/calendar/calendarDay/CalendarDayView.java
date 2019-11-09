@@ -58,34 +58,22 @@ public class CalendarDayView extends RelativeLayout {
 
         //Make calculations for DayView in background
         Observable
-                .fromCallable(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        //Iterate over all events and start the calculations
-                        for (EventModel event : calendarDayModel.getEventList()) {
-                            checkOverlappingEvents(event);
-                        }
-                        return true;
+                .fromCallable(() -> {
+                    //Iterate over all events and start the calculations
+                    for (EventModel event : calendarDayModel.getEventList()) {
+                        checkOverlappingEvents(event);
                     }
+                    return true;
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Boolean>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-
+                    public void onSubscribe(Disposable d) { }
                     @Override
-                    public void onNext(Boolean aBoolean) {
-
-                    }
-
+                    public void onNext(Boolean aBoolean) { }
                     @Override
-                    public void onError(Throwable e) {
-
-                    }
-
+                    public void onError(Throwable e) { }
                     @Override
                     public void onComplete() {
                         renderFields();
