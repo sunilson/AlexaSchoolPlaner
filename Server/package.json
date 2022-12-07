@@ -12,7 +12,7 @@
     "cors": "^2.8.4",
     "debug": "~2.6.9",
     "dot": "^1.1.2",
-    "express": "~4.15.5",
+    "express": "~4.17.3",
     "google-auth-library": "^0.12.0",
     "ical": "^0.5.0",
     "is-coordinates": "^2.0.2",
